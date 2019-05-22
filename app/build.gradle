@@ -36,12 +36,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.google.guava:guava:23.6-android'
+    implementation 'com.google.guava:guava:24.1-jre'
 
     implementation files('libs/bitcoinj-core-0.16-SNAPSHOT.jar')
-    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
     implementation 'com.google.guava:guava:27.1-android'
-    compile 'com.google.protobuf:protobuf-java:3.7.1'
+    implementation 'com.google.protobuf:protobuf-java:3.7.1'
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'org.slf4j:slf4j-api:1.7.25'
     implementation 'net.jcip:jcip-annotations:1.0'
