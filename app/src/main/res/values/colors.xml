@@ -3,4 +3,29 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="A1">#333333</color>
+    <color name="A2">#CCCCCC</color>
+    <color name="A3">#222222</color>
+    <color name="A4">#999999</color>
+    <color name="A5">#252525</color>
+    <color name="A6">#1C5FA9</color>
+    <color name="A7">#bf000000</color>
+    <color name="A8">#EDEDF2</color>
+    <color name="A9">#727272</color>
+
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="dark_blue">#51BCED</color>
+    <color name="blue">#54A7E9</color>
+    <color name="alpha_blue">#ECF5FF</color>
+    <color name="dark_purple">#7A4EDC</color>
+    <color name="grey_1">#DDDDDD</color>
+    <color name="grey_2">#EAEAEA</color>
+    <color name="grey_3">#F6F6F6</color>
+    <color name="grey_4">#EEEEEE</color>
+    <color name="grey_5">#9C9D9D</color>
+    <color name="grey_6">#F3F5F9</color>
+    <color name="grey_7">#B3B3B3</color>
+    <color name="red">#F55656</color>
 </resources>
