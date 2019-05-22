@@ -4,4 +4,9 @@
 
     <string name="copy_ok">Copy Success</string>
     <string name="exit">Please press again to exit</string>
+
+
+
+
+    <string name="create_new_wallet">Create new wallet by generating seed phrase.If you ever lose your device,you will need this phrase to recover your wallet!  Never save it in your loacl or remote folders in any form.</string>
 </resources>
