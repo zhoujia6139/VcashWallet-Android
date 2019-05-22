@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".CreateWalletActivity"
+        <activity android:name=".WalletCreateActivity"
             android:screenOrientation="portrait"
             />
     </application>

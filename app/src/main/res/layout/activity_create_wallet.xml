@@ -5,6 +5,8 @@
     android:background="@color/white"
     android:orientation="vertical">
 
+    <include layout="@layout/layout_toolbar" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -20,26 +22,35 @@
             android:paddingRight="30dp"
             android:paddingBottom="35dp"
             android:text="@string/create_new_wallet"
-            android:textColor="@color/A1"
+            android:textColor="@color/A10"
             android:textSize="15sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/ic_space_line" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
             android:gravity="center_vertical"
             android:paddingLeft="30dp"
             android:paddingRight="30dp">
 
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_eyes_black" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:text="Do not let anyone see your seed phrase."
-                android:textColor="@color/A1"
+                android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
 
@@ -52,15 +63,16 @@
             android:paddingRight="30dp">
 
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_lock_black" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:text="Never type your seed phrase into password managers or elsewhere."
-                android:textColor="@color/A1"
+                android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
 
@@ -74,15 +86,16 @@
             android:paddingRight="30dp">
 
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_copy_black" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:text="Make at least 2 copies of the phrase in caseof  emergency."
-                android:textColor="@color/A1"
+                android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
 
@@ -96,6 +109,10 @@
         android:layout_marginLeft="28dp"
         android:layout_marginRight="28dp"
         android:layout_marginBottom="40dp"
-        android:text="I Agree" />
+        android:background="@drawable/selector_home_create"
+        android:text="I Agree"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="15sp" />
 
 </LinearLayout>

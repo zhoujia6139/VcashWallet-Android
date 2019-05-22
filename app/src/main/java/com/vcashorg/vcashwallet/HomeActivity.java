@@ -13,6 +13,6 @@ public class HomeActivity extends BaseActivity {
 
     @OnClick(R.id.create_wallet)
     public void onCreateWalletClick(){
-        nv(CreateWalletActivity.class);
+        nv(WalletCreateActivity.class);
     }
 }
