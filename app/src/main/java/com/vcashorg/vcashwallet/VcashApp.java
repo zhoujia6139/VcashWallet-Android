@@ -3,6 +3,8 @@ package com.vcashorg.vcashwallet;
 import android.app.Application;
 import android.content.Context;
 
+import com.vcashorg.vcashwallet.wallet.WalletApi;
+
 public class VcashApp extends Application {
 
     private static Context mContext;
@@ -12,6 +14,9 @@ public class VcashApp extends Application {
         super.onCreate();
 
         mContext = getApplicationContext();
+
+        WalletApi.setWalletContext(getApplicationContext());
+        WalletApi.createWallet(null, null);
     }
 
 

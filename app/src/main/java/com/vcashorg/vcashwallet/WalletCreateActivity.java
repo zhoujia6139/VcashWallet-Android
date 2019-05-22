@@ -3,6 +3,8 @@ package com.vcashorg.vcashwallet;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 
+import butterknife.OnClick;
+
 public class WalletCreateActivity extends ToolBarActivity {
 
 
@@ -14,5 +16,10 @@ public class WalletCreateActivity extends ToolBarActivity {
     @Override
     protected void initToolBar() {
         setToolBarTitle("Create new wallet");
+    }
+
+    @OnClick(R.id.btn_agree)
+    public void onAgreeClick(){
+        nv(MnemonicCreateActivity.class);
     }
 }
