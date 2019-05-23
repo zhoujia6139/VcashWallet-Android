@@ -1,16 +1,9 @@
 package com.vcashorg.vcashwallet;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.TextView;
-
 import com.vcashorg.vcashwallet.base.BaseActivity;
-import com.vcashorg.vcashwallet.modal.Demo;
+import com.vcashorg.vcashwallet.bean.Demo;
 import com.vcashorg.vcashwallet.net.CommonObserver;
 import com.vcashorg.vcashwallet.net.RequestUtils;
-import com.vcashorg.vcashwallet.net.Response;
-import com.vcashorg.vcashwallet.net.RetrofitUtils;
-import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 

@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.DialogInterface;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -14,6 +16,7 @@ import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 public class MnemonicCreateActivity extends ToolBarActivity {
 
@@ -59,5 +62,21 @@ public class MnemonicCreateActivity extends ToolBarActivity {
             helper.setText(R.id.tv_word,item);
         }
 
+    }
+
+
+    @OnClick(R.id.btn_next)
+    public void onNextClick(){
+        new AlertDialog.Builder(this)
+                .setTitle("Save seed phrase")
+                .setMessage("Please write the seed phrase down. Do not screenshot it and save it in your photo gallery. It makes the phrase prone to cyber attacks and, less secure.")
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        nv(MnemonicConfirmActivity.class);
+                    }
+                })
+                .setNegativeButton("Cancel",null)
+                .show();
     }
 }

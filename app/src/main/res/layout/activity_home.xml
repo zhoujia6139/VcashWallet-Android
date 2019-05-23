@@ -53,6 +53,7 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/restore_wallet"
             android:layout_marginTop="16dp"
             android:background="@drawable/selector_home_restore"
             android:layout_width="match_parent"

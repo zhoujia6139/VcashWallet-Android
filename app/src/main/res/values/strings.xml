@@ -11,4 +11,10 @@
     <string name="create_new_wallet">Create new wallet by generating seed phrase.If you ever lose your device,you will need this phrase to recover your wallet!  Never save it in your loacl or remote folders in any form.</string>
 
     <string name="wallet_mneonic">Your seed phrase is the access key to all the funds in your wallet. Print or write down the phrase to keep it in a safe or in a locked vault.Without the phrase you will not be able to recover your money.</string>
+
+    <string name="wallet_mneonic_confirm">To ensure the seed phrase is written down correctly. please fill in the specific words below.</string>
+
+    <string name="password_create_1">Create password to access your wallet</string>
+
+    <string name="password_create_2">You are highly recommended to set a strong password, preferably with uppercase and lowercase letters and numbers.</string>
 </resources>

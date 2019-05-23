@@ -1,4 +1,4 @@
-package com.vcashorg.vcashwallet.modal;
+package com.vcashorg.vcashwallet.bean;
 
 import java.util.List;
 

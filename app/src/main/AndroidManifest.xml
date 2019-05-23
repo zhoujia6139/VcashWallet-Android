@@ -36,6 +36,12 @@
             android:screenOrientation="portrait" />
         <activity android:name=".MnemonicCreateActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".MnemonicConfirmActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".PasswordCreateActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".WalletMainActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

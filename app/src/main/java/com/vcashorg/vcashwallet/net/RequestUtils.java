@@ -1,6 +1,6 @@
 package com.vcashorg.vcashwallet.net;
 
-import com.vcashorg.vcashwallet.modal.Demo;
+import com.vcashorg.vcashwallet.bean.Demo;
 
 public class RequestUtils {
 
