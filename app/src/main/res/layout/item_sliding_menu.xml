@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:minHeight="50dp"
+    android:id="@+id/ll_menu_bg"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:layout_marginLeft="25dp"
+        android:id="@+id/iv_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tv_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="14dp"
+        android:textColor="@color/A10"
+        android:textSize="16sp"
+        tools:text="Vcash Wallet" />
+</LinearLayout>
