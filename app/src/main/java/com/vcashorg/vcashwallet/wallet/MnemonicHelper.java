@@ -25,7 +25,7 @@ import java.util.List;
 public class MnemonicHelper {
     public static final String BIP39_ENGLISH_SHA256 = "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
-    public static MnemonicHelper sIntance;
+    private static MnemonicHelper sIntance;
 
     private MnemonicCode mc;
 
