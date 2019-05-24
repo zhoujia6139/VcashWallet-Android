@@ -2,10 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="65dp"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp">
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:background="@color/white">
+
+    <View
+        android:layout_width="1dp"
+        android:background="@color/grey_4"
+        android:layout_height="match_parent"/>
 
     <ImageView
+        android:layout_marginLeft="12dp"
         android:id="@+id/iv_tx"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +42,14 @@
             android:textSize="12sp" />
     </LinearLayout>
 
+    <View
+        android:layout_alignParentRight="true"
+        android:layout_width="1dp"
+        android:background="@color/grey_4"
+        android:layout_height="match_parent"/>
+
     <LinearLayout
+        android:layout_marginRight="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
