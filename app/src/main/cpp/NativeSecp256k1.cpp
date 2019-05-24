@@ -7,7 +7,12 @@
 
 #define SECRET_KEY_SIZE 32
 #define PEDERSEN_COMMITMENT_SIZE 33
-
+#define PUBKEY_SIZE 64
+#define COMPRESSED_PUBKEY_SIZE 33
+#define MAX_WIDTH (1 << 20)
+#define SCRATCH_SPACE_SIZE (256 * MAX_WIDTH)
+#define MAX_PROOF_SIZE 5134
+#define BULLET_PROOF_MSG_SIZE 16
 
 unsigned char* ConvertJByteaArrayToUnsingedChars(JNIEnv *env, jbyteArray bytearray)
 {
@@ -50,6 +55,30 @@ jbyteArray serCommit(JNIEnv *env, secp256k1_context* context, secp256k1_pedersen
                                             outCommit,
                                             innercommitment);
     return ConvertUnsignedCharsToJByteArray(env, outCommit, PEDERSEN_COMMITMENT_SIZE);
+}
+
+secp256k1_pedersen_commitment* parseCommit(JNIEnv *env, secp256k1_context* context, jbyteArray commitment){
+    unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, commitment);
+    secp256k1_pedersen_commitment* innerCommit = new secp256k1_pedersen_commitment;
+    int ret = secp256k1_pedersen_commitment_parse(context,
+                                                  innerCommit,
+                                                  bytes);
+    delete bytes;
+    if (ret == 1){
+        return innerCommit;
+    }
+    else{
+        return nullptr;
+    }
+}
+
+secp256k1_bulletproof_generators *sharedGenerators(secp256k1_context* context){
+    static secp256k1_bulletproof_generators * proofGen = NULL;
+    if (proofGen == NULL) {
+        proofGen = secp256k1_bulletproof_generators_create(context, &secp256k1_generator_const_g, 256);
+    }
+
+    return proofGen;
 }
 
 JNIEXPORT jlong JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1ctx_1create
@@ -101,6 +130,411 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
     delete keyData;
     if (ret == 1){
         return serCommit(env, (secp256k1_context*)(uintptr_t)context, &innerCommit);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1bind_1sum
+        (JNIEnv *env, jobject claseObject, jlong context, jobjectArray positive, jobjectArray negative){
+    int positiveSize = env->GetArrayLength(positive);
+    int negativeSize = env->GetArrayLength(negative);
+    int totalCount = positiveSize + negativeSize;
+    const uint8_t * point[totalCount];
+    for (int i=0; i<positiveSize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(positive,i);
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, byteArr);
+        point[i] = bytes;
+    }
+
+    for (int i=0; i<negativeSize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(negative,i);
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, byteArr);
+        point[positiveSize+i] = bytes;
+    }
+
+    uint8_t retData[SECRET_KEY_SIZE];
+    int ret = secp256k1_pedersen_blind_sum((secp256k1_context*)(uintptr_t)context,
+                                           retData,
+                                           point,
+                                           totalCount,
+                                           positiveSize);
+    for (int i=0; i<totalCount; i++){
+        const uint8_t *item = point[i];
+        delete item;
+    }
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, retData, SECRET_KEY_SIZE);
+    }
+    else{
+        return nullptr;
+    }
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1commit_1sum
+        (JNIEnv *env, jobject claseObject, jlong context, jobjectArray positive, jobjectArray negative){
+    int positiveSize = env->GetArrayLength(positive);
+    int negativeSize = env->GetArrayLength(negative);
+    secp256k1_pedersen_commitment innerCommit;
+    secp256k1_pedersen_commitment* positiveVec[positiveSize];
+    secp256k1_pedersen_commitment* negativeVec[negativeSize];
+    for (int i=0; i<positiveSize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(positive,i);
+        positiveVec[i] = parseCommit(env, (secp256k1_context*)(uintptr_t)context, byteArr);
+    }
+    for (int i=0; i<negativeSize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(negative,i);
+        negativeVec[i] = parseCommit(env, (secp256k1_context*)(uintptr_t)context, byteArr);
+    }
+    int ret = secp256k1_pedersen_commit_sum((secp256k1_context*)(uintptr_t)context,
+                                            &innerCommit,
+                                            positiveVec,
+                                            positiveSize,
+                                            negativeVec,
+                                            negativeSize);
+    if (ret == 1){
+        return serCommit(env, (secp256k1_context*)(uintptr_t)context, &innerCommit);
+    }
+    else{
+        return nullptr;
+    }
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1commit_1to_1pubkey
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray commit){
+    secp256k1_pubkey pubkey;
+    secp256k1_pedersen_commitment* innerCommit = parseCommit(env, (secp256k1_context*)(uintptr_t)context, commit);
+    if (innerCommit){
+        int ret = secp256k1_pedersen_commitment_to_pubkey((secp256k1_context*)(uintptr_t)context,
+                                                          &pubkey,
+                                                          innerCommit);
+        if (ret == 1){
+            return ConvertUnsignedCharsToJByteArray(env, pubkey.data, PUBKEY_SIZE);
+        }
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1get_1compressed_1pubkey
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray pubkey){
+    int pubkeyLen = env->GetArrayLength(pubkey);
+    if (pubkeyLen == PUBKEY_SIZE){
+        uint8_t* pubkeys = ConvertJByteaArrayToUnsingedChars(env, pubkey);
+        uint8_t compressKey[COMPRESSED_PUBKEY_SIZE];
+        size_t length = COMPRESSED_PUBKEY_SIZE;
+        int ret = secp256k1_ec_pubkey_serialize((secp256k1_context*)(uintptr_t)context,
+                                                compressKey,
+                                                &length,
+                                                (const secp256k1_pubkey*)pubkeys,
+                                                SECP256K1_EC_COMPRESSED);
+        delete pubkeys;
+        if (ret == 1 && length == COMPRESSED_PUBKEY_SIZE){
+            return ConvertUnsignedCharsToJByteArray(env, compressKey, COMPRESSED_PUBKEY_SIZE);
+        }
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1pubkey_1from_1compressed_1key
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray compressedkey){
+    int pubkeyLen = env->GetArrayLength(compressedkey);
+    if (pubkeyLen == COMPRESSED_PUBKEY_SIZE){
+        uint8_t* comPubkeys = ConvertJByteaArrayToUnsingedChars(env, compressedkey);
+        secp256k1_pubkey pubkey;
+        int ret = secp256k1_ec_pubkey_parse((secp256k1_context*)(uintptr_t)context,
+                                            &pubkey,
+                                            comPubkeys,
+                                            COMPRESSED_PUBKEY_SIZE);
+        delete comPubkeys;
+        if (ret == 1){
+            return ConvertUnsignedCharsToJByteArray(env, pubkey.data, PUBKEY_SIZE);
+        }
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1verify_1single_1signature
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray signature, jbyteArray pubkey, jbyteArray nonce_sum, jbyteArray pubkey_sum, jbyteArray msg){
+    uint8_t* sigs = ConvertJByteaArrayToUnsingedChars(env, signature);
+    uint8_t* pubkeys = ConvertJByteaArrayToUnsingedChars(env, pubkey);
+    uint8_t* nonce_sums = ConvertJByteaArrayToUnsingedChars(env, nonce_sum);
+    uint8_t* pubkey_sums = ConvertJByteaArrayToUnsingedChars(env, pubkey_sum);
+    uint8_t* msgs = ConvertJByteaArrayToUnsingedChars(env, msg);
+    int ret = secp256k1_aggsig_verify_single((secp256k1_context*)(uintptr_t)context,
+                                             sigs,
+                                             msgs,
+                                             (const secp256k1_pubkey *)nonce_sums,
+                                             (const secp256k1_pubkey *)pubkeys,
+                                             (const secp256k1_pubkey *)pubkey_sums,
+                                             nullptr,
+                                             true);
+
+    delete sigs;
+    delete pubkeys;
+    delete nonce_sums;
+    delete pubkey_sums;
+    delete msgs;
+    if (ret == 1){
+        return true;
+    }
+
+    return false;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1calculate_1single_1signature
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray secKey, jbyteArray secNounce, jbyteArray nounceSum, jbyteArray pubkeySum, jbyteArray msg){
+    uint8_t* seed = nullptr;
+    uint8_t retSig[64];
+    uint8_t* secKeys = ConvertJByteaArrayToUnsingedChars(env, secKey);
+    uint8_t* secNounces = ConvertJByteaArrayToUnsingedChars(env, secNounce);
+    uint8_t* nounceSums = ConvertJByteaArrayToUnsingedChars(env, nounceSum);
+    uint8_t* pubkeySums = ConvertJByteaArrayToUnsingedChars(env, pubkeySum);
+    uint8_t* msgs = ConvertJByteaArrayToUnsingedChars(env, msg);
+    int ret = secp256k1_aggsig_sign_single((secp256k1_context*)(uintptr_t)context,
+                                           retSig,
+                                           msgs,
+                                           secKeys,
+                                           secNounces,
+                                           nullptr,
+                                           (const secp256k1_pubkey *)nounceSums,
+                                           (const secp256k1_pubkey *)nounceSums,
+                                           (const secp256k1_pubkey *)pubkeySums,
+                                           seed);
+    delete secKeys;
+    delete secNounces;
+    delete nounceSums;
+    delete pubkeySums;
+    delete msgs;
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, retSig, 64);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1combination_1pubkey
+        (JNIEnv *env, jobject claseObject, jlong context, jobjectArray pubkeyArr){
+    int pubkeySize = env->GetArrayLength(pubkeyArr);
+    secp256k1_pubkey* inkeyArr[pubkeySize];
+    for (int i=0; i<pubkeySize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(pubkeyArr,i);
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, byteArr);
+        inkeyArr[i] = (secp256k1_pubkey*)bytes;
+    }
+    secp256k1_pubkey outKey;
+    int ret = secp256k1_ec_pubkey_combine((secp256k1_context*)(uintptr_t)context,
+                                          &outKey,
+                                          inkeyArr,
+                                          pubkeySize);
+    for (int i=0; i<pubkeySize; i++) {
+        const uint8_t *item = (const uint8_t *)inkeyArr[i];
+        delete item;
+    }
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, outKey.data, 64);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1combination_1signature_1and_1nonceSum
+        (JNIEnv *env, jobject claseObject, jlong context, jobjectArray sigArr, jbyteArray nonceSum){
+    int sigSize = env->GetArrayLength(sigArr);
+    uint8_t* sigs[sigSize];
+    for (int i=0; i<sigSize; i++){
+        jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(sigArr,i);
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, byteArr);
+        sigs[i] = bytes;
+    }
+    uint8_t* nonceSums = ConvertJByteaArrayToUnsingedChars(env, nonceSum);
+    uint8_t retSig[64];
+    int ret = secp256k1_aggsig_add_signatures_single((secp256k1_context*)(uintptr_t)context,
+                                                     retSig,
+                                                     (const unsigned char**)sigs,
+                                                     sigSize,
+                                                     (const secp256k1_pubkey*)nonceSums);
+    for (int i=0; i<sigSize; i++) {
+        const uint8_t *item = sigs[i];
+        delete item;
+    }
+    delete nonceSums;
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, retSig, 64);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1signature_1to_1compactData
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray signature){
+    int sigSize = env->GetArrayLength(signature);
+    if (sigSize == 64){
+        uint8_t compactData[64];
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, signature);
+        int ret = secp256k1_ecdsa_signature_serialize_compact((secp256k1_context*)(uintptr_t)context,
+                                                              compactData,
+                                                              (const secp256k1_ecdsa_signature*)bytes);
+        delete bytes;
+        if (ret == 1){
+            return ConvertUnsignedCharsToJByteArray(env, compactData, 64);
+        }
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1compact_1data_1to_1signature
+        (JNIEnv * env, jobject claseObject, jlong context, jbyteArray compactData){
+    int comSize = env->GetArrayLength(compactData);
+    if (comSize == 64){
+        secp256k1_ecdsa_signature retSig;
+        unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, compactData);
+        int ret = secp256k1_ecdsa_signature_parse_compact((secp256k1_context*)(uintptr_t)context,
+                                                              &retSig,
+                                                              bytes);
+        delete bytes;
+        if (ret == 1){
+            return ConvertUnsignedCharsToJByteArray(env, retSig.data, 64);
+        }
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1export_1secnonce_1single
+        (JNIEnv *env, jobject claseObject, jlong context){
+    uint8_t* seed = nullptr;
+    uint8_t retData[32];
+    int ret = secp256k1_aggsig_export_secnonce_single((secp256k1_context*)(uintptr_t)context,
+                                                      retData,
+                                                      seed);
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, retData, 32);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1get_1pubkey_1from_1secretKey
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray seckey){
+    secp256k1_pubkey pubkey;
+    unsigned char* bytes = ConvertJByteaArrayToUnsingedChars(env, seckey);
+    int ret = secp256k1_ec_pubkey_create((secp256k1_context*)(uintptr_t)context,
+                                         &pubkey,
+                                         bytes);
+    delete bytes;
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, pubkey.data, PUBKEY_SIZE);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1createbullet_1proof
+        (JNIEnv *env, jobject claseObject, jlong context, jlong value, jbyteArray key, jbyteArray nounce, jbyteArray msg){
+    unsigned char* keys = ConvertJByteaArrayToUnsingedChars(env, key);
+    unsigned char* nounces = ConvertJByteaArrayToUnsingedChars(env, nounce);
+    unsigned char* msgs = ConvertJByteaArrayToUnsingedChars(env, msg);
+
+    uint8_t proof[MAX_PROOF_SIZE];
+    size_t proofSize = MAX_PROOF_SIZE;
+    uint64_t amount = value;
+    const unsigned char* const* key_points = &keys;
+    //const unsigned char* const* temp = &((const unsigned char*)key.data.bytes);
+
+    secp256k1_scratch_space* scratch = secp256k1_scratch_space_create((secp256k1_context*)(uintptr_t)context, SCRATCH_SPACE_SIZE);
+    int ret = secp256k1_bulletproof_rangeproof_prove((secp256k1_context*)(uintptr_t)context,
+                                                     scratch,
+                                                     sharedGenerators((secp256k1_context*)(uintptr_t)context),
+                                                     proof,
+                                                     &proofSize,
+                                                     NULL,
+                                                     NULL,
+                                                     NULL,
+                                                     &amount,
+                                                     NULL,
+                                                     key_points,
+                                                     NULL,
+                                                     1,
+                                                     &secp256k1_generator_const_h,
+                                                     64,
+                                                     nounces,
+                                                     NULL,
+                                                     NULL,
+                                                     0,
+                                                     msgs);
+    secp256k1_scratch_space_destroy(scratch);
+    delete keys;
+    delete nounces;
+    delete msgs;
+
+    if (ret == 1){
+        return ConvertUnsignedCharsToJByteArray(env, proof, proofSize);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1verify_1bullet_1proof
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray commit, jbyteArray proof){
+    unsigned char* proofs = ConvertJByteaArrayToUnsingedChars(env, proof);
+    int proofLen = env->GetArrayLength(proof);
+    secp256k1_scratch_space* scratch = secp256k1_scratch_space_create((secp256k1_context*)(uintptr_t)context, SCRATCH_SPACE_SIZE);
+    int ret = secp256k1_bulletproof_rangeproof_verify((secp256k1_context*)(uintptr_t)context,
+                                                      scratch,
+                                                      sharedGenerators((secp256k1_context*)(uintptr_t)context),
+                                                      proofs,
+                                                      proofLen,
+                                                      NULL,
+                                                      parseCommit(env, (secp256k1_context*)(uintptr_t)context, commit),
+                                                      1,
+                                                      64,
+                                                      &secp256k1_generator_const_h,
+                                                      NULL,
+                                                      0);
+    secp256k1_scratch_space_destroy(scratch);
+    delete proofs;
+    if (ret == 1){
+        return true;
+    }
+
+    return false;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1rewind_1bullet_1proof
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray commitment, jbyteArray nounce, jbyteArray proof){
+    uint8_t blindOut[SECRET_KEY_SIZE];
+    uint64_t value = 0;
+    uint8_t messageOut[BULLET_PROOF_MSG_SIZE];
+
+    unsigned char* proofs = ConvertJByteaArrayToUnsingedChars(env, proof);
+    int proofLen = env->GetArrayLength(proof);
+    unsigned char* nounces = ConvertJByteaArrayToUnsingedChars(env, nounce);
+
+    int ret = secp256k1_bulletproof_rangeproof_rewind((secp256k1_context*)(uintptr_t)context,
+                                                      sharedGenerators((secp256k1_context*)(uintptr_t)context),
+                                                      &value,
+                                                      blindOut,
+                                                      proofs,
+                                                      proofLen,
+                                                      0,
+                                                      parseCommit(env, (secp256k1_context*)(uintptr_t)context, commitment),
+                                                      &secp256k1_generator_const_h,
+                                                      nounces,
+                                                      NULL,
+                                                      0,
+                                                      messageOut);
+    delete proofs;
+    delete nounces;
+    if (ret == 1){
+        jbyte *by = (jbyte*)messageOut;
+        jbyteArray jarray = env->NewByteArray(BULLET_PROOF_MSG_SIZE+8);
+        env->SetByteArrayRegion(jarray, 0, BULLET_PROOF_MSG_SIZE, by);
+        env->SetByteArrayRegion(jarray, BULLET_PROOF_MSG_SIZE, 8, (jbyte*)&value);
+        return jarray;
     }
 
     return nullptr;
