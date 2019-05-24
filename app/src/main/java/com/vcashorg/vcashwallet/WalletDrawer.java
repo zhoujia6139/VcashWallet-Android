@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.Image;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -97,6 +98,9 @@ public class WalletDrawer {
                     item.checked = true;
                     adapter.notifyDataSetChanged();
                 }
+                if(item.name.equals("Setting")){
+                    context.startActivity(new Intent(context,SettingActivity.class));
+                }
                 drawer.closeDrawers();
             }
         });
@@ -133,13 +137,13 @@ public class WalletDrawer {
         item2.checkId = R.drawable.ic_menu_setting_check;
         item2.uncheckId = R.drawable.ic_menu_setting_uncheck;
         //Address book
-        MenuItem item3 = new MenuItem();
-        item3.name = "Address book";
-        item3.checkId = R.drawable.ic_menu_address_check;
-        item3.uncheckId = R.drawable.ic_menu_address_uncheck;
+//        MenuItem item3 = new MenuItem();
+//        item3.name = "Address book";
+//        item3.checkId = R.drawable.ic_menu_address_check;
+//        item3.uncheckId = R.drawable.ic_menu_address_uncheck;
 
         itemList.add(item1);
         itemList.add(item2);
-        itemList.add(item3);
+//        itemList.add(item3);
     }
 }

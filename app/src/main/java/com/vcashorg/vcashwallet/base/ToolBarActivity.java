@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 
 import com.vcashorg.vcashwallet.R;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
 
@@ -96,6 +97,10 @@ public abstract class ToolBarActivity extends BaseActivity{
             }
 
         }
+    }
+
+    protected void setToolBarBgColor(int color){
+        mToolbar.setBackgroundColor(UIUtils.getColor(color));
     }
 
     protected void setRightDrawable(int drawable){

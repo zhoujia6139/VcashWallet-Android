@@ -20,5 +20,6 @@ public class HomeActivity extends BaseActivity {
     @OnClick(R.id.restore_wallet)
     public void onRestoreWalletClick(){
         nv(WalletMainActivity.class);
+        //nv(MainActivity.class);
     }
 }

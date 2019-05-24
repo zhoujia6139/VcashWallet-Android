@@ -109,4 +109,16 @@ public class WalletMainActivity extends BaseActivity {
     public void onOpenMenuClick(){
         walletDrawer.openDrawer();
     }
+
+    @OnClick(R.id.send)
+    public void onVcashSendClick(){
+        nv(VcashSendActivity.class);
+    }
+
+    @OnClick(R.id.receive)
+    public void onVcashReceiveClick(){
+        nv(VcashReceiveActivity.class);
+    }
+
+
 }
