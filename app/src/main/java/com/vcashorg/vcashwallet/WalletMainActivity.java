@@ -55,13 +55,20 @@ public class WalletMainActivity extends BaseActivity {
 
         adapter.addHeaderView(headerView);
 
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                nv(TxDetailsActivity.class);
+            }
+        });
+
         mRvTx.setAdapter(adapter);
 
         walletDrawer = new WalletDrawer(this);
     }
 
-    private void initHeaderView(){
-        headerView = LayoutInflater.from(this).inflate(R.layout.layout_vcash_tx_header,null);
+    private void initHeaderView() {
+        headerView = LayoutInflater.from(this).inflate(R.layout.layout_vcash_tx_header, null);
     }
 
     private List<VcashTx> randomData() {
@@ -106,17 +113,17 @@ public class WalletMainActivity extends BaseActivity {
     }
 
     @OnClick(R.id.iv_open_menu)
-    public void onOpenMenuClick(){
+    public void onOpenMenuClick() {
         walletDrawer.openDrawer();
     }
 
     @OnClick(R.id.send)
-    public void onVcashSendClick(){
+    public void onVcashSendClick() {
         nv(VcashSendActivity.class);
     }
 
     @OnClick(R.id.receive)
-    public void onVcashReceiveClick(){
+    public void onVcashReceiveClick() {
         nv(VcashReceiveActivity.class);
     }
 

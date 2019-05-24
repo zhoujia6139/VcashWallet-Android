@@ -51,8 +51,9 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".widget.qrcode.ScannerActivity"
             android:exported="false"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"/>
+        <activity android:name=".TxDetailsActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
