@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet;
 
 
+import android.util.Log;
+
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.Demo;
 import com.vcashorg.vcashwallet.net.CommonObserver;
