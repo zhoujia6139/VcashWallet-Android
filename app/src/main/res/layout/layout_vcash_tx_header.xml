@@ -5,9 +5,9 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="209dp"
-        android:scaleType="centerCrop"
+        android:layout_height="210dp"
         android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_wallet_main_bg" />
 
     <LinearLayout
@@ -91,15 +91,15 @@
     </LinearLayout>
 
     <TextView
-        android:layout_marginLeft="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/shadow_18323"
+        android:gravity="center"
         android:paddingTop="6dp"
         android:paddingBottom="6dp"
-        android:layout_marginRight="12dp"
-        android:background="@drawable/bg_grey_corner_top"
         android:text="Recent transaction"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:textSize="12sp" />
 </RelativeLayout>
