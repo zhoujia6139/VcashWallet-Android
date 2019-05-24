@@ -4,6 +4,7 @@
     package="com.vcashorg.vcashwallet" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -41,6 +42,17 @@
         <activity android:name=".PasswordCreateActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".WalletMainActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".VcashSendActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".VcashReceiveActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".SettingActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".widget.qrcode.ScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".TxDetailsActivity"
             android:screenOrientation="portrait"/>
     </application>
 

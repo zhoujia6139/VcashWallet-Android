@@ -4,6 +4,8 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -12,6 +14,7 @@ import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.VcashTx;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.widget.LinerLineItemDecoration;
+import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,9 @@ public class WalletMainActivity extends BaseActivity {
 
     WalletDrawer walletDrawer;
 
+    View headerView;
+
+
     @Override
     protected int provideContentViewId() {
         return R.layout.activity_drawer;
@@ -33,16 +39,36 @@ public class WalletMainActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        initHeaderView();
+
         mRvTx.setLayoutManager(new LinearLayoutManager(this));
-        mRvTx.addItemDecoration(new LinerLineItemDecoration(1, 1, UIUtils.getColor(R.color.grey_4)));
+        RecyclerViewDivider divider = new RecyclerViewDivider(this, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
+        divider.hideFirstDecoration();
+        divider.hideLastDecoration();
+        divider.setMarginLeft(12);
+        divider.setMarginRight(12);
+        mRvTx.addItemDecoration(divider);
 
         List<VcashTx> data = randomData();
 
         VcashTxAdapter adapter = new VcashTxAdapter(R.layout.item_vcash_tx, data);
 
+        adapter.addHeaderView(headerView);
+
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                nv(TxDetailsActivity.class);
+            }
+        });
+
         mRvTx.setAdapter(adapter);
 
         walletDrawer = new WalletDrawer(this);
+    }
+
+    private void initHeaderView() {
+        headerView = LayoutInflater.from(this).inflate(R.layout.layout_vcash_tx_header, null);
     }
 
     private List<VcashTx> randomData() {
@@ -87,7 +113,19 @@ public class WalletMainActivity extends BaseActivity {
     }
 
     @OnClick(R.id.iv_open_menu)
-    public void onOpenMenuClick(){
+    public void onOpenMenuClick() {
         walletDrawer.openDrawer();
     }
+
+    @OnClick(R.id.send)
+    public void onVcashSendClick() {
+        nv(VcashSendActivity.class);
+    }
+
+    @OnClick(R.id.receive)
+    public void onVcashReceiveClick() {
+        nv(VcashReceiveActivity.class);
+    }
+
+
 }
