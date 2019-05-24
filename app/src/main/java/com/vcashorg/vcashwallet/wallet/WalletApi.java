@@ -58,4 +58,12 @@ public class WalletApi {
     public static void clearWallet(){
         return;
     }
+
+    public static String getWalletUserId(){
+        if (VcashWallet.getInstance() != null){
+            return VcashWallet.getInstance().mUserId;
+        }
+
+        return null;
+    }
 }

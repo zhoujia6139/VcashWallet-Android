@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.Demo;
 import com.vcashorg.vcashwallet.net.CommonObserver;
@@ -15,6 +16,7 @@ public class MainActivity extends BaseActivity {
     public void initView() {
         WalletApi.setWalletContext(getApplicationContext());
         WalletApi.createWallet(null, null);
+        Log.d("----------------", WalletApi.getWalletUserId());
     }
 
     @Override
@@ -41,14 +43,4 @@ public class MainActivity extends BaseActivity {
         return R.layout.activity_main;
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
 }
