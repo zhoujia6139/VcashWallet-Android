@@ -7,13 +7,21 @@
 
     <include layout="@layout/layout_wallet_titlebar" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_tx"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/sr_tx"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_height="0dp">
 
-    </android.support.v7.widget.RecyclerView>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_tx"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

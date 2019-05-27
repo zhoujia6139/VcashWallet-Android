@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,7 +14,6 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.VcashTx;
 import com.vcashorg.vcashwallet.utils.UIUtils;
-import com.vcashorg.vcashwallet.widget.LinerLineItemDecoration;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
@@ -22,14 +22,20 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class WalletMainActivity extends BaseActivity {
+public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener,BaseQuickAdapter.RequestLoadMoreListener{
 
     @BindView(R.id.rv_tx)
     RecyclerView mRvTx;
+    @BindView(R.id.sr_tx)
+    SwipeRefreshLayout mSrTx;
 
     WalletDrawer walletDrawer;
+    VcashTxAdapter adapter;
 
     View headerView;
+    View footerView;
+
+    private List<VcashTx> mDatas = new ArrayList<>();
 
 
     @Override
@@ -40,6 +46,7 @@ public class WalletMainActivity extends BaseActivity {
     @Override
     public void initView() {
         initHeaderView();
+        initFooterView();
 
         mRvTx.setLayoutManager(new LinearLayoutManager(this));
         RecyclerViewDivider divider = new RecyclerViewDivider(this, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
@@ -49,11 +56,10 @@ public class WalletMainActivity extends BaseActivity {
         divider.setMarginRight(12);
         mRvTx.addItemDecoration(divider);
 
-        List<VcashTx> data = randomData();
-
-        VcashTxAdapter adapter = new VcashTxAdapter(R.layout.item_vcash_tx, data);
+        adapter = new VcashTxAdapter(R.layout.item_vcash_tx, mDatas);
 
         adapter.addHeaderView(headerView);
+        adapter.addFooterView(footerView);
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -62,8 +68,11 @@ public class WalletMainActivity extends BaseActivity {
             }
         });
 
+        adapter.setOnLoadMoreListener(this,mRvTx);
+        adapter.setEnableLoadMore(false);
         mRvTx.setAdapter(adapter);
 
+        mSrTx.setOnRefreshListener(this);
         walletDrawer = new WalletDrawer(this);
     }
 
@@ -71,16 +80,42 @@ public class WalletMainActivity extends BaseActivity {
         headerView = LayoutInflater.from(this).inflate(R.layout.layout_vcash_tx_header, null);
     }
 
+    private void initFooterView(){
+        footerView =  LayoutInflater.from(this).inflate(R.layout.layout_tx_empty_footer, null);;
+    }
+
     private List<VcashTx> randomData() {
         List<VcashTx> data = new ArrayList<>();
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 9; i++) {
             VcashTx vcashTx = new VcashTx();
             vcashTx.type = i % 3;
             data.add(vcashTx);
         }
 
         return data;
+    }
+
+    private void loadData(boolean refresh){
+        if(refresh){
+            adapter.removeFooterView(footerView);
+            adapter.setNewData(randomData());
+        }else {
+            adapter.loadMoreEnd();
+            adapter.addData(randomData());
+        }
+        mSrTx.setRefreshing(false);
+        adapter.setEnableLoadMore(true);
+    }
+
+    @Override
+    public void onRefresh() {
+        loadData(true);
+    }
+
+    @Override
+    public void onLoadMoreRequested() {
+        loadData(false);
     }
 
     class VcashTxAdapter extends BaseQuickAdapter<VcashTx, BaseViewHolder> {
@@ -108,6 +143,12 @@ public class WalletMainActivity extends BaseActivity {
                     Drawable d3 = UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled);
                     txState.setCompoundDrawablesWithIntrinsicBounds(d3, null, null, null);
                     break;
+            }
+
+            if(helper.getLayoutPosition() == getData().size()){
+                helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow_2);
+            }else {
+                helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow);
             }
         }
     }
