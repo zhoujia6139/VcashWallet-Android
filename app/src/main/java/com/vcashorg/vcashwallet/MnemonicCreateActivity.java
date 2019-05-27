@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +14,7 @@ import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -22,6 +24,8 @@ public class MnemonicCreateActivity extends ToolBarActivity {
 
     @BindView(R.id.rv_mneonic)
     RecyclerView mRv;
+
+    private ArrayList<String> mnemonicListData;
 
     @Override
     protected void initToolBar() {
@@ -40,12 +44,11 @@ public class MnemonicCreateActivity extends ToolBarActivity {
         mRv.addItemDecoration(new GridLineItemDecoration(UIUtils.dip2Px(1),UIUtils.dip2Px(1),UIUtils.getColor(R.color.grey_4)));
         mRv.setHasFixedSize(true);
         mRv.setNestedScrollingEnabled(false);
-        List<String> words = WalletApi.generateMnemonicPassphrase();
+        mnemonicListData = (ArrayList<String>) WalletApi.generateMnemonicPassphrase();
 
-        MnemonicAdapter adapter = new MnemonicAdapter(R.layout.item_mnemonic,words);
+        MnemonicAdapter adapter = new MnemonicAdapter(R.layout.item_mnemonic,mnemonicListData);
 
         mRv.setAdapter(adapter);
-
     }
 
 
@@ -73,7 +76,9 @@ public class MnemonicCreateActivity extends ToolBarActivity {
                 .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        nv(MnemonicConfirmActivity.class);
+                        Intent intent = new Intent(MnemonicCreateActivity.this,MnemonicConfirmActivity.class);
+                        intent.putStringArrayListExtra(MnemonicConfirmActivity.PARAM_MNEMONIC_LIST,mnemonicListData);
+                        nv(intent);
                     }
                 })
                 .setNegativeButton("Cancel",null)
