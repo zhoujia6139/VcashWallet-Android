@@ -4,6 +4,8 @@
 #include "com_vcashorg_vcashwallet_wallet_NativeSecp256k1.h"
 #include "secp256k1_bulletproofs.h"
 #include "secp256k1_aggsig.h"
+#include <android/log.h>
+#include "blake2.h"
 
 #define SECRET_KEY_SIZE 32
 #define PEDERSEN_COMMITMENT_SIZE 33
@@ -13,6 +15,28 @@
 #define SCRATCH_SPACE_SIZE (256 * MAX_WIDTH)
 #define MAX_PROOF_SIZE 5134
 #define BULLET_PROOF_MSG_SIZE 16
+
+#define TAG    "vwallet jni"
+#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
+
+
+void createRandomBytesOfLength(char* buf, size_t length) {
+    FILE *fp = fopen("/dev/urandom", "r");
+    if (!fp)
+    {
+        exit(-1);
+        LOGD("-----cannot open /dev/random");
+        return;
+    }
+    for (int i = 0; i < length; i++)
+    {
+        char c = fgetc(fp);
+        buf[i] = c;
+    }
+
+    fclose(fp);
+    return;
+}
 
 unsigned char* ConvertJByteaArrayToUnsingedChars(JNIEnv *env, jbyteArray bytearray)
 {
@@ -286,13 +310,15 @@ JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1calculate_1single_1signature
         (JNIEnv *env, jobject claseObject, jlong context, jbyteArray secKey, jbyteArray secNounce, jbyteArray nounceSum, jbyteArray pubkeySum, jbyteArray msg){
-    uint8_t* seed = nullptr;
     uint8_t retSig[64];
     uint8_t* secKeys = ConvertJByteaArrayToUnsingedChars(env, secKey);
     uint8_t* secNounces = ConvertJByteaArrayToUnsingedChars(env, secNounce);
     uint8_t* nounceSums = ConvertJByteaArrayToUnsingedChars(env, nounceSum);
     uint8_t* pubkeySums = ConvertJByteaArrayToUnsingedChars(env, pubkeySum);
     uint8_t* msgs = ConvertJByteaArrayToUnsingedChars(env, msg);
+    char seed[32];
+    createRandomBytesOfLength(seed, 32);
+
     int ret = secp256k1_aggsig_sign_single((secp256k1_context*)(uintptr_t)context,
                                            retSig,
                                            msgs,
@@ -302,7 +328,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
                                            (const secp256k1_pubkey *)nounceSums,
                                            (const secp256k1_pubkey *)nounceSums,
                                            (const secp256k1_pubkey *)pubkeySums,
-                                           seed);
+                                           (unsigned char*)seed);
     delete secKeys;
     delete secNounces;
     delete nounceSums;
@@ -406,11 +432,12 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1export_1secnonce_1single
         (JNIEnv *env, jobject claseObject, jlong context){
-    uint8_t* seed = nullptr;
+    char seed[32];
+    createRandomBytesOfLength(seed, 32);
     uint8_t retData[32];
     int ret = secp256k1_aggsig_export_secnonce_single((secp256k1_context*)(uintptr_t)context,
                                                       retData,
-                                                      seed);
+                                                      (unsigned char*)seed);
     if (ret == 1){
         return ConvertUnsignedCharsToJByteArray(env, retData, 32);
     }
@@ -504,7 +531,7 @@ JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_
     return false;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1rewind_1bullet_1proof
+JNIEXPORT jobject JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1rewind_1bullet_1proof
         (JNIEnv *env, jobject claseObject, jlong context, jbyteArray commitment, jbyteArray nounce, jbyteArray proof){
     uint8_t blindOut[SECRET_KEY_SIZE];
     uint64_t value = 0;
@@ -530,11 +557,36 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
     delete proofs;
     delete nounces;
     if (ret == 1){
+        jclass proofClass = env->FindClass("com/vcashorg/vcashwallet/wallet/WallegtType/VcashProofInfo");
+        jmethodID id_generate=env->GetMethodID(proofClass,"<init>", "()V");
+        jobject proof=env->NewObject(proofClass,id_generate);
+        jfieldID proofValue = env->GetFieldID(proofClass,"value","J");
+        jfieldID proofMsg = env->GetFieldID(proofClass,"msg","[B");
+        env->SetLongField(proof, proofValue, value);
+
         jbyte *by = (jbyte*)messageOut;
-        jbyteArray jarray = env->NewByteArray(BULLET_PROOF_MSG_SIZE+8);
+        jbyteArray jarray = env->NewByteArray(BULLET_PROOF_MSG_SIZE);
         env->SetByteArrayRegion(jarray, 0, BULLET_PROOF_MSG_SIZE, by);
-        env->SetByteArrayRegion(jarray, BULLET_PROOF_MSG_SIZE, 8, (jbyte*)&value);
-        return jarray;
+        env->SetObjectField(proof,proofMsg,jarray);
+
+        return proof;
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_blake_12b
+        (JNIEnv *env, jobject claseObject, jbyteArray inputData, jbyteArray keyData){
+    uint8_t retData[32];
+    unsigned char* input = ConvertJByteaArrayToUnsingedChars(env, inputData);
+    size_t inputLength = env->GetArrayLength(inputData);
+    unsigned char* key = ConvertJByteaArrayToUnsingedChars(env, keyData);
+    size_t keyLength = env->GetArrayLength(keyData);
+    int ret = blake2b(retData, input, key, 32, inputLength, keyLength);
+    delete input;
+    delete key;
+    if (ret >= 0){
+        return ConvertUnsignedCharsToJByteArray(env, retData, 32);
     }
 
     return nullptr;
