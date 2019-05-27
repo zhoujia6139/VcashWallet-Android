@@ -162,10 +162,18 @@ JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_
 /*
  * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
  * Method:    secp256k1_rewind_bullet_proof
- * Signature: (J[B[B[B)[B
+ * Signature: (J[B[B[B)Lcom/vcashorg/vcashwallet/wallet/WallegtType/VcashProofInfo;
  */
-JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1rewind_1bullet_1proof
+JNIEXPORT jobject JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1rewind_1bullet_1proof
         (JNIEnv *, jobject, jlong, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
+ * Method:    blake_2b
+ * Signature: ([B[B)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_blake_12b
+        (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet.wallet;
 
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -93,17 +95,21 @@ public class NativeSecp256k1 {
         return this.secp256k1_verify_bullet_proof(mContext, commitment, proof);
     }
 
-    public byte[] rewindBulletProof(byte[] commitment, byte[] nounce, byte[] proof){
-        byte[] retData = this.secp256k1_rewind_bullet_proof(mContext, commitment, nounce, proof);
-        byte[] msg = new byte[16];
-        System.arraycopy(retData, 0, msg, 0, 16);
-        VcashKeychainPath keychainPath = new VcashKeychainPath(3, msg);
-
-        ByteBuffer buf = ByteBuffer.wrap(retData, 16, 8);
-        buf.order(ByteOrder.nativeOrder());
-        long value = buf.getLong();
+    public VcashProofInfo rewindBulletProof(byte[] commitment, byte[] nounce, byte[] proof){
+        VcashProofInfo retData = this.secp256k1_rewind_bullet_proof(mContext, commitment, nounce, proof);
+//        byte[] msg = new byte[16];
+//        System.arraycopy(retData, 0, msg, 0, 16);
+//        VcashKeychainPath keychainPath = new VcashKeychainPath(3, msg);
+//
+//        ByteBuffer buf = ByteBuffer.wrap(retData, 16, 8);
+//        buf.order(ByteOrder.nativeOrder());
+//        long value = buf.getLong();
 
         return retData;
+    }
+
+    public byte[] blake2b(byte[] inputData, byte[] key){
+        return this.blake_2b(inputData, key);
     }
 
     private native long secp256k1_ctx_create();
@@ -144,6 +150,8 @@ public class NativeSecp256k1 {
 
     public native boolean secp256k1_verify_bullet_proof(long context, byte[] commitment, byte[] proof);
 
-    public native byte[] secp256k1_rewind_bullet_proof(long context, byte[] commitment, byte[] nounce, byte[] proof);
+    public native VcashProofInfo secp256k1_rewind_bullet_proof(long context, byte[] commitment, byte[] nounce, byte[] proof);
+
+    public native byte[] blake_2b(byte[] inputData, byte[] key);
 }
 
