@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.vcashorg.vcashwallet.MainActivity;
 import com.vcashorg.vcashwallet.R;
+import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import java.util.LinkedList;
@@ -94,7 +95,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         //如果是主页面
-        if(this instanceof MainActivity){
+        if(this instanceof WalletMainActivity){
             if (System.currentTimeMillis() - mPreTime > 2000) {// 两次点击间隔大于2秒
                 UIUtils.showToast(UIUtils.getString(R.string.exit));
                 mPreTime = System.currentTimeMillis();

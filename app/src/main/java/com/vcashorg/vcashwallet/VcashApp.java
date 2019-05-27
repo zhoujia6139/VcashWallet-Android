@@ -16,7 +16,6 @@ public class VcashApp extends Application {
         mContext = getApplicationContext();
 
         WalletApi.setWalletContext(getApplicationContext());
-        WalletApi.createWallet(null, null);
     }
 
 

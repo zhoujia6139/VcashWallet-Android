@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,11 +19,11 @@ import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 
 public class MnemonicConfirmActivity extends ToolBarActivity {
 
     public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
+    public static final String PARAM_MNEMONIC_SEED = "mnemonic_seed";
 
     @BindView(R.id.rv_confirm)
     RecyclerView mRvConfirm;
@@ -30,13 +31,15 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @BindView(R.id.rv_ensure)
     RecyclerView mRvEnsure;
 
+    ArrayList<String> mnemonicList;
     List<MnemonicData> confirmDataList;
     List<MnemonicData> ensureDataList;
 
     MnemonicConfirmAdapter confirmAdapter;
     MnemonicEnsureAdapter ensureAdapter;
 
-    public String chooseData = "";
+    private String chooseData = "";
+    private byte[] seed;
 
     @Override
     protected void initToolBar() {
@@ -50,7 +53,8 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
 
     @Override
     public void initParams() {
-        ArrayList<String> mnemonicList = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        mnemonicList = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        seed = getIntent().getByteArrayExtra(PARAM_MNEMONIC_SEED);
         ArrayList<MnemonicData> mnemonicDataList = (ArrayList<MnemonicData>) buildMnemonicDataList(mnemonicList);
         confirmDataList = getSubStringByRandom(mnemonicDataList, 6);
         ensureDataList = new ArrayList<>(confirmDataList);
@@ -70,7 +74,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
                 MnemonicData item = (MnemonicData) adapter.getData().get(position);
                 chooseData = item.data;
                 for (MnemonicData ensureData : ensureDataList) {
-                    if (ensureData.state == MnemonicData.STATE_UNCHCECK) {
+                    if (ensureData.state == MnemonicData.STATE_UNCHECK) {
                         if (chooseData.equals(ensureData.data)) {
                             ensureData.state = MnemonicData.STATE_CHECK_TRUE;
                         } else {
@@ -84,6 +88,9 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
                 }
                 if (validate()) {
                     UIUtils.showToast("助记词验证成功");
+                    Intent intent = new Intent(MnemonicConfirmActivity.this,PasswordCreateActivity.class);
+                    intent.putExtra(PasswordCreateActivity.PARAM_MNEMONIC_LIST,mnemonicList);
+                    nv(intent);
                 }
             }
         });
@@ -98,7 +105,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 MnemonicData item = (MnemonicData) adapter.getData().get(position);
                 if (item.state == MnemonicData.STATE_CHECK_FALSE) {
-                    item.state = MnemonicData.STATE_UNCHCECK;
+                    item.state = MnemonicData.STATE_UNCHECK;
                     ensureAdapter.notifyDataSetChanged();
                 }
             }
@@ -116,7 +123,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
         @Override
         protected void convert(BaseViewHolder helper, MnemonicData item) {
             helper.setText(R.id.tv_num, item.num + "");
-            if (item.state == MnemonicData.STATE_UNCHCECK) {
+            if (item.state == MnemonicData.STATE_UNCHECK) {
                 helper.setText(R.id.tv_word, "");
                 helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_grey);
             } else if (item.state == MnemonicData.STATE_CHECK_TRUE) {
@@ -154,7 +161,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
 
     private boolean validate() {
         for (MnemonicData data : ensureDataList) {
-            if (data.state == MnemonicData.STATE_UNCHCECK
+            if (data.state == MnemonicData.STATE_UNCHECK
                     || data.state == MnemonicData.STATE_CHECK_FALSE) {
                 return false;
             }
@@ -185,11 +192,6 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             list.remove(target);
         }
         return backList;
-    }
-
-    @OnClick(R.id.cv)
-    public void textClick() {
-        nv(PasswordCreateActivity.class);
     }
 
 }

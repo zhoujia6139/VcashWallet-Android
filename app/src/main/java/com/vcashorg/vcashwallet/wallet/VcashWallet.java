@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet.wallet;
 
 import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.utils.SPUtil;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 public class VcashWallet {
     private static VcashWallet instance = null;
@@ -10,6 +12,7 @@ public class VcashWallet {
     private VcashWallet(VcashKeychain keychain){
         mKeyChain = keychain;
         mUserId = this.createUserId();
+        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.USER_ID,mUserId);
     }
 
     public static void createVcashWallet(VcashKeychain keychain){
