@@ -67,6 +67,8 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".TxDetailsActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".MnemonicRestoreActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

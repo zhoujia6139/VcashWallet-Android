@@ -101,8 +101,8 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             adapter.removeFooterView(footerView);
             adapter.setNewData(randomData());
         }else {
-            adapter.loadMoreEnd();
             adapter.addData(randomData());
+            adapter.loadMoreEnd();
         }
         mSrTx.setRefreshing(false);
         adapter.setEnableLoadMore(true);
@@ -145,7 +145,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     break;
             }
 
-            if(helper.getLayoutPosition() == getData().size()){
+            if(helper.getAdapterPosition() == getData().size()){
                 helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow_2);
             }else {
                 helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow);

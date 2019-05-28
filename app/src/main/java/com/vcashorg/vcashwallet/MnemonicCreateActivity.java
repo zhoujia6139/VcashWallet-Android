@@ -27,8 +27,6 @@ public class MnemonicCreateActivity extends ToolBarActivity {
 
     private ArrayList<String> mnemonicListData;
 
-    private byte[] seed;
-
     @Override
     protected void initToolBar() {
         setToolBarTitle("Create new wallet");
@@ -47,8 +45,7 @@ public class MnemonicCreateActivity extends ToolBarActivity {
         mRv.setHasFixedSize(true);
         mRv.setNestedScrollingEnabled(false);
 
-        seed = WalletApi.getSeed();
-        mnemonicListData = (ArrayList<String>) WalletApi.generateMnemonicBySeed(seed);
+        mnemonicListData = (ArrayList<String>) WalletApi.generateMnemonicPassphrase();
 
         MnemonicAdapter adapter = new MnemonicAdapter(R.layout.item_mnemonic,mnemonicListData);
 
@@ -81,7 +78,6 @@ public class MnemonicCreateActivity extends ToolBarActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(MnemonicCreateActivity.this,MnemonicConfirmActivity.class);
                         intent.putStringArrayListExtra(MnemonicConfirmActivity.PARAM_MNEMONIC_LIST,mnemonicListData);
-                        intent.putExtra(MnemonicConfirmActivity.PARAM_MNEMONIC_SEED,seed);
                         nv(intent);
                     }
                 })

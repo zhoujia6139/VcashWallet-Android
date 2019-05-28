@@ -63,6 +63,7 @@ public class PasswordCreateActivity extends ToolBarActivity {
 
     @Override
     public void initView() {
+        btnStart.setEnabled(false);
         et_psw.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

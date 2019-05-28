@@ -23,7 +23,6 @@ import butterknife.BindView;
 public class MnemonicConfirmActivity extends ToolBarActivity {
 
     public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
-    public static final String PARAM_MNEMONIC_SEED = "mnemonic_seed";
 
     @BindView(R.id.rv_confirm)
     RecyclerView mRvConfirm;
@@ -39,7 +38,6 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     MnemonicEnsureAdapter ensureAdapter;
 
     private String chooseData = "";
-    private byte[] seed;
 
     @Override
     protected void initToolBar() {
@@ -54,7 +52,6 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         mnemonicList = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
-        seed = getIntent().getByteArrayExtra(PARAM_MNEMONIC_SEED);
         ArrayList<MnemonicData> mnemonicDataList = (ArrayList<MnemonicData>) buildMnemonicDataList(mnemonicList);
         confirmDataList = getSubStringByRandom(mnemonicDataList, 6);
         ensureDataList = new ArrayList<>(confirmDataList);

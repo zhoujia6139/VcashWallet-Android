@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:paddingLeft="14dp"
+    android:gravity="center_vertical">
+
+    <FrameLayout
+        android:id="@+id/fl_bg"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/bg_circle_grey">
+
+        <TextView
+            android:id="@+id/tv_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            tools:text="2" />
+    </FrameLayout>
+
+    <EditText
+        android:id="@+id/et_word"
+        android:layout_width="match_parent"
+        android:background="@null"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        android:layout_gravity="center"
+        android:layout_marginLeft="9dp"
+        android:textColor="@color/A10"
+        android:textSize="15sp"
+        tools:text="winter" />
+
+</LinearLayout>
