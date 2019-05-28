@@ -9,6 +9,8 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
 import java.util.ArrayList;
+import com.vcashorg.vcashwallet.utils.SPUtil;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 public class VcashWallet {
     public ArrayList<VcashOutput> outputs;
@@ -24,6 +26,7 @@ public class VcashWallet {
     private VcashWallet(VcashKeychain keychain){
         mKeyChain = keychain;
         mUserId = this.createUserId();
+        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.USER_ID,mUserId);
     }
 
     public static void createVcashWallet(VcashKeychain keychain){

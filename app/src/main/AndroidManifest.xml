@@ -5,6 +5,9 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
     <application
         android:allowBackup="true"
@@ -24,7 +27,7 @@
             <!--</intent-filter>-->
         </activity>
 
-        <activity android:name=".HomeActivity"
+        <activity android:name=".LauncherActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +36,16 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".VcashStartActivity"
+            android:screenOrientation="portrait">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
+        <activity android:name=".VcashValidateActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".WalletCreateActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".MnemonicCreateActivity"
@@ -53,6 +66,8 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".TxDetailsActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".MnemonicRestoreActivity"
             android:screenOrientation="portrait"/>
     </application>
 

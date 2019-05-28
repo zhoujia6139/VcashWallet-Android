@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,21 +9,35 @@ import android.view.View;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
+import com.vcashorg.vcashwallet.bean.MnemonicData;
 import com.vcashorg.vcashwallet.utils.UIUtils;
-import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 
 public class MnemonicConfirmActivity extends ToolBarActivity {
 
-    @BindView(R.id.rv_data)
-    RecyclerView mRvData;
+    public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
+
+    @BindView(R.id.rv_confirm)
+    RecyclerView mRvConfirm;
+
+    @BindView(R.id.rv_ensure)
+    RecyclerView mRvEnsure;
+
+    ArrayList<String> mnemonicList;
+    List<MnemonicData> confirmDataList;
+    List<MnemonicData> ensureDataList;
+
+    MnemonicConfirmAdapter confirmAdapter;
+    MnemonicEnsureAdapter ensureAdapter;
+
+    private String chooseData = "";
 
     @Override
     protected void initToolBar() {
@@ -35,46 +50,136 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     }
 
     @Override
-    public void initView() {
-
-        mRvData.setLayoutManager(new GridLayoutManager(this,3,GridLayoutManager.VERTICAL, false));
-        mRvData.addItemDecoration(new GridLineItemDecoration(UIUtils.dip2Px(1),UIUtils.dip2Px(1),UIUtils.getColor(R.color.grey_4)));
-
-        List<String> words = WalletApi.generateMnemonicPassphrase();
-        List<String> subWords = getSubStringByRandom(words,6);
-
-        MnemonicDataAdapter adapter = new MnemonicDataAdapter(R.layout.item_center_txt,subWords);
-        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                UIUtils.showToast("Position: " + position);
-            }
-        });
-        mRvData.setAdapter(adapter);
-
+    public void initParams() {
+        mnemonicList = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        ArrayList<MnemonicData> mnemonicDataList = (ArrayList<MnemonicData>) buildMnemonicDataList(mnemonicList);
+        confirmDataList = getSubStringByRandom(mnemonicDataList, 6);
+        ensureDataList = new ArrayList<>(confirmDataList);
+        Collections.shuffle(ensureDataList);
     }
 
+    @Override
+    public void initView() {
 
-    class MnemonicDataAdapter extends BaseQuickAdapter<String, BaseViewHolder>{
+        mRvConfirm.setLayoutManager(new GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false));
+        mRvConfirm.addItemDecoration(new GridLineItemDecoration(UIUtils.dip2Px(1), UIUtils.dip2Px(1), UIUtils.getColor(R.color.grey_4)));
 
-        public MnemonicDataAdapter(int layoutResId, @Nullable List<String> data) {
+        confirmAdapter = new MnemonicConfirmAdapter(R.layout.item_center_txt, confirmDataList);
+        confirmAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                MnemonicData item = (MnemonicData) adapter.getData().get(position);
+                chooseData = item.data;
+                for (MnemonicData ensureData : ensureDataList) {
+                    if (ensureData.state == MnemonicData.STATE_UNCHECK) {
+                        if (chooseData.equals(ensureData.data)) {
+                            ensureData.state = MnemonicData.STATE_CHECK_TRUE;
+                        } else {
+                            ensureData.state = MnemonicData.STATE_CHECK_FALSE;
+                        }
+                        ensureAdapter.notifyDataSetChanged();
+                        break;
+                    } else if (ensureData.state == MnemonicData.STATE_CHECK_FALSE) {
+                        break;
+                    }
+                }
+                if (validate()) {
+                    UIUtils.showToast("助记词验证成功");
+                    Intent intent = new Intent(MnemonicConfirmActivity.this,PasswordCreateActivity.class);
+                    intent.putExtra(PasswordCreateActivity.PARAM_MNEMONIC_LIST,mnemonicList);
+                    nv(intent);
+                }
+            }
+        });
+        mRvConfirm.setAdapter(confirmAdapter);
+
+
+        mRvEnsure.setLayoutManager(new GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false));
+        mRvEnsure.addItemDecoration(new GridLineItemDecoration(UIUtils.dip2Px(1), UIUtils.dip2Px(1), UIUtils.getColor(R.color.grey_4)));
+        ensureAdapter = new MnemonicEnsureAdapter(R.layout.item_mnemonic, ensureDataList);
+        ensureAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                MnemonicData item = (MnemonicData) adapter.getData().get(position);
+                if (item.state == MnemonicData.STATE_CHECK_FALSE) {
+                    item.state = MnemonicData.STATE_UNCHECK;
+                    ensureAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        mRvEnsure.setAdapter(ensureAdapter);
+    }
+
+    class MnemonicEnsureAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder> {
+
+        public MnemonicEnsureAdapter(int layoutResId, @Nullable List<MnemonicData> data) {
             super(layoutResId, data);
         }
 
         @Override
-        protected void convert(BaseViewHolder helper, String item) {
-            helper.setText(R.id.tv_word,item);
+        protected void convert(BaseViewHolder helper, MnemonicData item) {
+            helper.setText(R.id.tv_num, item.num + "");
+            if (item.state == MnemonicData.STATE_UNCHECK) {
+                helper.setText(R.id.tv_word, "");
+                helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_grey);
+            } else if (item.state == MnemonicData.STATE_CHECK_TRUE) {
+                helper.setText(R.id.tv_word, item.data);
+                helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
+            } else if (item.state == MnemonicData.STATE_CHECK_FALSE) {
+                helper.setText(R.id.tv_word, chooseData);
+                helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
+            }
         }
     }
 
+    class MnemonicConfirmAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder> {
 
-    public List<String> getSubStringByRandom(List<String> list, int count){
-        List<String> backList = new ArrayList<>();
+        public MnemonicConfirmAdapter(int layoutResId, @Nullable List<MnemonicData> data) {
+            super(layoutResId, data);
+        }
+
+        @Override
+        protected void convert(BaseViewHolder helper, MnemonicData item) {
+            helper.setText(R.id.tv_word, item.data);
+        }
+    }
+
+    public List<MnemonicData> buildMnemonicDataList(List<String> list) {
+        List<MnemonicData> result = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            MnemonicData item = new MnemonicData();
+            item.num = i + 1;
+            item.data = list.get(i);
+            result.add(item);
+        }
+        return result;
+    }
+
+    private boolean validate() {
+        for (MnemonicData data : ensureDataList) {
+            if (data.state == MnemonicData.STATE_UNCHECK
+                    || data.state == MnemonicData.STATE_CHECK_FALSE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * randomData
+     *
+     * @param list
+     * @param count
+     * @return
+     */
+    public List<MnemonicData> getSubStringByRandom(List<MnemonicData> list, int count) {
+        List<MnemonicData> backList = new ArrayList<>();
         Random random = new Random();
         int backSum = 0;
         if (list.size() >= count) {
             backSum = count;
-        }else {
+        } else {
             backSum = list.size();
         }
         for (int i = 0; i < backSum; i++) {
@@ -84,11 +189,6 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             list.remove(target);
         }
         return backList;
-    }
-
-    @OnClick(R.id.cv)
-    public void textClick(){
-        nv(PasswordCreateActivity.class);
     }
 
 }

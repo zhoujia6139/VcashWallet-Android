@@ -41,6 +41,21 @@ public class WalletApi {
         return strList;
     }
 
+    public static byte[] getSeed(){
+        return  MnemonicHelper.instance(context).randomBytes(32);
+    }
+
+    public static List<String> generateMnemonicBySeed(byte[] seed){
+        try {
+            return  MnemonicHelper.instance(context).mnemoicFromBytes(seed);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MnemonicException.MnemonicLengthException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static boolean createWallet(List<String> wordsArr, String password){
         if (wordsArr == null){
             wordsArr = MnemonicHelper.split("layer floor valley flag dawn dress sponsor whale illegal session juice beef scout mammal snake cage river lemon easily away title else layer limit");

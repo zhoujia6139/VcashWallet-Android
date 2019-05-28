@@ -33,7 +33,7 @@
         android:layout_height="0dp">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_confirm"
+            android:id="@+id/rv_ensure"
             android:background="@drawable/bg_white_grey_border_round_rect"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
@@ -50,7 +50,7 @@
         android:layout_height="1dp"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_data"
+        android:id="@+id/rv_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
