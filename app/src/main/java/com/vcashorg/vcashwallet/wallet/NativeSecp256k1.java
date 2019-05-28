@@ -124,34 +124,34 @@ public class NativeSecp256k1 {
 
     private native byte[] secp256k1_commit_sum(long context, byte[][] positive, byte[][] negative);
 
-    public native byte[] secp256k1_commit_to_pubkey(long context, byte[] commit);
+    private native byte[] secp256k1_commit_to_pubkey(long context, byte[] commit);
 
-    public native byte[] secp256k1_get_compressed_pubkey(long context, byte[] pubkey);
+    private native byte[] secp256k1_get_compressed_pubkey(long context, byte[] pubkey);
 
-    public native byte[] secp256k1_pubkey_from_compressed_key(long context, byte[] compressedKey);
+    private native byte[] secp256k1_pubkey_from_compressed_key(long context, byte[] compressedKey);
 
-    public native boolean secp256k1_verify_single_signature(long context, byte[] signature, byte[] pubkey, byte[] nounceSum, byte[] pubkeySum, byte[] msg);
+    private native boolean secp256k1_verify_single_signature(long context, byte[] signature, byte[] pubkey, byte[] nounceSum, byte[] pubkeySum, byte[] msg);
 
-    public native byte[] secp256k1_calculate_single_signature(long context, byte[] secKey, byte[] secNounce, byte[] nounceSum, byte[] pubkeySum, byte[] msg);
+    private native byte[] secp256k1_calculate_single_signature(long context, byte[] secKey, byte[] secNounce, byte[] nounceSum, byte[] pubkeySum, byte[] msg);
 
-    public native byte[] secp256k1_combination_pubkey(long context, byte[][] pubkeyArr);
+    private native byte[] secp256k1_combination_pubkey(long context, byte[][] pubkeyArr);
 
-    public native byte[] secp256k1_combination_signature_and_nonceSum(long context, byte[][] sigArr, byte[] nonceSum);
+    private native byte[] secp256k1_combination_signature_and_nonceSum(long context, byte[][] sigArr, byte[] nonceSum);
 
-    public native byte[] secp256k1_signature_to_compactData(long context, byte[] signature);
+    private native byte[] secp256k1_signature_to_compactData(long context, byte[] signature);
 
-    public native byte[] secp256k1_compact_data_to_signature(long context, byte[] compaceData);
+    private native byte[] secp256k1_compact_data_to_signature(long context, byte[] compaceData);
 
-    public native byte[] secp256k1_export_secnonce_single(long context);
+    private native byte[] secp256k1_export_secnonce_single(long context);
 
-    public native byte[] secp256k1_get_pubkey_from_secretKey(long context, byte[] secKey);
+    private native byte[] secp256k1_get_pubkey_from_secretKey(long context, byte[] secKey);
 
-    public native byte[] secp256k1_createbullet_proof(long context, long value, byte[] secKey, byte[] nounce, byte[] msg);
+    private native byte[] secp256k1_createbullet_proof(long context, long value, byte[] secKey, byte[] nounce, byte[] msg);
 
-    public native boolean secp256k1_verify_bullet_proof(long context, byte[] commitment, byte[] proof);
+    private native boolean secp256k1_verify_bullet_proof(long context, byte[] commitment, byte[] proof);
 
-    public native VcashProofInfo secp256k1_rewind_bullet_proof(long context, byte[] commitment, byte[] nounce, byte[] proof);
+    private native VcashProofInfo secp256k1_rewind_bullet_proof(long context, byte[] commitment, byte[] nounce, byte[] proof);
 
-    public native byte[] blake_2b(byte[] inputData, byte[] key);
+    private native byte[] blake_2b(byte[] inputData, byte[] key);
 }
 

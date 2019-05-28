@@ -18,16 +18,7 @@ public abstract class CommonObserver<T> implements Observer<T> {
             return;
         }
 
-        if (result instanceof Response) {
-            Response res = (Response) result;
-            if (res.code == 200) {
-                onSuccess(result);
-            } else {
-                onFailure(null, res.msg);
-            }
-        } else {
-            onSuccess(result);
-        }
+        onSuccess(result);
     }
 
     @Override

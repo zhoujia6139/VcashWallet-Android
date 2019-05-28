@@ -4,10 +4,6 @@ package com.vcashorg.vcashwallet;
 import android.util.Log;
 
 import com.vcashorg.vcashwallet.base.BaseActivity;
-import com.vcashorg.vcashwallet.bean.Demo;
-import com.vcashorg.vcashwallet.net.CommonObserver;
-import com.vcashorg.vcashwallet.net.RequestUtils;
-import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import java.util.List;
@@ -25,19 +21,6 @@ public class MainActivity extends BaseActivity {
     public void initData() {
         super.initData();
 
-        //http请求使用方式参考
-        RequestUtils.getDemo(new CommonObserver<Demo>() {
-            @Override
-            public void onSuccess(Demo result) {
-                List<Demo.DemoItem> demo = result.demo;
-                UIUtils.showToast(demo.size() + "");
-            }
-
-            @Override
-            public void onFailure(Throwable e, String errorMsg) {
-                UIUtils.showToast(errorMsg);
-            }
-        });
     }
 
     @Override
