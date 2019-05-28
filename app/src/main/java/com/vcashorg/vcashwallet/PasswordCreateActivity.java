@@ -6,15 +6,15 @@ import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.Button;
 
-import com.vcashorg.vcashwallet.access.AccessFactory;
+import com.google.gson.Gson;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AESUtil;
 import com.vcashorg.vcashwallet.utils.CharSequenceX;
-import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
@@ -169,16 +169,21 @@ public class PasswordCreateActivity extends ToolBarActivity {
 
             @Override
             public void subscribe(ObservableEmitter emitter) throws Exception {
-                String guid = AccessFactory.getInstance(PasswordCreateActivity.this).createGUID();
-                String hash = AccessFactory.getInstance(PasswordCreateActivity.this).getHash(guid, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                SPUtil.getInstance(PasswordCreateActivity.this).setValue(SPUtil.ACCESS_HASH, hash);
-
+//                String guid = AccessFactory.getInstance(PasswordCreateActivity.this).createGUID();
+//                String hash = AccessFactory.getInstance(PasswordCreateActivity.this).getHash(guid, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+//                SPUtil.getInstance(PasswordCreateActivity.this).setValue(SPUtil.ACCESS_HASH, hash);
 
                 boolean result = WalletApi.createWallet(words,psw);
                 if(result){
-                    AccessFactory.getInstance(PasswordCreateActivity.this).setPIN(psw);
-                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveWalletToJSON(words,
-                            new CharSequenceX(AccessFactory.getInstance(PasswordCreateActivity.this).getGUID() + psw));
+//                    AccessFactory.getInstance(PasswordCreateActivity.this).setPIN(psw);
+////                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveWalletToJSON(words,
+////                            new CharSequenceX(AccessFactory.getInstance(PasswordCreateActivity.this).getGUID() + psw));
+                    String json = new Gson().toJson(words);
+                    Log.i("yjq","JSON: " + json);
+                    String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+                    Log.i("yjq","Encrypt: " + encrypt);
+                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveMnemonicToSDCard(encrypt);
+
                     emitter.onComplete();
                 }else {
                     emitter.onError(null);
@@ -199,15 +204,19 @@ public class PasswordCreateActivity extends ToolBarActivity {
                     @Override
                     public void onError(Throwable e) {
                         UIUtils.showToast("Create Wallet Error");
-
+                        if (progress.isShowing()) {
+                            progress.dismiss();
+                        }
                     }
 
                     @Override
                     public void onComplete() {
                         UIUtils.showToast("Create Wallet Success");
-                        if (progress != null && progress.isShowing()) {
+                        if (progress.isShowing()) {
                             progress.dismiss();
                         }
+                        nv(WalletMainActivity.class);
+                        finish();
                     }
                 });
     }

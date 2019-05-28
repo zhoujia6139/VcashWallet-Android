@@ -10,11 +10,13 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.vcashorg.vcashwallet.access.AccessFactory;
 import com.vcashorg.vcashwallet.utils.AESUtil;
 import com.vcashorg.vcashwallet.utils.CharSequenceX;
 import com.vcashorg.vcashwallet.utils.DecryptionException;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
 
 import org.bitcoinj.crypto.MnemonicException;
@@ -28,10 +30,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
@@ -56,7 +61,9 @@ public class PayloadUtil {
 
     private static PayloadUtil instance = null;
 
-    private PayloadUtil()	{ ; }
+    private PayloadUtil() {
+
+    }
 
     public static PayloadUtil getInstance(Context ctx) {
 
@@ -69,13 +76,12 @@ public class PayloadUtil {
         return instance;
     }
 
-    public File getBackupFile()  {
+    public File getBackupFile() {
         String directory = Environment.DIRECTORY_DOCUMENTS;
         File dir = null;
-        if(context.getPackageName().contains("staging"))    {
+        if (context.getPackageName().contains("staging")) {
             dir = Environment.getExternalStoragePublicDirectory(directory + strOptionalBackupDir + "/staging");
-        }
-        else    {
+        } else {
             dir = Environment.getExternalStoragePublicDirectory(directory + strOptionalBackupDir);
         }
         File file = new File(dir, strOptionalFilename);
@@ -83,7 +89,7 @@ public class PayloadUtil {
         return file;
     }
 
-    public JSONObject putPayload(String data, boolean external)    {
+    public JSONObject putPayload(String data, boolean external) {
 
         JSONObject obj = new JSONObject();
 
@@ -91,8 +97,7 @@ public class PayloadUtil {
             obj.put("version", 1);
             obj.put("payload", data);
             obj.put("external", external);
-        }
-        catch(JSONException je) {
+        } catch (JSONException je) {
             return null;
         }
 
@@ -103,7 +108,7 @@ public class PayloadUtil {
 
         File dir = ctx.getDir(dataDir, Context.MODE_PRIVATE);
         File file = new File(dir, strFilename);
-        if(file.exists())    {
+        if (file.exists()) {
             return true;
         }
 
@@ -116,7 +121,7 @@ public class PayloadUtil {
             JSONObject wallet = new JSONObject();
 
 
-            wallet.put("mnenonic",mnemonic);
+            wallet.put("mnenonic", mnemonic);
 
 
             JSONObject meta = new JSONObject();
@@ -133,13 +138,12 @@ public class PayloadUtil {
             obj.put("meta", meta);
 
             return obj;
-        }
-        catch(JSONException ex) {
+        } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public synchronized void saveWalletToJSON(List<String> mnemonic,CharSequenceX password) throws MnemonicException.MnemonicLengthException, IOException, JSONException, DecryptionException, UnsupportedEncodingException {
+    public synchronized void saveWalletToJSON(List<String> mnemonic, CharSequenceX password) throws MnemonicException.MnemonicLengthException, IOException, JSONException, DecryptionException, UnsupportedEncodingException {
 //        Log.i("PayloadUtil", get().toJSON().toString());
 
         // save payload
@@ -147,7 +151,7 @@ public class PayloadUtil {
 
     }
 
-    public synchronized boolean walletFileExists()  {
+    public synchronized boolean walletFileExists() {
         File dir = context.getDir(dataDir, Context.MODE_PRIVATE);
         File walletfile = new File(dir, strFilename);
         return walletfile.exists();
@@ -164,7 +168,7 @@ public class PayloadUtil {
         bakfile.setWritable(true, true);
 
         // prepare tmp file.
-        if(tmpfile.exists()) {
+        if (tmpfile.exists()) {
             tmpfile.delete();
 //            secureDelete(tmpfile);
         }
@@ -173,15 +177,14 @@ public class PayloadUtil {
 
         String data = null;
         String jsonstr = jsonobj.toString(4);
-        if(password != null) {
+        if (password != null) {
             data = AESUtil.encrypt(jsonstr, password, AESUtil.DefaultPBKDF2Iterations);
-        }
-        else {
+        } else {
             data = jsonstr;
         }
 
         JSONObject jsonObj = putPayload(data, false);
-        if(jsonObj != null)    {
+        if (jsonObj != null) {
             Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmpfile), "UTF-8"));
             try {
                 out.write(jsonObj.toString());
@@ -210,7 +213,7 @@ public class PayloadUtil {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
         String str = null;
 
-        while((str = in.readLine()) != null) {
+        while ((str = in.readLine()) != null) {
             sb.append(str);
         }
 
@@ -219,33 +222,30 @@ public class PayloadUtil {
         JSONObject jsonObj = null;
         try {
             jsonObj = new JSONObject(sb.toString());
-        }
-        catch(JSONException je)   {
+        } catch (JSONException je) {
             ;
         }
         String payload = null;
-        if(jsonObj != null && jsonObj.has("payload"))    {
+        if (jsonObj != null && jsonObj.has("payload")) {
             payload = jsonObj.getString("payload");
         }
 
         // not a json stream, assume v0
-        if(payload == null)    {
+        if (payload == null) {
             payload = sb.toString();
         }
 
         JSONObject node = null;
-        if(password == null) {
+        if (password == null) {
             node = new JSONObject(payload);
-        }
-        else {
+        } else {
             String decrypted = null;
             try {
                 decrypted = AESUtil.decrypt(payload, password, AESUtil.DefaultPBKDF2Iterations);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 return null;
             }
-            if(decrypted == null) {
+            if (decrypted == null) {
                 return null;
             }
             node = new JSONObject(decrypted);
@@ -259,7 +259,7 @@ public class PayloadUtil {
             long length = file.length();
             SecureRandom random = new SecureRandom();
             RandomAccessFile raf = new RandomAccessFile(file, "rws");
-            for(int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++) {
                 raf.seek(0);
                 raf.getFilePointer();
                 byte[] data = new byte[64];
@@ -297,7 +297,7 @@ public class PayloadUtil {
 
         String state = Environment.getExternalStorageState();
 
-        if(Environment.MEDIA_MOUNTED.equals(state)) {
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
 
@@ -308,13 +308,12 @@ public class PayloadUtil {
 
         String directory = Environment.DIRECTORY_DOCUMENTS;
         File dir = null;
-        if(context.getPackageName().contains("staging"))    {
+        if (context.getPackageName().contains("staging")) {
             dir = Environment.getExternalStoragePublicDirectory(directory + strOptionalBackupDir + "/staging");
-        }
-        else    {
+        } else {
             dir = Environment.getExternalStoragePublicDirectory(directory + strOptionalBackupDir);
         }
-        if(!dir.exists())   {
+        if (!dir.exists()) {
             dir.mkdirs();
             dir.setWritable(true, true);
             dir.setReadable(true, true);
@@ -324,7 +323,7 @@ public class PayloadUtil {
         newfile.setReadable(true, true);
 
         JSONObject jsonObj = putPayload(data, false);
-        if(jsonObj != null)    {
+        if (jsonObj != null) {
             Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newfile), "UTF-8"));
             try {
                 out.write(jsonObj.toString());
@@ -339,38 +338,62 @@ public class PayloadUtil {
 
     }
 
-    public String getDecryptedBackupPayload(String data, CharSequenceX password)  {
+    public boolean saveMnemonicToSDCard(String content) {
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            UIUtils.showToast("No SDCard");
+            return false;
+        }
 
-        String encrypted = null;
+        File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
+        File sdFile = new File(sdCardDir, strFilename);
 
         try {
-            JSONObject jsonObj = new JSONObject(data);
-            if(jsonObj != null && jsonObj.has("payload"))    {
-                encrypted = jsonObj.getString("payload");
-            }
-            else    {
-                encrypted = data;
-            }
+            FileOutputStream fos = new FileOutputStream(sdFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(content);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
-        catch(JSONException je) {
-            encrypted = data;
-        }
+        UIUtils.showToast("SAVE SUCCESS");
+        return true;
 
-        String decrypted = null;
-        try {
-            decrypted = AESUtil.decrypt(encrypted, password, AESUtil.DefaultPBKDF2Iterations);
-        }
-        catch (Exception e) {
-//            Toast.makeText(context, R.string.decryption_error, Toast.LENGTH_SHORT).show();
-        }
-        finally {
-            if (decrypted == null || decrypted.length() < 1) {
-//                Toast.makeText(context, R.string.decryption_error, Toast.LENGTH_SHORT).show();
-//                AppUtil.getInstance(context).restartApp();
-            }
-        }
-
-        return decrypted;
     }
 
+    public String readMnemonicFromSDCard() {
+        String content = null;
+        File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
+        File sdFile = new File(sdCardDir, strFilename);
+
+        try {
+            FileInputStream fis = new FileInputStream(sdFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            content = (String) ois.readObject();
+            ois.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return content;
+    }
+
+    public boolean ifMnemonicFileExist() {
+        try {
+            File f = new File(Environment.getExternalStorageDirectory(), strFilename);
+            if (!f.exists()) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
 }
