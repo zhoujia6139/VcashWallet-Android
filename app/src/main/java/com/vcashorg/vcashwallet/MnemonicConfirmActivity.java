@@ -85,8 +85,9 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
                 }
                 if (validate()) {
                     UIUtils.showToast("助记词验证成功");
-                    Intent intent = new Intent(MnemonicConfirmActivity.this,PasswordCreateActivity.class);
-                    intent.putExtra(PasswordCreateActivity.PARAM_MNEMONIC_LIST,mnemonicList);
+                    Intent intent = new Intent(MnemonicConfirmActivity.this, PasswordActivity.class);
+                    intent.putExtra(PasswordActivity.PARAM_MNEMONIC_LIST,mnemonicList);
+                    intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_CREATE);
                     nv(intent);
                 }
             }

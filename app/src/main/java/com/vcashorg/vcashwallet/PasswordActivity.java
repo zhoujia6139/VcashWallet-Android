@@ -28,9 +28,16 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
-public class PasswordCreateActivity extends ToolBarActivity {
+public class PasswordActivity extends ToolBarActivity {
 
     public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
+    public static final String PARAM_MODE = "mode";
+
+    public static final int MODE_VALIDATE = 0;
+    public static final int MODE_CREATE = 1;
+    public static final int MODE_RESTORE = 2;
+
+    private int mode = MODE_VALIDATE;
 
     @BindView(R.id.til_psw)
     TextInputLayout til_psw;
@@ -59,6 +66,7 @@ public class PasswordCreateActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         words = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        mode = getIntent().getIntExtra(PARAM_MODE, MODE_VALIDATE);
     }
 
     @Override
@@ -154,13 +162,16 @@ public class PasswordCreateActivity extends ToolBarActivity {
     public void onBtnStartClick() {
         if (validatePassword()) {
            // nv(WalletMainActivity.class);
-            create(et_psw.getText().toString());
+            if(mode == MODE_CREATE || mode == MODE_RESTORE){
+                create(et_psw.getText().toString());
+            }
+
         }
     }
 
     private void create(final String psw) {
 
-        final ProgressDialog progress = new ProgressDialog(PasswordCreateActivity.this);
+        final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
         progress.setMessage("Create wallet...");
@@ -183,7 +194,7 @@ public class PasswordCreateActivity extends ToolBarActivity {
                     Log.i("yjq","JSON: " + json);
                     String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
                     Log.i("yjq","Encrypt: " + encrypt);
-                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveMnemonicToSDCard(encrypt);
+                    PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
 
                     emitter.onComplete();
                 }else {
@@ -220,5 +231,9 @@ public class PasswordCreateActivity extends ToolBarActivity {
                         finish();
                     }
                 });
+    }
+
+    private void validate(){
+
     }
 }

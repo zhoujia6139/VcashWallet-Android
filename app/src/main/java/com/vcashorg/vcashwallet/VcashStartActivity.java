@@ -31,7 +31,6 @@ public class VcashStartActivity extends BaseActivity {
                 .onGranted(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        //权限已经被授予
                         nv(WalletCreateActivity.class);
                     }
                 })
@@ -47,7 +46,20 @@ public class VcashStartActivity extends BaseActivity {
 
     @OnClick(R.id.restore_wallet)
     public void onRestoreWalletClick(){
-        nv(WalletMainActivity.class);
-        //nv(MainActivity.class);
+        AndPermission.with(this)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE)
+                .onGranted(new Action() {
+                    @Override
+                    public void onAction(List<String> permissions) {
+                        nv(MnemonicRestoreActivity.class);
+                    }
+                })
+                .onDenied(new Action() {
+                    @Override
+                    public void onAction(List<String> permissions) {
+                        UIUtils.showToast("Need Storage Permission");
+                    }
+                })
+                .start();
     }
 }
