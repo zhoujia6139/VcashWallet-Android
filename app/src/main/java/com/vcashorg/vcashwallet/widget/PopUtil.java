@@ -20,9 +20,8 @@ public class PopUtil extends PopupWindow {
     public TextView tvConfirm, tvCancel;
 
     public interface PopOnCall {
-        void onClick(View v);
 
-        void onFinish();
+        void onConfirm();
     }
 
     public PopUtil(Activity activity) {
@@ -32,6 +31,14 @@ public class PopUtil extends PopupWindow {
         mPopWindow = LayoutInflater.from(activity).inflate(R.layout.layout_top_pop, null);
         tvConfirm = (TextView) mPopWindow.findViewById(R.id.tv_confirm);
         tvCancel = (TextView) mPopWindow.findViewById(R.id.tv_cancel);
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isShowing()){
+                    dismiss();
+                }
+            }
+        });
         setmPopWindow();
     }
 
@@ -41,7 +48,7 @@ public class PopUtil extends PopupWindow {
         //设置SelectPicPopupWindow弹出窗体的宽
         this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         //设置SelectPicPopupWindow弹出窗体的高
-        this.setHeight(dip2px(activity, mPopWindow.getHeight()));
+        this.setHeight(dip2px(activity, 124));
         //  设置SelectPicPopupWindow弹出窗体可点击
         this.setFocusable(false);
         //   设置背景透明
@@ -53,11 +60,27 @@ public class PopUtil extends PopupWindow {
         return popUtil;
     }
 
-    private void show(){
+    public PopUtil setConfirmListener(final PopOnCall popOnCall){
+        if(popOnCall != null){
+            tvConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    popOnCall.onConfirm();
+                    if(isShowing()){
+                        dismiss();
+                    }
+                }
+            });
+        }
+        return this;
+    }
+
+    public void show(){
         showAtLocation(activity.getWindow().getDecorView(),
                 Gravity.TOP, 0, 0);
-
     }
+
+
 
     public static int dip2px(Context context, float dipValue) {
         final float scale = context.getResources().getDisplayMetrics().density;

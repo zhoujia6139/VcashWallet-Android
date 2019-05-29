@@ -14,6 +14,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.VcashTx;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.widget.PopUtil;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
     RecyclerView mRvTx;
     @BindView(R.id.sr_tx)
     SwipeRefreshLayout mSrTx;
+    @BindView(R.id.tv_height)
+    TextView mTvHeight;
 
     WalletDrawer walletDrawer;
     VcashTxAdapter adapter;
@@ -74,6 +77,19 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
         mSrTx.setOnRefreshListener(this);
         walletDrawer = new WalletDrawer(this);
+
+        mTvHeight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopUtil.get(WalletMainActivity.this).setConfirmListener(new PopUtil.PopOnCall() {
+                    @Override
+                    public void onConfirm() {
+
+                    }
+                }).show();
+            }
+        });
+
     }
 
     private void initHeaderView() {
