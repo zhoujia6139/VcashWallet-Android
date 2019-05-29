@@ -37,6 +37,11 @@ public class SettingActivity extends ToolBarActivity {
         startActivityForResult(intent,1000);
     }
 
+    @OnClick(R.id.tv_change_psw)
+    public void onChangePswClick(){
+        nv(PasswordChangeActivity.class);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == 1000 && resultCode == RESULT_OK){

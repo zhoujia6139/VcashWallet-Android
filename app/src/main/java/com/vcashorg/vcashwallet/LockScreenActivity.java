@@ -100,7 +100,6 @@ public class LockScreenActivity extends ToolBarActivity {
 
         String value;
 
-
         public LockScreenItem(boolean checked, int type, String value) {
             this.checked = checked;
             this.type = type;

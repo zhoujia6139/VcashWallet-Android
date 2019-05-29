@@ -56,6 +56,7 @@
         android:background="@color/grey_4" />
 
     <TextView
+        android:id="@+id/tv_change_psw"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@color/white"
