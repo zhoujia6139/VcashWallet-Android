@@ -2,11 +2,10 @@ package com.vcashorg.vcashwallet.net;
 
 import android.support.annotation.NonNull;
 
-import com.vcashorg.vcashwallet.api.ApiUrl;
-import com.vcashorg.vcashwallet.utils.Constants;
+import com.vcashorg.vcashwallet.api.NodeApiUrl;
+import com.vcashorg.vcashwallet.api.ServerApiUrl;
 
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -14,33 +13,49 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitUtils {
     private static final String TAG = "RetrofitUtils";
 
-    private static ApiUrl mApiUrl;
+    private static NodeApiUrl mNodeApiUrl;
+    private static ServerApiUrl mServerApiUrl;
 
 
-    public static ApiUrl getApiUrl(){
-        if(mApiUrl == null){
+    public static NodeApiUrl getNodeApiUrl(){
+        if(mNodeApiUrl == null){
             synchronized (RetrofitUtils.class){
-                if(mApiUrl == null){
-                    mApiUrl = new RetrofitUtils().getRetrofit();
+                if(mNodeApiUrl == null){
+                    mNodeApiUrl = new RetrofitUtils().getNodeRetrofit();
                 }
             }
         }
-        return mApiUrl;
+        return mNodeApiUrl;
+    }
+
+    public static ServerApiUrl getServerApiUrl(){
+        if(mServerApiUrl == null){
+            synchronized (RetrofitUtils.class){
+                if(mServerApiUrl == null){
+                    mServerApiUrl = new RetrofitUtils().getServerRetrofit();
+                }
+            }
+        }
+        return mServerApiUrl;
     }
 
 
     private RetrofitUtils(){};
 
-    public ApiUrl getRetrofit(){
-        return initRetrofit(initOkHttp()).create(ApiUrl.class);
+    public NodeApiUrl getNodeRetrofit(){
+        return initRetrofit(initOkHttp(), NodeApiUrl.BaseUrl).create(NodeApiUrl.class);
+    }
+
+    public ServerApiUrl getServerRetrofit(){
+        return initRetrofit(initOkHttp(), ServerApiUrl.BaseUrl).create(ServerApiUrl.class);
     }
 
 
     @NonNull
-    private Retrofit initRetrofit(OkHttpClient client){
+    private Retrofit initRetrofit(OkHttpClient client, String baseUrl){
         return new Retrofit.Builder()
                 .client(client)
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();

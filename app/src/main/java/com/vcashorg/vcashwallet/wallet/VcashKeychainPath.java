@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 
-public class VcashKeychainPath {
+public class VcashKeychainPath implements Comparable {
     public int mDepth;
     public int[] mPath;
 
@@ -43,5 +43,18 @@ public class VcashKeychainPath {
         VcashKeychainPath path = new VcashKeychainPath(this.mDepth, this.mPath[0], this.mPath[1], this.mPath[2], this.mPath[3]);
         path.mPath[path.mDepth-1] += 1;
         return path;
+    }
+
+    public int compareTo(Object obj) {
+        VcashKeychainPath path=(VcashKeychainPath)obj;
+        if (mPath[2] > path.mPath[2]){
+            return 1;
+        }
+        else if (mPath[2] < path.mPath[2]){
+            return -1;
+        }
+        else{
+            return 0;
+        }
     }
 }
