@@ -28,9 +28,16 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
-public class PasswordCreateActivity extends ToolBarActivity {
+public class PasswordActivity extends ToolBarActivity {
 
     public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
+    public static final String PARAM_MODE = "mode";
+
+    public static final int MODE_CHANGE_PSW = 0;
+    public static final int MODE_CREATE = 1;
+    public static final int MODE_RESTORE = 2;
+
+    private int mode = MODE_CREATE;
 
     @BindView(R.id.til_psw)
     TextInputLayout til_psw;
@@ -59,11 +66,15 @@ public class PasswordCreateActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         words = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        mode = getIntent().getIntExtra(PARAM_MODE, MODE_CREATE);
+        if(mode == MODE_CHANGE_PSW){
+            setToolBarTitle("Change wallet password");
+            btnStart.setText("Save new password");
+        }
     }
 
     @Override
     public void initView() {
-        btnStart.setEnabled(false);
         et_psw.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -77,9 +88,7 @@ public class PasswordCreateActivity extends ToolBarActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!s.toString().equals("")) {
-                    til_psw.setErrorEnabled(false);
-                }
+
                 btnState();
             }
         });
@@ -92,14 +101,12 @@ public class PasswordCreateActivity extends ToolBarActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                til_psw_confirm.setErrorEnabled(false);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!s.toString().equals("")) {
-                    til_psw_confirm.setErrorEnabled(false);
-                }
+
                 btnState();
             }
         });
@@ -107,43 +114,23 @@ public class PasswordCreateActivity extends ToolBarActivity {
 
     private void btnState() {
         if (!et_psw.getText().toString().trim().equals("") && !et_psw_confirm.getText().toString().trim().equals("")) {
-            btnStart.setEnabled(true);
             btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
         } else {
-            btnStart.setEnabled(false);
             btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
         }
-    }
-
-    /**
-     * 显示错误提示，并获取焦点
-     *
-     * @param textInputLayout
-     * @param error
-     */
-    private void showError(TextInputLayout textInputLayout, String error) {
-        textInputLayout.setError(error);
-        textInputLayout.getEditText().setFocusable(true);
-        textInputLayout.getEditText().setFocusableInTouchMode(true);
-        textInputLayout.getEditText().requestFocus();
     }
 
     private boolean validatePassword() {
         String psw1 = til_psw.getEditText().getText().toString();
         String psw2 = til_psw_confirm.getEditText().getText().toString();
 
-        if (TextUtils.isEmpty(psw1)) {
-            showError(til_psw, "Password cant be empty");
-            return false;
-        }
-
-        if (TextUtils.isEmpty(psw2)) {
-            showError(til_psw_confirm, "Confirm password cant be empty");
+        if (TextUtils.isEmpty(psw1) || TextUtils.isEmpty(psw2)) {
             return false;
         }
 
         if (!psw1.equals(psw2)) {
-            UIUtils.showToast("Password not same");
+            til_psw_confirm.setErrorEnabled(true);
+            til_psw_confirm.setError("Passwords do not match");
             return false;
         }
 
@@ -153,14 +140,13 @@ public class PasswordCreateActivity extends ToolBarActivity {
     @OnClick(R.id.btn_start)
     public void onBtnStartClick() {
         if (validatePassword()) {
-           // nv(WalletMainActivity.class);
             create(et_psw.getText().toString());
         }
     }
 
     private void create(final String psw) {
 
-        final ProgressDialog progress = new ProgressDialog(PasswordCreateActivity.this);
+        final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
         progress.setMessage("Create wallet...");
@@ -183,7 +169,7 @@ public class PasswordCreateActivity extends ToolBarActivity {
                     Log.i("yjq","JSON: " + json);
                     String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
                     Log.i("yjq","Encrypt: " + encrypt);
-                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveMnemonicToSDCard(encrypt);
+                    PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
 
                     emitter.onComplete();
                 }else {
@@ -221,4 +207,5 @@ public class PasswordCreateActivity extends ToolBarActivity {
                     }
                 });
     }
+
 }

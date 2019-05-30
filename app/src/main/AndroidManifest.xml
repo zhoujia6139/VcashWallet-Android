@@ -52,7 +52,7 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".MnemonicConfirmActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".PasswordCreateActivity"
+        <activity android:name=".PasswordActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".WalletMainActivity"
             android:screenOrientation="portrait"/>
@@ -68,6 +68,10 @@
         <activity android:name=".TxDetailsActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".MnemonicRestoreActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LockScreenActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".PasswordChangeActivity"
             android:screenOrientation="portrait"/>
     </application>
 

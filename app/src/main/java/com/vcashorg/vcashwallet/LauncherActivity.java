@@ -14,13 +14,15 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        if(PayloadUtil.getInstance(this).ifMnemonicFileExist()){
-//            startActivity(new Intent(this,VcashValidateActivity.class));
-//        }else {
-//            startActivity(new Intent(this,VcashStartActivity.class));
-//        }
+        if(PayloadUtil.getInstance(this).ifMnemonicFileExist()){
+            Intent intent = new Intent(this,VcashValidateActivity.class);
+            intent.putExtra(VcashValidateActivity.PARAM_MODE,VcashValidateActivity.MODE_LAUNCHER_VALIDATE);
+            startActivity(intent);
+        }else {
+            startActivity(new Intent(this,VcashStartActivity.class));
+        }
 
-        startActivity(new Intent(this,MnemonicRestoreActivity.class));
+        // startActivity(new Intent(this,MnemonicRestoreActivity.class));
 
         finish();
     }
