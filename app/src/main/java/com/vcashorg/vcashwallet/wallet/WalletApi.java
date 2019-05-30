@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.vcashorg.vcashwallet.api.NodeApi;
+import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
@@ -17,10 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WalletApi {
+    final public static long VCASH_BASE = 1000000000;
     private static  Context context;
 
     public static void setWalletContext(Context con){
         context = con;
+        EncryptedDBHelper.setDbContext(con);
     }
 
     public static List<String> getAllPhraseWords(){
@@ -124,6 +127,10 @@ public class WalletApi {
         return info;
     }
 
+    public static long getCurChainHeight(){
+        return VcashWallet.getInstance().getChainHeight();
+    }
+
     public static void checkWalletUtxo(final WalletCallback callback){
         ArrayList<VcashOutput> arr = new ArrayList<>();
         NodeApi.getOutputsByPmmrIndex(0, arr, new WalletCallback() {
@@ -142,6 +149,19 @@ public class WalletApi {
             }
         });
     }
+
+    public static void createSendTransaction(String targetUserId, long amount, long fee, final WalletCallback callback){
+        //VcashWallet.getInstance().c
+    }
+
+    public static double nanoToVcash(long nano){
+        return (double)nano/VCASH_BASE;
+    }
+
+    public static long vcashToNano(double vcash){
+        return (long)(vcash*VCASH_BASE);
+    }
+
 
     public static class WalletBalanceInfo {
         public long total;

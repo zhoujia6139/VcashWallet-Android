@@ -4,7 +4,6 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 
 public class VcashOutput {
     public String commitment;
-    //VcashKeychainPath.pathData hex format
     public String keyPath;
     public long mmr_index;
     public long value;
@@ -13,7 +12,6 @@ public class VcashOutput {
     public boolean is_coinbase;
     public OutputStatus status;
     public short tx_log_id;
-    public byte[] blinding;
 
     public enum OutputStatus{
         Unconfirmed,
