@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -112,16 +113,33 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         return data;
     }
 
-    private void loadData(boolean refresh){
-        if(refresh){
-            adapter.removeFooterView(footerView);
-            adapter.setNewData(randomData());
-        }else {
-            adapter.addData(randomData());
-            adapter.loadMoreEnd();
-        }
-        mSrTx.setRefreshing(false);
-        adapter.setEnableLoadMore(true);
+    private int i=0;
+
+    private void loadData(final boolean refresh){
+
+        mRvTx.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(refresh){
+                    i=0;
+                    adapter.removeFooterView(footerView);
+                    adapter.setNewData(randomData());
+                    mSrTx.setRefreshing(false);
+                }else {
+                    adapter.addData(randomData());
+                    adapter.notifyDataSetChanged();
+                    i ++;
+                    if(i == 3){
+                        adapter.loadMoreEnd();
+                    }else {
+                        adapter.loadMoreComplete();
+                    }
+                }
+
+            }
+        },2000);
+
+
     }
 
     @Override
@@ -160,6 +178,9 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     txState.setCompoundDrawablesWithIntrinsicBounds(d3, null, null, null);
                     break;
             }
+
+            Log.i("yjq","size: " + getData().size());
+            Log.i("yjq","pos: " + helper.getAdapterPosition());
 
             if(helper.getAdapterPosition() == getData().size()){
                 helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow_2);

@@ -338,6 +338,7 @@ public class PayloadUtil {
 
     }
 
+    //File fs = new File(Environment.getExternalStorageDirectory()+"/msc/" + fileName);
     public boolean saveMnemonicToSDCard(String content) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             UIUtils.showToast("No SDCard");
