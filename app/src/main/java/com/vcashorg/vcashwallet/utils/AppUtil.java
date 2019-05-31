@@ -2,10 +2,13 @@ package com.vcashorg.vcashwallet.utils;
 
 import android.content.Context;
 
+import com.vcashorg.vcashwallet.prng.PRNGFixes;
+
 import org.bitcoinj.core.Utils;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.util.ArrayList;
 
@@ -26,7 +29,7 @@ public class AppUtil {
 
     public void applyPRNGFixes()    {
         try {
-            com.blockin.wallet.prng.PRNGFixes.apply();
+            PRNGFixes.apply();
         }
         catch(Exception e0) {
             //
@@ -35,7 +38,7 @@ public class AppUtil {
             //
             Security.removeProvider("LinuxPRNG");
             try {
-                com.blockin.wallet.prng.PRNGFixes.apply();
+                PRNGFixes.apply();
             }
             catch(Exception e1) {
 //                Toast.makeText(context, R.string.cannot_launch_app, Toast.LENGTH_SHORT).show();
@@ -50,6 +53,13 @@ public class AppUtil {
 
     public static byte[] decode(String hex) {
         return Utils.HEX.decode(hex);
+    }
+
+    public static byte[] randomBytes(int len) {
+        SecureRandom random = new SecureRandom();
+        byte seed[] = new byte[len];
+        random.nextBytes(seed);
+        return seed;
     }
 
     public static byte[] getDataFromArray(ArrayList<Integer> array) {

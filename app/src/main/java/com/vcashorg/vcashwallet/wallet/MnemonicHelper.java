@@ -54,13 +54,6 @@ public class MnemonicHelper {
         return mc.getWordList();
     }
 
-    public byte[] randomBytes(int len) {
-        AppUtil.getInstance(context).applyPRNGFixes();
-        SecureRandom random = new SecureRandom();
-        byte seed[] = new byte[len];
-        random.nextBytes(seed);
-        return seed;
-    }
 
     public List<String> mnemoicFromBytes(byte[] seeds) throws IOException, MnemonicException.MnemonicLengthException {
         List<String> mnemoics = null;

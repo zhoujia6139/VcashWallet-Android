@@ -53,11 +53,10 @@ public class NodeApi {
         });
     }
 
-    public static void getOutputsByCommitArr(ArrayList<byte[]> commitArr, final WalletCallback callback){
+    public static void getOutputsByCommitArr(ArrayList<String> commitArr, final WalletCallback callback){
         StringBuffer sb = new StringBuffer();
-        for (byte[] item :commitArr){
-            String strCommit = AppUtil.hex(item);
-            sb.append(strCommit);
+        for (String item :commitArr){
+            sb.append(item);
             sb.append(",");
         }
 
