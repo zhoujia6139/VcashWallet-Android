@@ -147,7 +147,7 @@ public class VcashSlate {
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
         final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath);
         byte[] proof = VcashWallet.getInstance().mKeyChain.createRangeProof(amount, keypath);
-        VcashTransaction.Output output = tx.new VcashTransaction.Output();
+        VcashTransaction.Output output = tx.new Output();
         output.features = OutputFeaturePlain;
         output.commit = commitment;
         output.proof = proof;
