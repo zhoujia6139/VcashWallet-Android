@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <include layout="@layout/layout_toolbar" />
@@ -16,12 +17,14 @@
         android:paddingBottom="14dp">
 
         <ImageView
+            android:id="@+id/iv_status"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:layout_marginTop="8dp"
             android:src="@drawable/ic_tx_ongoing" />
 
         <TextView
+            android:id="@+id/tv_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -53,11 +56,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_tx_id"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="08e37083ac8f3032c4dbf3bca1a9d22ae92df3d6da4689220714fb3194523c234e"
+                tools:text="08e37083ac8f3032c4dbf3bca1a9d22ae92df3d6da4689220714fb3194523c234e"
                 android:textColor="@color/A10" />
         </LinearLayout>
 
@@ -75,11 +79,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_sender"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="ecc7c627c32e6a2023ed"
+                tools:text="ecc7c627c32e6a2023ed"
                 android:textColor="@color/A10" />
         </LinearLayout>
 
@@ -97,11 +102,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_recipient"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="e9d8ce89ecc7c627c32e"
+                tools:text="e9d8ce89ecc7c627c32e"
                 android:textColor="@color/A10" />
         </LinearLayout>
 
@@ -119,11 +125,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_tx_amount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="5.23122 Vcash"
+                tools:text="5.23122 Vcash"
                 android:textColor="@color/A10" />
         </LinearLayout>
 
@@ -141,11 +148,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_tx_fee"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="0.03122 Vcash"
+                tools:text="0.03122 Vcash"
                 android:textColor="@color/A10" />
         </LinearLayout>
 
@@ -163,11 +171,12 @@
                 android:textColor="@color/A10" />
 
             <TextView
+                android:id="@+id/tv_tx_time"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                android:text="2019-05-15 11:09:22"
+                tools:text="2019-05-15 11:09:22"
                 android:textColor="@color/A10" />
         </LinearLayout>
 

@@ -2,9 +2,10 @@ package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class VcashTxLog {
+public class VcashTxLog implements Serializable {
     public short tx_id;
     public String tx_slate_id;
     public String parter_id;

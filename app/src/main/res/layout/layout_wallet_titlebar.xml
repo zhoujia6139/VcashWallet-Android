@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/black"
     android:gravity="center_vertical"
     android:paddingLeft="12dp"
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/ic_highlight"
         android:drawablePadding="4dp"
-        android:text="Height:10324"
+        tools:text="Height:10324"
         android:textColor="@color/white"
         android:textSize="12sp" />
 </LinearLayout>
