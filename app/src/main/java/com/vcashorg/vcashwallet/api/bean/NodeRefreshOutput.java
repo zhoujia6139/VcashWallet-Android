@@ -1,7 +1,7 @@
 package com.vcashorg.vcashwallet.api.bean;
 
 public class NodeRefreshOutput {
-    long height;
-    String commit;
-    long mmr_index;
+    public long height;
+    public String commit;
+    public long mmr_index;
 }

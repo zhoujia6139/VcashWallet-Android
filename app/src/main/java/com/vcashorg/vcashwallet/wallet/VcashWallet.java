@@ -7,6 +7,7 @@ import com.vcashorg.vcashwallet.api.bean.NodeChainInfo;
 import com.vcashorg.vcashwallet.api.bean.NodeOutputs;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
@@ -22,6 +23,7 @@ import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
+import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxReceived;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
 public class VcashWallet {
@@ -145,12 +147,12 @@ public class VcashWallet {
         return null;
     }
 
-    public void sendTransaction(String targetUserId, long amount, long fee, final WalletCallback callback){
+    public void sendTransaction(long amount, long fee, final WalletCallback callback){
         long total = 0;
-        ArrayList<VcashOutput> arrayList = new ArrayList<VcashOutput>();
+        ArrayList<VcashOutput> spendable = new ArrayList<VcashOutput>();
         for (VcashOutput item : outputs){
             if (item.isSpendable()){
-                arrayList.add(item);
+                spendable.add(item);
                 total += item.value;
             }
         }
@@ -159,7 +161,7 @@ public class VcashWallet {
         // 1.1First attempt to spend without change
         long actualFee = fee;
         if (fee == 0){
-            actualFee = calcuteFee(arrayList.size(), 1);
+            actualFee = calcuteFee(spendable.size(), 1);
         }
         long amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
@@ -172,7 +174,7 @@ public class VcashWallet {
 
         // 1.2Second attempt to spend with change
         if (total != amount_with_fee) {
-            actualFee = calcuteFee(arrayList.size(), 2);
+            actualFee = calcuteFee(spendable.size(), 2);
         }
         amount_with_fee = amount + actualFee;
         long change = total - amount_with_fee;
@@ -195,14 +197,96 @@ public class VcashWallet {
         txLog.amount_debited = total;
         txLog.confirm_state = DefaultState;
         slate.txLog = txLog;
+
+        byte[] blind = slate.addTxElement(spendable, change);
+        if (blind == null){
+            Log.e("", "sender addTxElement failed");
+            if (callback!=null){
+                callback.onCall(false, null);
+            }
+            return;
+        }
+
+        //3 construct sender Context
+        VcashContext context = new VcashContext();
+        context.sec_key = AppUtil.hex(blind);
+        context.slate_id = slate.uuid;
+        slate.context = context;
+
+        //4 sender fill round 1
+        if (!slate.fillRound1(context, 0, null)){
+            Log.e("", "sender fillRound1 failed");
+            if (callback!=null){
+                callback.onCall(false, null);
+            }
+            return;
+        }
+
+        if (callback!=null){
+            callback.onCall(true, null);
+        }
     }
 
     public boolean receiveTransaction(VcashSlate slate){
-        return false;
+        //5, fill slate with receiver output
+        VcashTxLog txLog = new VcashTxLog();
+        txLog.tx_id = VcashWallet.getInstance().getNextLogId();
+        txLog.tx_slate_id = slate.uuid;
+        txLog.tx_type = TxReceived;
+        txLog.create_time = Calendar.getInstance().getTimeInMillis()/1000;
+        //txLog.fee = slate.fee;
+        txLog.amount_credited = slate.amount;
+        txLog.amount_debited = 0;
+        txLog.confirm_state = DefaultState;
+        slate.txLog = txLog;
+
+        byte[] blind = slate.addReceiverTxOutput();
+        if (blind == null){
+            Log.e("", "--------receiver addReceiverTxOutput failed");
+            return false;
+        }
+
+        //6, construct receiver Context
+        VcashContext context = new VcashContext();
+        context.sec_key = AppUtil.hex(blind);
+        context.slate_id = slate.uuid;
+        slate.context = context;
+
+        //7, receiver fill round 1
+        if (!slate.fillRound1(context, 1, null)){
+            Log.e("", "--------receiver fillRound1 failed");
+            return false;
+        }
+
+        //8, receiver fill round 2
+        if (!slate.fillRound2(context, 1)){
+            Log.e("", "--------receiver fillRound2 failed");
+            return false;
+        }
+
+        return true;
     }
 
     public boolean finalizeTransaction(VcashSlate slate){
-        return false;
+        //9, sender fill round 2
+        if (!slate.fillRound2(slate.context, 0)){
+            Log.e("", "--------sender fillRound2 failed");
+            return false;
+        }
+
+        //10, create group signature
+        byte[] groupSig = slate.finalizeSignature();
+        if (groupSig == null){
+            Log.e("", "--------sender create group signature failed");
+            return false;
+        }
+
+        if (!slate.finalizeTx(groupSig)){
+            Log.e("", "--------sender finalize tx failed");
+            return false;
+        }
+
+        return true;
     }
 
 

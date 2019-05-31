@@ -52,7 +52,6 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public boolean saveOutputData(ArrayList<VcashOutput> arr){
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
-        db.beginTransaction();
         try {
             for (VcashOutput item : arr) {
                 db.execSQL("REPLACE INTO VcashOutput (" +
@@ -69,12 +68,10 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                         item.tx_log_id +
                         ")");
             }
-            db.setTransactionSuccessful();
         } catch (SQLException e){
             isSuc = false;
             e.printStackTrace();
         } finally {
-            db.endTransaction();
         }
 
         return isSuc;
@@ -106,17 +103,14 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public boolean saveTxDataArr(ArrayList<VcashTxLog> arr){
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
-        db.beginTransaction();
         try {
             for (VcashTxLog item : arr) {
                 saveTx_imp(item, db);
             }
-            db.setTransactionSuccessful();
         } catch (SQLException e){
             isSuc = false;
             e.printStackTrace();
         } finally {
-            db.endTransaction();
         }
 
         return isSuc;
@@ -181,6 +175,19 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
         return parseTxLog(cursor);
+    }
+
+    public boolean deleteTxBySlateId(String slate_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isSuc = true;
+        try {
+            db.execSQL(String.format("delete from VcashTxLog WHERE tx_slate_id = %s", slate_id), null);
+        }catch (SQLException e){
+            isSuc = false;
+            e.printStackTrace();
+        }
+
+        return isSuc;
     }
 
     private VcashTxLog parseTxLog(Cursor cursor){
@@ -250,10 +257,11 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         boolean isSuc = true;
         try {
             db.execSQL("REPLACE INTO VcashContext (" +
-                    "slate_id, sec_key)" +
+                    "slate_id, sec_key, sec_nounce)" +
                     "values(" +
                     "'" + context.slate_id + "'," +
                     "'" + context.sec_key + "'" +
+                    "'" + context.sec_nounce + "'" +
                     ")");
         }catch (SQLException e){
             isSuc = false;
@@ -269,6 +277,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         if (cursor != null){
             VcashContext context = new VcashContext();
             context.sec_key = cursor.getString(cursor.getColumnIndex("sec_key"));
+            context.sec_nounce = cursor.getString(cursor.getColumnIndex("sec_nounce"));
             context.slate_id = cursor.getString(cursor.getColumnIndex("slate_id"));
             return context;
         }
@@ -314,10 +323,12 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE VcashTxLog (" +
                 "tx_id              integer primary key," +
                 "tx_slate_id        text," +
+                "parter_id          text," +
                 "tx_type            integer," +
                 "create_time        integer," +
                 "confirm_time       integer," +
                 "confirm_state      integer," +
+                "server_status      integer," +
                 "amount_credited    integer," +
                 "amount_debited     integer," +
                 "fee                integer," +
@@ -331,7 +342,8 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "curTxLogId         integer)");
 
         db.execSQL("CREATE TABLE VcashContext (" +
-                "slate_id     text primary key NOT NULL," +
+                "slate_id       text primary key NOT NULL," +
+                "sec_nounce     text," +
                 "sec_key        text)");
     }
 

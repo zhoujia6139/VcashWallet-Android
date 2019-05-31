@@ -3,11 +3,20 @@ package com.vcashorg.vcashwallet.wallet;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.vcashorg.vcashwallet.api.NodeApi;
+import com.vcashorg.vcashwallet.api.ServerApi;
+import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
+import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
@@ -15,6 +24,7 @@ import org.bitcoinj.crypto.MnemonicException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class WalletApi {
@@ -24,6 +34,7 @@ public class WalletApi {
     public static void setWalletContext(Context con){
         context = con;
         EncryptedDBHelper.setDbContext(con);
+        AppUtil.getInstance(context).applyPRNGFixes();
     }
 
     public static List<String> getAllPhraseWords(){
@@ -33,7 +44,7 @@ public class WalletApi {
     public static List<String> generateMnemonicPassphrase(){
         List<String> strList = null;
         try {
-            byte[] seed = MnemonicHelper.instance(context).randomBytes(32);
+            byte[] seed = AppUtil.randomBytes(32);
             strList = MnemonicHelper.instance(context).mnemoicFromBytes(seed);
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,7 +56,7 @@ public class WalletApi {
     }
 
     public static byte[] getSeed(){
-        return  MnemonicHelper.instance(context).randomBytes(32);
+        return  AppUtil.randomBytes(32);
     }
 
     public static List<String> generateMnemonicBySeed(byte[] seed){
@@ -151,7 +162,278 @@ public class WalletApi {
     }
 
     public static void createSendTransaction(String targetUserId, long amount, long fee, final WalletCallback callback){
-        //VcashWallet.getInstance().c
+        VcashWallet.getInstance().sendTransaction(amount, fee, callback);
+    }
+
+    public static void sendTransaction(VcashSlate slate, String user, final WalletCallback callback){
+        EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
+
+        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                VcashWallet.getInstance().reloadOutputInfo();
+            }
+        };
+
+        slate.lockOutputsFn.onCall();
+        slate.createNewOutputsFn.onCall();
+
+        //save txLog
+        slate.txLog.parter_id = user;
+        slate.txLog.server_status = ServerTxStatus.TxDefaultStatus;
+        if (!EncryptedDBHelper.getsInstance().saveTx(slate.txLog)){
+            rollbackBlock.onCall();
+            if (callback != null){
+                callback.onCall(false, "Db error");
+                return;
+            }
+        }
+
+        //save context
+        if (!EncryptedDBHelper.getsInstance().saveContext(slate.context)){
+            rollbackBlock.onCall();
+            if (callback != null){
+                callback.onCall(false, "Db error");
+                return;
+            }
+        }
+
+        ServerTransaction server_tx = new ServerTransaction(slate);
+        server_tx.sender_id = VcashWallet.getInstance().mUserId;
+        server_tx.receiver_id = user;
+        server_tx.status = ServerTxStatus.TxDefaultStatus;
+
+        ServerApi.sendTransaction(server_tx, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    Log.d("", "sendTransaction to server suc");
+                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                    callback.onCall(true, null);
+                }
+                else{
+                    Log.e("", "sendTransaction to server failed! roll back database");
+                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    callback.onCall(false, "Tx send to server failed");
+                }
+            }
+        });
+    }
+
+    public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback){
+        if (!VcashWallet.getInstance().receiveTransaction(tx.slateObj)){
+            Log.e("", "VcashWallet receiveTransaction failed");
+            callback.onCall(false, null);
+            return;
+        }
+
+        EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
+
+        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                VcashWallet.getInstance().reloadOutputInfo();
+            }
+        };
+
+        tx.slateObj.createNewOutputsFn.onCall();
+        //save txLog
+        tx.slateObj.txLog.parter_id = tx.sender_id;
+        tx.slateObj.txLog.server_status = ServerTxStatus.TxReceiverd;
+        if (!EncryptedDBHelper.getsInstance().saveTx(tx.slateObj.txLog)){
+            rollbackBlock.onCall();
+            Log.e("", "VcashDataManager saveAppendTx failed");
+            callback.onCall(false, null);
+            return;
+        }
+
+        Gson gson = new Gson();
+        tx.slate = gson.toJson(tx.slateObj);
+        tx.status = ServerTxStatus.TxReceiverd;
+        ServerApi.receiveTransaction(tx, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    Log.d("", "send receiveTransaction suc");
+                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                    callback.onCall(true, null);
+                }
+                else{
+                    Log.e("", "send receiveTransaction to server failed! roll back database");
+                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    callback.onCall(false, null);
+                }
+            }
+        });
+
+    }
+
+    public static void finalizeTransaction(final ServerTransaction tx, final WalletCallback callback){
+        VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(tx.slateObj.uuid);
+        if (context == null){
+            Log.e("", "database record is broke, cannot finalize tx");
+            callback.onCall(false, null);
+            return;
+        }
+        tx.slateObj.context = context;
+
+        if (!VcashWallet.getInstance().finalizeTransaction(tx.slateObj)){
+            Log.e("", "finalizeTransaction failed");
+            callback.onCall(false, null);
+            return;
+        }
+
+        byte[] txPayload = tx.slateObj.tx.computePayload(false);
+        NodeApi.postTx(AppUtil.hex(txPayload), new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    callback.onCall(true, null);
+                    VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(tx.slateObj.uuid);
+                    if (txLog != null){
+                        txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+                        txLog.server_status = ServerTxStatus.TxFinalized;
+                        EncryptedDBHelper.getsInstance().saveTx(txLog);
+                    }
+
+                    Gson gson = new Gson();
+                    tx.slate = gson.toJson(tx.slateObj);
+                    tx.status = ServerTxStatus.TxFinalized;
+                    ServerApi.filanizeTransaction(tx.tx_id, new WalletCallback() {
+                        @Override
+                        public void onCall(boolean yesOrNo, Object data) {
+                            if (!yesOrNo){
+                                Log.e("", "filalize tx to Server failed, cache tx state");
+                            }
+                        }
+                    });
+                }
+                else {
+                    callback.onCall(false, "post tx to node failed");
+                }
+            }
+        });
+    }
+
+    public static boolean cancelTransaction(VcashTxLog txLog){
+        ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
+        if (txLog.isCanBeCanneled()){
+            if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxSent){
+                for (String commitment: txLog.inputs){
+                    for (VcashOutput item:walletOutputs){
+                        if (commitment.equals(item.commitment)){
+                            item.status = VcashOutput.OutputStatus.Unspent;
+                        }
+                    }
+                }
+            }
+
+            for (String commitment: txLog.outputs){
+                for (VcashOutput item:walletOutputs){
+                    if (commitment.equals(item.commitment)){
+                        item.status = VcashOutput.OutputStatus.Spent;
+                    }
+                }
+            }
+
+            txLog.tx_type = ((txLog.tx_type == VcashTxLog.TxLogEntryType.TxSent)?VcashTxLog.TxLogEntryType.TxSentCancelled:VcashTxLog.TxLogEntryType.TxReceivedCancelled);
+            txLog.server_status = ServerTxStatus.TxCanceled;
+            EncryptedDBHelper.getsInstance().saveTx(txLog);
+            VcashWallet.getInstance().syncOutputInfo();
+            ServerApi.cancelTransaction(txLog.tx_slate_id, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if (!yesOrNo){
+                        Log.e("", "cancel tx to Server failed");
+                    }
+                }
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+    public static ArrayList<VcashTxLog> getTransationArr(){
+        return EncryptedDBHelper.getsInstance().getTxData();
+    }
+
+    public static VcashTxLog getTxByTxid(String txid){
+        return EncryptedDBHelper.getsInstance().getTxBySlateId(txid);
+    }
+
+    public static boolean deleteTxByTxid(String txid){
+        return  EncryptedDBHelper.getsInstance().deleteTxBySlateId(txid);
+    }
+
+    public static void updateOutputStatusWithComplete(final WalletCallback callback){
+        ArrayList<String> strArr = new ArrayList<>();
+        for (VcashOutput item: VcashWallet.getInstance().outputs){
+            strArr.add(item.commitment);
+        }
+
+        if (strArr.size() == 0){
+            callback.onCall(true, null);
+            return;
+        }
+
+        NodeApi.getOutputsByCommitArr(strArr, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    ArrayList<NodeRefreshOutput> apiOutputs = (ArrayList<NodeRefreshOutput>)data;
+                    ArrayList<VcashTxLog> txs = getTransationArr();
+                    boolean hasChange = false;
+                    for (VcashOutput item: VcashWallet.getInstance().outputs){
+                        NodeRefreshOutput nodeOutput = null;
+                        for (NodeRefreshOutput output: apiOutputs){
+                            if (item.commitment.equals(output.commit)){
+                                nodeOutput = output;
+                            }
+                        }
+
+                        if (nodeOutput!=null){
+                            //should not be coinbase
+                            if (item.is_coinbase && item.status == VcashOutput.OutputStatus.Unconfirmed){
+
+                            }
+                            else if(!item.is_coinbase && item.status == VcashOutput.OutputStatus.Unconfirmed){
+                                VcashTxLog tx = null;
+                                for (VcashTxLog txLog :txs){
+                                    if (txLog.tx_id == item.tx_log_id){
+                                        tx = txLog;
+                                    }
+                                }
+
+                                if (tx != null){
+                                    tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
+                                    tx.confirm_time = Calendar.getInstance().getTimeInMillis()/1000;
+                                }
+                                item.height = nodeOutput.height;
+                                item.status = VcashOutput.OutputStatus.Unspent;
+
+                                hasChange = true;
+                            }
+                        }
+                        else{
+                            if (item.status == VcashOutput.OutputStatus.Locked || item.status == VcashOutput.OutputStatus.Unspent){
+                                item.status = VcashOutput.OutputStatus.Spent;
+                                hasChange = true;
+                            }
+                        }
+                    }
+
+                    if (hasChange){
+                        EncryptedDBHelper.getsInstance().saveTxDataArr(txs);
+                        VcashWallet.getInstance().syncOutputInfo();
+                    }
+                }
+
+                callback.onCall(yesOrNo, null);
+            }
+        });
     }
 
     public static double nanoToVcash(long nano){

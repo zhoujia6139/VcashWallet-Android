@@ -3,7 +3,7 @@
  * Copyright (c) 2018 Blockin. All Rights Reserved.
  */
 
-package com.blockin.wallet.prng;
+package com.vcashorg.vcashwallet.prng;
 
 /*
  * This software is provided 'as-is', without any express or implied

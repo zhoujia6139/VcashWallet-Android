@@ -11,6 +11,7 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import java.util.ArrayList;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStatus.Locked;
+import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStatus.Unconfirmed;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStatus.Unspent;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeatureCoinbase;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeaturePlain;
@@ -89,8 +90,89 @@ public class VcashSlate {
         return NativeSecp256k1.instance().bindSum(positives, negatives);
     }
 
-    private byte[] createTxOutputWithAmount(long amount){
+    public byte[] addReceiverTxOutput(){
+        byte[] secKey = createTxOutputWithAmount(amount);
+        tx.sortTx();
+        return secKey;
+    }
+
+    public boolean fillRound1(VcashContext context, int participant_id, String message){
+        return true;
+    }
+
+    public boolean fillRound2(VcashContext context, int participant_id) {
+        return true;
+    }
+
+    public byte[] finalizeSignature(){
         return null;
+    }
+
+    public boolean finalizeTx(byte[] finalSig){
+        return false;
+    }
+
+    public void generateOffset(VcashContext context){
+        byte[] seed = AppUtil.randomBytes(32);
+        while (!NativeSecp256k1.instance().verifyEcSecretKey(seed)){
+            seed = AppUtil.randomBytes(32);
+        }
+
+        tx.offset = seed;
+        byte[][] positiveArr = new byte[1][];
+        byte[][] negativeArr = new byte[1][];
+        positiveArr[0] = AppUtil.decode(context.sec_key);
+        negativeArr[0] = tx.offset;
+        context.sec_key = AppUtil.hex(NativeSecp256k1.instance().bindSum(positiveArr, negativeArr));
+    }
+
+    public byte[] createMsgToSign(){
+        VcashTransaction.TxKernel kernel = tx.body.kernels.get(0);
+        return kernel.kernelMsgToSign();
+    }
+
+    public void addParticipantInfo(VcashContext context, int participant_id, String message){
+        byte[] pub_key = NativeSecp256k1.instance().getPubkeyFromSecretKey(AppUtil.decode(context.sec_key));
+        byte[] pub_nonce = NativeSecp256k1.instance().getPubkeyFromSecretKey(AppUtil.decode(context.sec_nounce));
+        ParticipantData partiData = new ParticipantData();
+        partiData.pId = (short) participant_id;
+        partiData.public_nonce = pub_nonce;
+        partiData.public_blind_excess = pub_key;
+        partiData.message = message;
+
+        participant_data.add(partiData);
+    }
+
+    private byte[] createTxOutputWithAmount(final long amount){
+        final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
+        final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath);
+        byte[] proof = VcashWallet.getInstance().mKeyChain.createRangeProof(amount, keypath);
+        VcashTransaction.Output output = tx.new VcashTransaction.Output();
+        output.features = OutputFeaturePlain;
+        output.commit = commitment;
+        output.proof = proof;
+        tx.body.outputs.add(output);
+
+        createNewOutputsFn = new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                VcashOutput output = new VcashOutput();
+                output.commitment = AppUtil.hex(commitment);
+                output.keyPath = AppUtil.hex(keypath.pathData());
+                output.value = amount;
+                output.height = height;
+                output.lock_height = 0;
+                output.is_coinbase = false;
+                output.status = Unconfirmed;
+                output.tx_log_id = txLog.tx_id;
+                txLog.appendOutput(output.commitment);
+
+                VcashWallet.getInstance().addNewTxChangeOutput(output);
+                VcashWallet.getInstance().syncOutputInfo();
+            }
+        };
+
+        return VcashWallet.getInstance().mKeyChain.deriveBindKey(amount, keypath);
     }
 
     public class ParticipantData{
