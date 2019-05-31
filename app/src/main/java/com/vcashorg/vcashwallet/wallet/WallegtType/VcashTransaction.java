@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 
 import org.bitcoin.protocols.payments.Protos;
@@ -40,11 +41,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         for (TxKernel kernel: body.kernels){
             fee += kernel.fee;
         }
-        byte[] zeroKey = new byte[32];
-        for (int j=0; j<32; j++){
-            zeroKey[j] = 0;
-        }
-        byte[] feeCommit = NativeSecp256k1.instance().getCommitment(fee, zeroKey);
+
+        byte[] feeCommit = NativeSecp256k1.instance().getCommitment(fee, AppUtil.zeroByteArray(32));
         positiveCommits.add(feeCommit);
 
         byte[] offsetCommit = NativeSecp256k1.instance().getCommitment(0,   offset);
@@ -184,7 +182,7 @@ public class VcashTransaction extends VcashTxBaseObject {
         public KernelFeatures features;
         public long fee;
         public long lock_height;
-        public byte[] excess;
+        public byte[] excess = AppUtil.zeroByteArray(64);
         public byte[] excess_sig;
 
         public KernelFeatures featureWithLockHeight(long lock_height){
@@ -214,6 +212,11 @@ public class VcashTransaction extends VcashTxBaseObject {
             }
 
             return NativeSecp256k1.instance().blake2b(buf.array(), null);
+        }
+
+        public void setLock_height(long height){
+            lock_height = height;
+            features = featureWithLockHeight(height);
         }
 
         public boolean verify(){

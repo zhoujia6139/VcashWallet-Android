@@ -20,6 +20,7 @@ import java.util.Map;
 public class NodeApi {
     static private String Tag = "------NodeApi";
     static private long curHeight = 0;
+    static private long lastFetch = 0;
 
     public static void getOutputsByPmmrIndex(long startHeight, final ArrayList<VcashOutput> retArr, final WalletCallback callback){
         RetrofitUtils.getNodeApiUrl().getOutputs(startHeight)
@@ -82,27 +83,31 @@ public class NodeApi {
     }
 
     public static long getChainHeight(final WalletCallback callback){
-        RetrofitUtils.getNodeApiUrl().getChainHeight()
-                .compose(RxHelper.<NodeChainInfo>io2main())
-                .subscribe(new CommonObserver<NodeChainInfo>() {
-                    @Override
-                    public void onSuccess(NodeChainInfo result) {
-                        curHeight = result.height;
-                        if (callback != null){
-                            callback.onCall(true, result);
+        if (lastFetch - AppUtil.getCurrentTimeSecs() > 10){
+            RetrofitUtils.getNodeApiUrl().getChainHeight()
+                    .compose(RxHelper.<NodeChainInfo>io2main())
+                    .subscribe(new CommonObserver<NodeChainInfo>() {
+                        @Override
+                        public void onSuccess(NodeChainInfo result) {
+                            lastFetch = AppUtil.getCurrentTimeSecs();
+                            curHeight = result.height;
+                            if (callback != null){
+                                callback.onCall(true, result);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable e, String errorMsg) {
-                        Log.e(Tag, String.format("getChainHeight failed:%s", errorMsg));
-                        if (callback != null){
-                            callback.onCall(false, null);
+                        @Override
+                        public void onFailure(Throwable e, String errorMsg) {
+                            Log.e(Tag, String.format("getChainHeight failed:%s", errorMsg));
+                            if (callback != null){
+                                callback.onCall(false, null);
+                            }
+                            lastFetch = 0;
                         }
-                    }
-                });
+                    });
+        }
 
-        return 0;
+        return curHeight;
     }
 
     public static void postTx(String tx, final WalletCallback callback){

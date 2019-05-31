@@ -12,7 +12,6 @@ public class VcashKeychain {
 
     public VcashKeychain(DeterministicKey key){
         mMasterKey = key;
-        Log.d("---------masterkey", key.getPrivateKeyAsHex());
     }
 
     public byte[] deriveBindKey(long amount, VcashKeychainPath path){
