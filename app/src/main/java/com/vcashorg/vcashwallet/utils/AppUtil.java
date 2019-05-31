@@ -62,6 +62,18 @@ public class AppUtil {
         return seed;
     }
 
+    public static byte[] zeroByteArray(int len){
+        byte[] ret = new byte[len];
+        for (int i=0; i<len; i++){
+            ret[i] = 0;
+        }
+        return ret;
+    }
+
+    public static long getCurrentTimeSecs(){
+        return System.currentTimeMillis()/1000;
+    }
+
     public static byte[] getDataFromArray(ArrayList<Integer> array) {
         if (array == null || !(array instanceof ArrayList) ){
             return null;

@@ -21,13 +21,15 @@ import java.util.Date;
 
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxReceived;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
 public class VcashWallet {
-    public ArrayList<VcashOutput> outputs;
+    static private String Tag = "------VcashWallet";
+    public ArrayList<VcashOutput> outputs = new ArrayList<>();
 
     final private long DEFAULT_BASE_FEE = 1000000;
     private static VcashWallet instance = null;
@@ -36,6 +38,7 @@ public class VcashWallet {
     private long mChainHeight;
     private short mCurTxLogId;
     public String mUserId = null;
+    private ArrayList<WalletNoParamCallBack> heightListener = new ArrayList<>();
 
     private VcashWallet(VcashKeychain keychain){
         mKeyChain = keychain;
@@ -61,6 +64,7 @@ public class VcashWallet {
                 if (yesOrNo && info.height > mChainHeight){
                     mChainHeight = info.height;
                     saveBaseInfo();
+                    notifyChainHeightListener();
                 }
             }
         });
@@ -68,6 +72,16 @@ public class VcashWallet {
             mChainHeight = height;
         }
         return mChainHeight;
+    }
+
+    public void addChainHeightListener(WalletNoParamCallBack listener){
+        heightListener.add(listener);
+    }
+
+    private void notifyChainHeightListener(){
+        for (WalletNoParamCallBack listener:heightListener){
+            listener.onCall();
+        }
     }
 
     public VcashKeychainPath nextChild(){
@@ -110,7 +124,7 @@ public class VcashWallet {
         ArrayList<VcashOutput> arrayList = new ArrayList<VcashOutput>();
         for (VcashOutput output:outputs){
             if (output.status == VcashOutput.OutputStatus.Spent){
-                Log.w("", String.format("Output commit:%s has been spend, remove from wallet", output.commitment));
+                Log.w(Tag, String.format("Output commit:%s has been spend, remove from wallet", output.commitment));
             }
             else {
                 arrayList.add(output);
@@ -191,7 +205,7 @@ public class VcashWallet {
         txLog.tx_id = getNextLogId();
         txLog.tx_slate_id = slate.uuid;
         txLog.tx_type = TxSent;
-        txLog.create_time = Calendar.getInstance().getTimeInMillis()/1000;
+        txLog.create_time = AppUtil.getCurrentTimeSecs();
         txLog.fee = slate.fee;
         txLog.amount_credited = change;
         txLog.amount_debited = total;
@@ -200,7 +214,7 @@ public class VcashWallet {
 
         byte[] blind = slate.addTxElement(spendable, change);
         if (blind == null){
-            Log.e("", "sender addTxElement failed");
+            Log.e(Tag, "sender addTxElement failed");
             if (callback!=null){
                 callback.onCall(false, null);
             }
@@ -215,7 +229,7 @@ public class VcashWallet {
 
         //4 sender fill round 1
         if (!slate.fillRound1(context, 0, null)){
-            Log.e("", "sender fillRound1 failed");
+            Log.e(Tag, "sender fillRound1 failed");
             if (callback!=null){
                 callback.onCall(false, null);
             }
@@ -233,8 +247,8 @@ public class VcashWallet {
         txLog.tx_id = VcashWallet.getInstance().getNextLogId();
         txLog.tx_slate_id = slate.uuid;
         txLog.tx_type = TxReceived;
-        txLog.create_time = Calendar.getInstance().getTimeInMillis()/1000;
-        //txLog.fee = slate.fee;
+        txLog.create_time = AppUtil.getCurrentTimeSecs();
+        txLog.fee = slate.fee;
         txLog.amount_credited = slate.amount;
         txLog.amount_debited = 0;
         txLog.confirm_state = DefaultState;
@@ -254,13 +268,13 @@ public class VcashWallet {
 
         //7, receiver fill round 1
         if (!slate.fillRound1(context, 1, null)){
-            Log.e("", "--------receiver fillRound1 failed");
+            Log.e(Tag, "--------receiver fillRound1 failed");
             return false;
         }
 
         //8, receiver fill round 2
         if (!slate.fillRound2(context, 1)){
-            Log.e("", "--------receiver fillRound2 failed");
+            Log.e(Tag, "--------receiver fillRound2 failed");
             return false;
         }
 
@@ -270,19 +284,19 @@ public class VcashWallet {
     public boolean finalizeTransaction(VcashSlate slate){
         //9, sender fill round 2
         if (!slate.fillRound2(slate.context, 0)){
-            Log.e("", "--------sender fillRound2 failed");
+            Log.e(Tag, "--------sender fillRound2 failed");
             return false;
         }
 
         //10, create group signature
         byte[] groupSig = slate.finalizeSignature();
         if (groupSig == null){
-            Log.e("", "--------sender create group signature failed");
+            Log.e(Tag, "--------sender create group signature failed");
             return false;
         }
 
         if (!slate.finalizeTx(groupSig)){
-            Log.e("", "--------sender finalize tx failed");
+            Log.e(Tag, "--------sender finalize tx failed");
             return false;
         }
 

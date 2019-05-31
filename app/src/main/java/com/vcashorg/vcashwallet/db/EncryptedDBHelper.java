@@ -12,6 +12,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     static private Context mContext;
     private String mPassphrase;
+    private ArrayList<WalletNoParamCallBack> txDataListener = new ArrayList<>();
 
     private static volatile EncryptedDBHelper sInstance;
 
@@ -113,6 +115,10 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         } finally {
         }
 
+        if (isSuc){
+            notifyTxDataListener();
+        }
+
         return isSuc;
     }
 
@@ -124,6 +130,10 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         }catch (SQLException e){
             isSuc = false;
             e.printStackTrace();
+        }
+
+        if (isSuc){
+            notifyTxDataListener();
         }
 
         return isSuc;
@@ -298,6 +308,16 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public boolean rollbackDataTransaction(){
         this.getReadableDatabase().endTransaction();
         return true;
+    }
+
+    public void addTxDataListener(WalletNoParamCallBack listener){
+        txDataListener.add(listener);
+    }
+
+    private void notifyTxDataListener(){
+        for (WalletNoParamCallBack listener:txDataListener){
+            listener.onCall();
+        }
     }
 
     private EncryptedDBHelper(String passphrase) {

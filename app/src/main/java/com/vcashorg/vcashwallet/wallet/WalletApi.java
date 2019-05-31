@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class WalletApi {
+    static private String Tag = "------WalletApi";
     final public static long VCASH_BASE = 1000000000;
     private static  Context context;
 
@@ -79,7 +80,7 @@ public class WalletApi {
             DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(entropy);
             byte[] secret = masterKey.getPrivKeyBytes();
             String temp = AppUtil.hex(secret);
-            Log.d("WalletApi createWallet", temp);
+            Log.d(Tag, temp);
             VcashKeychain keyChain = new VcashKeychain(masterKey);
             VcashWallet.createVcashWallet(keyChain);
             return true;
@@ -89,6 +90,7 @@ public class WalletApi {
     }
 
     public static void clearWallet(){
+        EncryptedDBHelper.getsInstance().clearAllData();
         return;
     }
 
@@ -208,12 +210,12 @@ public class WalletApi {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
-                    Log.d("", "sendTransaction to server suc");
+                    Log.d(Tag, "sendTransaction to server suc");
                     EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
                     callback.onCall(true, null);
                 }
                 else{
-                    Log.e("", "sendTransaction to server failed! roll back database");
+                    Log.e(Tag, "sendTransaction to server failed! roll back database");
                     EncryptedDBHelper.getsInstance().rollbackDataTransaction();
                     callback.onCall(false, "Tx send to server failed");
                 }
@@ -223,7 +225,7 @@ public class WalletApi {
 
     public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback){
         if (!VcashWallet.getInstance().receiveTransaction(tx.slateObj)){
-            Log.e("", "VcashWallet receiveTransaction failed");
+            Log.e(Tag, "VcashWallet receiveTransaction failed");
             callback.onCall(false, null);
             return;
         }
@@ -244,7 +246,7 @@ public class WalletApi {
         tx.slateObj.txLog.server_status = ServerTxStatus.TxReceiverd;
         if (!EncryptedDBHelper.getsInstance().saveTx(tx.slateObj.txLog)){
             rollbackBlock.onCall();
-            Log.e("", "VcashDataManager saveAppendTx failed");
+            Log.e(Tag, "VcashDataManager saveAppendTx failed");
             callback.onCall(false, null);
             return;
         }
@@ -256,12 +258,12 @@ public class WalletApi {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
-                    Log.d("", "send receiveTransaction suc");
+                    Log.d(Tag, "send receiveTransaction suc");
                     EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
                     callback.onCall(true, null);
                 }
                 else{
-                    Log.e("", "send receiveTransaction to server failed! roll back database");
+                    Log.e(Tag, "send receiveTransaction to server failed! roll back database");
                     EncryptedDBHelper.getsInstance().rollbackDataTransaction();
                     callback.onCall(false, null);
                 }
@@ -273,14 +275,14 @@ public class WalletApi {
     public static void finalizeTransaction(final ServerTransaction tx, final WalletCallback callback){
         VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(tx.slateObj.uuid);
         if (context == null){
-            Log.e("", "database record is broke, cannot finalize tx");
+            Log.e(Tag, "database record is broke, cannot finalize tx");
             callback.onCall(false, null);
             return;
         }
         tx.slateObj.context = context;
 
         if (!VcashWallet.getInstance().finalizeTransaction(tx.slateObj)){
-            Log.e("", "finalizeTransaction failed");
+            Log.e(Tag, "finalizeTransaction failed");
             callback.onCall(false, null);
             return;
         }
@@ -305,7 +307,7 @@ public class WalletApi {
                         @Override
                         public void onCall(boolean yesOrNo, Object data) {
                             if (!yesOrNo){
-                                Log.e("", "filalize tx to Server failed, cache tx state");
+                                Log.e(Tag, "filalize tx to Server failed, cache tx state");
                             }
                         }
                     });
@@ -346,7 +348,7 @@ public class WalletApi {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if (!yesOrNo){
-                        Log.e("", "cancel tx to Server failed");
+                        Log.e(Tag, "cancel tx to Server failed");
                     }
                 }
             });
@@ -409,7 +411,7 @@ public class WalletApi {
 
                                 if (tx != null){
                                     tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
-                                    tx.confirm_time = Calendar.getInstance().getTimeInMillis()/1000;
+                                    tx.confirm_time = AppUtil.getCurrentTimeSecs();
                                 }
                                 item.height = nodeOutput.height;
                                 item.status = VcashOutput.OutputStatus.Unspent;
@@ -434,6 +436,14 @@ public class WalletApi {
                 callback.onCall(yesOrNo, null);
             }
         });
+    }
+
+    public static void addChainHeightListener(WalletNoParamCallBack listener){
+        VcashWallet.getInstance().addChainHeightListener(listener);
+    }
+
+    public static void addTxDataListener(WalletNoParamCallBack listener){
+        EncryptedDBHelper.getsInstance().addTxDataListener(listener);
     }
 
     public static double nanoToVcash(long nano){

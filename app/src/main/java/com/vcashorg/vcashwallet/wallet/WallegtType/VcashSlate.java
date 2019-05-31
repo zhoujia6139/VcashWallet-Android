@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet.wallet.WallegtType;
 
+import android.util.Log;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vcashorg.vcashwallet.utils.AppUtil;
@@ -18,16 +20,16 @@ import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.Outpu
 
 public class VcashSlate {
     @SerializedName("id")
-    public String uuid;
+    public String uuid = AppUtil.hex(AppUtil.randomBytes(16));
     public short num_participants;
     public long amount;
     public long fee;
     public long height;
     public long lock_height;
     @SerializedName("version")
-    public long slate_version;
-    public VcashTransaction tx;
-    public ArrayList<ParticipantData> participant_data;
+    public long slate_version = 1;
+    public VcashTransaction tx = new VcashTransaction();
+    public ArrayList<ParticipantData> participant_data = new ArrayList<>();
 
     @Expose(serialize = false, deserialize = false)
     public VcashTxLog txLog;
@@ -97,18 +99,82 @@ public class VcashSlate {
     }
 
     public boolean fillRound1(VcashContext context, int participant_id, String message){
+        if (tx.offset == null){
+            generateOffset(context);
+        }
+
+        addParticipantInfo(context, participant_id, message);
         return true;
     }
 
     public boolean fillRound2(VcashContext context, int participant_id) {
+        ArrayList<byte[]> pubNonceArr = new ArrayList<>();
+        ArrayList<byte[]> pubBlindArr = new ArrayList<>();
+        for (ParticipantData item: participant_data){
+            pubNonceArr.add(item.public_nonce);
+            pubBlindArr.add(item.public_blind_excess);
+        }
+        byte[] nonceSum = NativeSecp256k1.instance().combinationPubkey((byte[][])pubNonceArr.toArray());
+        byte[] keySum = NativeSecp256k1.instance().combinationPubkey((byte[][])pubBlindArr.toArray());
+        byte[] msgData = createMsgToSign();
+        if (nonceSum == null || keySum == null || msgData == null){
+            return false;
+        }
+
+        //1, verify part sig
+        for (ParticipantData item: participant_data){
+            if (item.part_sig != null){
+                if (!NativeSecp256k1.instance().verifySingleSignature(item.part_sig, item.public_blind_excess, nonceSum, keySum, msgData)){
+                    Log.e("------VcashSlate", String.format("verifySingleSignature failed! pId = %d", item.pId));
+                    return false;
+                }
+            }
+        }
+
+        //2, calcluate part sig
+        byte[] sig = NativeSecp256k1.instance().calculateSingleSignature(AppUtil.decode(context.sec_key), AppUtil.decode(context.sec_nounce), nonceSum, keySum, msgData);
+        if (sig == null){
+            return false;
+        }
+        ParticipantData participantData = null;
+        for (ParticipantData item : participant_data){
+            if (item.pId == participant_id){
+                participantData = item;
+            }
+        }
+        participantData.part_sig = sig;
+
         return true;
     }
 
     public byte[] finalizeSignature(){
+        ArrayList<byte[]> pubNonceArr = new ArrayList<>();
+        ArrayList<byte[]> pubBlindArr = new ArrayList<>();
+        ArrayList<byte[]> sigsArr = new ArrayList<>();
+        for (ParticipantData item: participant_data){
+            pubNonceArr.add(item.public_nonce);
+            pubBlindArr.add(item.public_blind_excess);
+            sigsArr.add(item.part_sig);
+        }
+
+        byte[] nonceSum = NativeSecp256k1.instance().combinationPubkey((byte[][])pubNonceArr.toArray());
+        byte[] keySum = NativeSecp256k1.instance().combinationPubkey((byte[][])pubBlindArr.toArray());
+        byte[] finalSig = NativeSecp256k1.instance().combinationSignatureAndNonceSum((byte[][])sigsArr.toArray(), nonceSum);
+        byte[] msgData = createMsgToSign();
+        if (finalSig != null && msgData != null){
+            if (NativeSecp256k1.instance().verifySingleSignature(finalSig, keySum, null, keySum, msgData)){
+                return finalSig;
+            }
+        }
+
         return null;
     }
 
     public boolean finalizeTx(byte[] finalSig){
+        byte[] final_excess = tx.calculateFinalExcess();
+        if (tx.setTxExcessAndandTxSig(final_excess, finalSig)){
+            return true;
+        }
         return false;
     }
 
