@@ -5,7 +5,9 @@ import android.content.Context;
 import org.bitcoinj.core.Utils;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.security.Security;
+import java.util.ArrayList;
 
 public class AppUtil {
     private static AppUtil instance = null;
@@ -48,5 +50,30 @@ public class AppUtil {
 
     public static byte[] decode(String hex) {
         return Utils.HEX.decode(hex);
+    }
+
+    public static byte[] getDataFromArray(ArrayList<Integer> array) {
+        if (array == null || !(array instanceof ArrayList) ){
+            return null;
+        }
+        ByteBuffer buf = ByteBuffer.allocate(1024);
+        for (Integer item : array){
+            byte bit = (byte) item.intValue();
+            buf.put(bit);
+        }
+        return buf.array();
+    }
+
+    public static ArrayList<Integer> getArrFromData(byte[] data){
+        if (data == null){
+            return null;
+        }
+        ArrayList<Integer> ret = new ArrayList<Integer>();
+        for (int i=0; i<data.length; i++){
+            byte item = data[i];
+            ret.add(new Integer(item));
+        }
+
+        return ret;
     }
 }
