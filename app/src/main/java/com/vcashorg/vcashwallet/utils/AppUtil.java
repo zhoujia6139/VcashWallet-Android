@@ -74,6 +74,19 @@ public class AppUtil {
         return System.currentTimeMillis()/1000;
     }
 
+    public static byte[][] ArrayListToByteArr(ArrayList<byte[]> arr){
+        if (arr == null || arr.size() == 0){
+            return null;
+        }
+        byte[][] retArr = new byte[arr.size()][];
+        int i = 0;
+        for (byte[] item :arr){
+            retArr[i] = item;
+            i++;
+        }
+        return retArr;
+    }
+
     public static byte[] getDataFromArray(ArrayList<Integer> array) {
         if (array == null || !(array instanceof ArrayList) ){
             return null;

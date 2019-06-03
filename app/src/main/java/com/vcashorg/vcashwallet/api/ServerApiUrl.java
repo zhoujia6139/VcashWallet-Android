@@ -6,6 +6,7 @@ import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import java.util.ArrayList;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -18,17 +19,17 @@ public interface ServerApiUrl {
     Observable<ArrayList<ServerTransaction>> checkStatus(@Path ("user_id") String user_id);
 
     @POST("/sendvcash")
-    Observable sendTransaction(@Body ServerTransaction tx);
+    Observable<ResponseBody> sendTransaction(@Body String tx);
 
     @POST("/receivevcash")
-    Observable receiveTransaction(@Body ServerTransaction tx);
+    Observable receiveTransaction(@Body String tx);
 
     @POST("/finalizevcash")
-    Observable filanizeTransaction(@Body FinalizeTxInfo tx);
+    Observable filanizeTransaction(@Body String tx);
 
     @POST("/finalizevcash")
-    Observable cancelTransaction(@Body FinalizeTxInfo tx);
+    Observable cancelTransaction(@Body String tx);
 
     @POST("/finalizevcash")
-    Observable closeTransaction(@Body FinalizeTxInfo tx);
+    Observable closeTransaction(@Body String tx);
 }

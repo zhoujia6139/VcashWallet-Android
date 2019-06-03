@@ -73,9 +73,9 @@ public class MnemonicHelper {
         return sb.toString();
     }
 
-    public static List<String> split(String mnemoics) {
+    public static ArrayList<String> split(String mnemoics) {
         String[] splitArr = mnemoics.split(" ");
-        List<String> result = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<>();
         for (int i = 0; i < splitArr.length; i++) {
             result.add(splitArr[i]);
         }
