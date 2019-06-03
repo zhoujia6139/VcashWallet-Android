@@ -16,6 +16,7 @@ public class SPUtil {
     public static final String ACCESS_HASH = "accessHash";
     public static final String USER_ID = "user_id";
     public static final String TIME_OUT = "time_out";
+    public static final String FIRST_CREATE_WALLET = "first_create_wallet";
 
     private static Context context = null;
     private static SPUtil instance = null;
@@ -51,5 +52,16 @@ public class SPUtil {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putInt(name, value);
         return editor.commit();
+    }
+
+    public boolean setValue(String name, boolean value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(name, value);
+        return editor.commit();
+    }
+
+    public boolean getValue(String name, boolean defaultValue){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(name, defaultValue);
     }
 }

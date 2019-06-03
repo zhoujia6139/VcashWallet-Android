@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.TimeOutUtil;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 public class VcashApp extends Application {
@@ -43,7 +45,9 @@ public class VcashApp extends Application {
             mFinalCount++;
             Log.e("VcashApp", "onActivityStarted: " + activity.getClass().getSimpleName() + ">>>" + mFinalCount);
             if(mFinalCount == 1){
-                if(TimeOutUtil.getInstance().isTimeOut() && activity instanceof WalletMainActivity){
+                if(TimeOutUtil.getInstance().isTimeOut()
+                        && SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)
+                        && !(activity instanceof VcashValidateActivity)){
                     Intent intent = new Intent(activity, VcashValidateActivity.class);
                     intent.putExtra(VcashValidateActivity.PARAM_MODE,VcashValidateActivity.MODE_TIMEOUT_VALIDATE);
                     activity.startActivity(intent);

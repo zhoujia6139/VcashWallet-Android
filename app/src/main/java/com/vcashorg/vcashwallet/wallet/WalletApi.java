@@ -56,20 +56,6 @@ public class WalletApi {
         return strList;
     }
 
-    public static byte[] getSeed(){
-        return  AppUtil.randomBytes(32);
-    }
-
-    public static List<String> generateMnemonicBySeed(byte[] seed){
-        try {
-            return  MnemonicHelper.instance(context).mnemoicFromBytes(seed);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MnemonicException.MnemonicLengthException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public static boolean createWallet(List<String> wordsArr, String password){
         if (wordsArr == null){

@@ -264,7 +264,7 @@ public class TxDetailsActivity extends ToolBarActivity {
 
 
     public void deleteTransaction(){
-        boolean result = EncryptedDBHelper.getsInstance().deleteTxBySlateId(vcashTxLog.tx_slate_id);
+        boolean result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);
         if(result){
             UIUtils.showToastCenter("Delete Success");
         }else {

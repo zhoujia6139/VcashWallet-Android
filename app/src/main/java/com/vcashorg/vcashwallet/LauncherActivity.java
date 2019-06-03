@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
+import com.vcashorg.vcashwallet.utils.SPUtil;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -14,15 +16,14 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(PayloadUtil.getInstance(this).ifMnemonicFileExist()){
+        if(SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)
+                && PayloadUtil.getInstance(this).ifMnemonicFileExist()){
             Intent intent = new Intent(this,VcashValidateActivity.class);
             intent.putExtra(VcashValidateActivity.PARAM_MODE,VcashValidateActivity.MODE_LAUNCHER_VALIDATE);
             startActivity(intent);
         }else {
             startActivity(new Intent(this,VcashStartActivity.class));
         }
-
-        // startActivity(new Intent(this,MnemonicRestoreActivity.class));
 
         finish();
     }

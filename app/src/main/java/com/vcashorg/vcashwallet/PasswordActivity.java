@@ -16,6 +16,7 @@ import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AESUtil;
 import com.vcashorg.vcashwallet.utils.CharSequenceX;
+import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
@@ -171,6 +172,8 @@ public class PasswordActivity extends ToolBarActivity {
                     String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
                     Log.i("yjq","Encrypt: " + encrypt);
                     PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
+
+                    SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
 
                     emitter.onComplete();
                 }else {
