@@ -5,9 +5,12 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.vcashorg.vcashwallet.utils.TimeOutUtil;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 public class VcashApp extends Application {
@@ -21,8 +24,28 @@ public class VcashApp extends Application {
         mContext = getApplicationContext();
 
         WalletApi.setWalletContext(getApplicationContext());
-
         registerActivityLifecycleCallbacks(lifecycleCallbacks);
+        WalletApi.createWallet(null, null);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
+                    @Override
+                    public void onCall(boolean yesOrNo, Object data) {
+                        if (yesOrNo){
+                            WalletApi.sendTransaction((VcashSlate) data, "acf39ed33ddb35196b0a", new WalletCallback() {
+                                @Override
+                                public void onCall(boolean yesOrNo, Object data) {
+
+                                }
+                            });
+                        }
+
+                    }
+                });
+            }
+        }, 20*1000);
+
     }
 
 

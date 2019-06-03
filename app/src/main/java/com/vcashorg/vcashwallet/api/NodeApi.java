@@ -83,7 +83,7 @@ public class NodeApi {
     }
 
     public static long getChainHeight(final WalletCallback callback){
-        if (lastFetch - AppUtil.getCurrentTimeSecs() > 10){
+        if (AppUtil.getCurrentTimeSecs() - lastFetch > 10){
             RetrofitUtils.getNodeApiUrl().getChainHeight()
                     .compose(RxHelper.<NodeChainInfo>io2main())
                     .subscribe(new CommonObserver<NodeChainInfo>() {

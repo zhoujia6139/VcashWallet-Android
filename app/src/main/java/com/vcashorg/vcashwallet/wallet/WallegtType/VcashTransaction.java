@@ -25,7 +25,7 @@ public class VcashTransaction extends VcashTxBaseObject {
     final public static int SIGNATURE_SIZE = 64;
     final public static int MAX_PROOF_SIZE = 5134;
     public byte[] offset;
-    public TransactionBody body;
+    public TransactionBody body = new TransactionBody();
 
     public byte[]calculateFinalExcess(){
         ArrayList<byte[]> negativeCommits = new ArrayList<byte[]>();
@@ -48,9 +48,7 @@ public class VcashTransaction extends VcashTxBaseObject {
         byte[] offsetCommit = NativeSecp256k1.instance().getCommitment(0,   offset);
         negativeCommits.add(offsetCommit);
 
-        byte[][] positiveArr = (byte[][])positiveCommits.toArray();
-        byte[][] negativeArr = (byte[][])negativeCommits.toArray();
-        return NativeSecp256k1.instance().commitSum(positiveArr, negativeArr);
+        return NativeSecp256k1.instance().commitSum(positiveCommits, negativeCommits);
     }
 
     public boolean setTxExcessAndandTxSig(byte[] excess, byte[] sig){
@@ -153,9 +151,9 @@ public class VcashTransaction extends VcashTxBaseObject {
     }
 
     public class TransactionBody extends VcashTxBaseObject{
-        public ArrayList<Input> inputs;
-        public ArrayList<Output> outputs;
-        public ArrayList<TxKernel> kernels;
+        public ArrayList<Input> inputs = new ArrayList<Input>();
+        public ArrayList<Output> outputs = new ArrayList<>();
+        public ArrayList<TxKernel> kernels = new ArrayList<>();
 
         public byte[] computePayload(boolean isForHash){
             //max 2 Output
@@ -405,8 +403,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").value("commitStr");
-                jsonWriter.name("features").value("featureStr");
+                jsonWriter.name("commit").value(commitStr);
+                jsonWriter.name("features").value(featureStr);
                 jsonWriter.endObject();
             }
 

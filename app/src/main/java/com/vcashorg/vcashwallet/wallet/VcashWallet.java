@@ -43,6 +43,13 @@ public class VcashWallet {
     private VcashWallet(VcashKeychain keychain){
         mKeyChain = keychain;
         mUserId = this.createUserId();
+        VcashWalletInfo info = EncryptedDBHelper.getsInstance().loadWalletInfo();
+        if (info != null){
+            mKeyPath = new VcashKeychainPath(3, AppUtil.decode(info.curKeyPath));
+            mChainHeight = info.curHeight;
+            mCurTxLogId = info.curTxLogId;
+        }
+        reloadOutputInfo();
         SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.USER_ID,mUserId);
     }
 
@@ -157,6 +164,7 @@ public class VcashWallet {
                 output.lock_height = nodeOutput.block_height;
             }
             output.status = VcashOutput.OutputStatus.Unspent;
+            return output;
         }
         return null;
     }
@@ -179,7 +187,7 @@ public class VcashWallet {
         }
         long amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
-            String errMsg = String.format("Not enough funds, available:%d, needed:%d", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
+            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
             if (callback!=null){
                 callback.onCall(false, errMsg);
             }
@@ -237,7 +245,7 @@ public class VcashWallet {
         }
 
         if (callback!=null){
-            callback.onCall(true, null);
+            callback.onCall(true, slate);
         }
     }
 
@@ -323,5 +331,6 @@ public class VcashWallet {
         info.curHeight = mChainHeight;
         info.curKeyPath = AppUtil.hex(mKeyPath.pathData());
         info.curTxLogId = mCurTxLogId;
+        EncryptedDBHelper.getsInstance().saveWalletInfo(info);
     }
 }

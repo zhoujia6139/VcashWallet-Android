@@ -13,6 +13,7 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.MnemonicData;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.MnemonicHelper;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
@@ -116,12 +117,12 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     @OnClick(R.id.btn_next)
     public void onNextClick(){
-        if(validate()){
+        //if(validate()){
             Intent intent = new Intent(this, PasswordActivity.class);
             intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,buildMnemonicList());
             intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_RESTORE);
             nv(intent);
-        }
+        //}
     }
 
     private boolean validate(){
@@ -138,10 +139,11 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     }
 
     private ArrayList<String> buildMnemonicList(){
-        ArrayList<String> result = new ArrayList<>();
-        for (MnemonicData data : restoreMnemonicData){
-            result.add(data.data);
-        }
+        ArrayList<String> result = MnemonicHelper.split("layer floor valley flag dawn dress sponsor whale illegal session juice beef scout mammal snake cage river lemon easily away title else layer limit");
+//        ArrayList<String> result = new ArrayList<>();
+//        for (MnemonicData data : restoreMnemonicData){
+//            result.add(data.data);
+//        }
         return result;
     }
 }

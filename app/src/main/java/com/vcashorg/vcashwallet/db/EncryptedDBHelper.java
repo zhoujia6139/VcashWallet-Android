@@ -141,13 +141,19 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     private boolean saveTx_imp(VcashTxLog txLog, SQLiteDatabase db){
         StringBuilder inputStrBuilder = new StringBuilder();
-        for (String str :txLog.inputs){
-            inputStrBuilder.append(str);
+        if (txLog.inputs != null){
+            for (String str :txLog.inputs){
+                inputStrBuilder.append(str);
+            }
         }
+
         StringBuilder outputStrBuilder = new StringBuilder();
-        for (String str :txLog.outputs){
-            outputStrBuilder.append(str);
+        if (txLog.outputs != null){
+            for (String str :txLog.outputs){
+                outputStrBuilder.append(str);
+            }
         }
+
         db.execSQL("REPLACE INTO VcashTxLog (" +
                 "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_state, server_status, amount_credited, amount_debited, fee, inputs, outputs)" +
                 "values(" +
@@ -184,7 +190,11 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public VcashTxLog getTxBySlateId(String slate_id){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
-        return parseTxLog(cursor);
+        if (cursor != null && cursor.moveToFirst()){
+
+            return parseTxLog(cursor);
+        }
+        return null;
     }
 
     public boolean deleteTxBySlateId(String slate_id){
@@ -251,7 +261,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public VcashWalletInfo loadWalletInfo(){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashWalletInfo LIMIT 1", null);
-        if (cursor != null){
+        if (cursor != null && cursor.moveToFirst()){
             VcashWalletInfo info = new VcashWalletInfo();
             info.curKeyPath = cursor.getString(cursor.getColumnIndex("curKeyPath"));
             info.curHeight = cursor.getLong(cursor.getColumnIndex("curHeight"));
@@ -270,7 +280,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                     "slate_id, sec_key, sec_nounce)" +
                     "values(" +
                     "'" + context.slate_id + "'," +
-                    "'" + context.sec_key + "'" +
+                    "'" + context.sec_key + "'," +
                     "'" + context.sec_nounce + "'" +
                     ")");
         }catch (SQLException e){
@@ -284,7 +294,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public VcashContext getContextBySlateId(String slateid){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashContext WHERE slate_id = ?", new String[] {slateid});
-        if (cursor != null){
+        if (cursor != null && cursor.moveToFirst()){
             VcashContext context = new VcashContext();
             context.sec_key = cursor.getString(cursor.getColumnIndex("sec_key"));
             context.sec_nounce = cursor.getString(cursor.getColumnIndex("sec_nounce"));

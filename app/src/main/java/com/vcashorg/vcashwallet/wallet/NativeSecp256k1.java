@@ -1,9 +1,11 @@
 package com.vcashorg.vcashwallet.wallet;
 
+import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 public class NativeSecp256k1 {
     static {
@@ -35,12 +37,13 @@ public class NativeSecp256k1 {
         return this.secp256k1_get_commitment(mContext, value, key);
     }
 
-    public byte[] bindSum(byte[][] positive, byte[][] negative){
-        return this.secp256k1_bind_sum(mContext, positive, negative);
+    public byte[] bindSum(ArrayList<byte[]> positive, ArrayList<byte[]> negative){
+
+        return this.secp256k1_bind_sum(mContext, AppUtil.ArrayListToByteArr(positive), AppUtil.ArrayListToByteArr(negative));
     }
 
-    public byte[] commitSum(byte[][] positive, byte[][] negative){
-        return this.secp256k1_commit_sum(mContext, positive, negative);
+    public byte[] commitSum(ArrayList<byte[]> positive, ArrayList<byte[]> negative){
+        return this.secp256k1_commit_sum(mContext, AppUtil.ArrayListToByteArr(positive), AppUtil.ArrayListToByteArr(negative));
     }
 
     public byte[] commitToPubkey(byte[] commit){
@@ -63,12 +66,12 @@ public class NativeSecp256k1 {
         return this.secp256k1_calculate_single_signature(mContext, secKey, secNounce, nounceSum, pubkeySum, msg);
     }
 
-    public byte[] combinationPubkey(byte[][] pubkeyArr){
-        return this.secp256k1_combination_pubkey(mContext, pubkeyArr);
+    public byte[] combinationPubkey(ArrayList<byte[]> pubkeyArr){
+        return this.secp256k1_combination_pubkey(mContext, AppUtil.ArrayListToByteArr(pubkeyArr));
     }
 
-    public byte[] combinationSignatureAndNonceSum(byte[][] sigArr, byte[] nonceSum){
-        return this.secp256k1_combination_signature_and_nonceSum(mContext, sigArr, nonceSum);
+    public byte[] combinationSignatureAndNonceSum(ArrayList<byte[]> sigArr, byte[] nonceSum){
+        return this.secp256k1_combination_signature_and_nonceSum(mContext, AppUtil.ArrayListToByteArr(sigArr), nonceSum);
     }
 
     public byte[] signatureToCompactData(byte[] signature){
