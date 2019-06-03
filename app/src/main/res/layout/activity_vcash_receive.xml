@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -33,9 +34,9 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="ecc7c627c32e6a2023ed"
             android:textColor="@color/A10"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            tools:text="ecc7c627c32e6a2023ed" />
 
         <ImageView
             android:id="@+id/iv_copy"

@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.base;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import com.vcashorg.vcashwallet.MainActivity;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.widget.ProgressDialogFragment;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -141,6 +143,26 @@ public abstract class BaseActivity extends AppCompatActivity {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(dialogFrag, tag);
         ft.commitAllowingStateLoss();
+    }
+
+    public void showProgressDialog() {
+        this.showProgressDialog((String) null);
+    }
+
+    public void showProgressDialog(DialogInterface.OnCancelListener listener) {
+        ProgressDialogFragment dialogFragment = new ProgressDialogFragment();
+        dialogFragment.setOnCancelListener(listener);
+        this.showDialog((DialogFragment) dialogFragment, "progress_dialog");
+    }
+
+    public void showProgressDialog(String text) {
+        ProgressDialogFragment dialogFragment = new ProgressDialogFragment();
+        dialogFragment.setTitle(text);
+        this.showDialog((DialogFragment) dialogFragment, "progress_dialog");
+    }
+
+    public void showProgressDialog(int id) {
+        this.showProgressDialog(getString(id));
     }
 
     public void dismissProgressDialog() {

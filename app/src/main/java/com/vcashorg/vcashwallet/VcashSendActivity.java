@@ -12,6 +12,10 @@ import android.widget.FrameLayout;
 import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.qrcode.BasicScannerActivity;
 import com.vcashorg.vcashwallet.widget.qrcode.ScannerActivity;
 import com.yanzhenjie.permission.Action;
@@ -85,7 +89,31 @@ public class VcashSendActivity extends ToolBarActivity {
             mBtnSend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UIUtils.showToast("Click Send");
+                    WalletApi.createSendTransaction(mEtAddress.getText().toString(), 0, 0, new WalletCallback() {
+                        @Override
+                        public void onCall(boolean yesOrNo, Object data) {
+                            if(yesOrNo){
+                                final VcashSlate slate = (VcashSlate) data;
+                                WalletApi.sendTransaction(slate, mEtAddress.getText().toString(), new WalletCallback() {
+                                    @Override
+                                    public void onCall(boolean yesOrNo, Object data) {
+                                        if(yesOrNo){
+                                            VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                            Intent intent = new Intent();
+                                            intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                                            intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                            nv(intent);
+                                            finish();
+                                        }else {
+                                            UIUtils.showToastCenter("Send Failed");
+                                        }
+                                    }
+                                });
+                            }else {
+                                UIUtils.showToastCenter("Send Failed");
+                            }
+                        }
+                    });
                 }
             });
         } else {

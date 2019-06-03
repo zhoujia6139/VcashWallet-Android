@@ -7,10 +7,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
-
 import java.io.IOException;
+import java.io.Serializable;
 
-public class ServerTransaction {
+public class ServerTransaction implements Serializable {
 
     public String tx_id;
     public String sender_id;
