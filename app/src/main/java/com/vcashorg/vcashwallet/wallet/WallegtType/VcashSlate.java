@@ -256,13 +256,13 @@ public class VcashSlate {
             jsonWriter.name("height").value(slate.height);
             jsonWriter.name("lock_height").value(slate.lock_height);
             jsonWriter.name("version").value(slate.slate_version);
-            Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransaction.VcashTransactionTypeAdapter()).create();
+            Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
             String jsonStr = gson.toJson(slate.tx);
             jsonWriter.name("tx").value(jsonStr);
 
             ArrayList<String> pData = new ArrayList<String>();
             for (ParticipantData data:slate.participant_data){
-                Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new VcashSlate.ParticipantData.ParticipantDataTypeAdapter()).create();
+                Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
                 pData.add(datagson.toJson(data));
             }
             Gson gson1 = new Gson();
@@ -300,7 +300,7 @@ public class VcashSlate {
                         break;
                     case "tx":
                         String txStr = jsonReader.nextString();
-                        Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransaction.VcashTransactionTypeAdapter()).create();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
                         slate.tx = gson.fromJson(txStr, VcashTransaction.class);
                         break;
                     case "participant_data":
@@ -309,7 +309,7 @@ public class VcashSlate {
                         ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>(){}.getType());
                         for (String item:datas){
                             ParticipantData pData = null;
-                            Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, pData.new VcashSlate.ParticipantData.ParticipantDataTypeAdapter()).create();
+                            Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, pData.new ParticipantDataTypeAdapter()).create();
                             pData = datagson.fromJson(item, ParticipantData.class);
                             slate.participant_data.add(pData);
                         }

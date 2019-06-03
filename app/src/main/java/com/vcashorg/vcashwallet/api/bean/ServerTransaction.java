@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 public class ServerTransaction implements Serializable {
-
     public String tx_id;
     public String sender_id;
     public String receiver_id;
@@ -25,7 +24,7 @@ public class ServerTransaction implements Serializable {
 
     public ServerTransaction(VcashSlate sla){
         tx_id = sla.uuid;
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, sla.new VcashSlate.VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, sla.new VcashSlateTypeAdapter()).create();
         slate = gson.toJson(sla);
     }
 

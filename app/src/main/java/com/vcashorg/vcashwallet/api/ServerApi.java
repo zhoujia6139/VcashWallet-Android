@@ -42,7 +42,7 @@ public class ServerApi {
     }
 
     public static void sendTransaction(ServerTransaction tx, final WalletCallback callback) {
-        Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransaction.ServerTransactionTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
 
         RetrofitUtils.getServerApiUrl().sendTransaction(jsonStr)
@@ -67,7 +67,7 @@ public class ServerApi {
     }
 
     public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback) {
-        Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransaction.ServerTransactionTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
         RetrofitUtils.getServerApiUrl().receiveTransaction(jsonStr)
                 .compose(RxHelper.io2main())
@@ -94,7 +94,7 @@ public class ServerApi {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxFinalized;
         tx.tx_id = tx_id;
-        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
         RetrofitUtils.getServerApiUrl().filanizeTransaction(jsonStr)
                 .compose(RxHelper.io2main())
@@ -120,7 +120,7 @@ public class ServerApi {
     public static void cancelTransaction(String tx_id, final WalletCallback callback) {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxCanceled;
-        tx.tx_id = tx_id;        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
+        tx.tx_id = tx_id;        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
         RetrofitUtils.getServerApiUrl().cancelTransaction(jsonStr)
                 .compose(RxHelper.io2main())
@@ -147,7 +147,7 @@ public class ServerApi {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxClosed;
         tx.tx_id = tx_id;
-        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
         RetrofitUtils.getServerApiUrl().closeTransaction(jsonStr)
                 .compose(RxHelper.io2main())
