@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,12 +14,15 @@ import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.vcashorg.vcashwallet.api.ServerTxManager;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.bean.VcashTx;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.PopUtil;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
@@ -51,6 +55,8 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
     private List<VcashTxLog> mDatas = new ArrayList<>();
 
+    private PopUtil popUtil;
+
 
     @Override
     protected int provideContentViewId() {
@@ -78,7 +84,11 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                nv(TxDetailsActivity.class);
+                VcashTxLog vcashTxLog = (VcashTxLog) adapter.getData().get(position);
+                Intent intent = new Intent();
+                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                nv(intent);
             }
         });
 
@@ -88,25 +98,82 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         mSrTx.setOnRefreshListener(this);
         walletDrawer = new WalletDrawer(this);
 
-        mTvHeight.setOnClickListener(new View.OnClickListener() {
+        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
             @Override
-            public void onClick(View v) {
-                PopUtil.get(WalletMainActivity.this).setConfirmListener(new PopUtil.PopOnCall() {
-                    @Override
-                    public void onConfirm() {
-
-                    }
-                }).show();
+            public void onChecked() {
+                showNewTxPop();
             }
         });
-
     }
 
     @Override
     public void initData() {
         String userid = WalletApi.getWalletUserId();
         Log.i("yjq","userid: " + userid);
-        refreshData();
+
+        //HEIGHT
+        WalletApi.addChainHeightListener(new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
+            }
+        });
+
+        WalletApi.addTxDataListener(new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                refreshData();
+            }
+        });
+
+        int mode = getIntent().getIntExtra(PasswordActivity.PARAM_MODE,1);
+        if(mode == PasswordActivity.MODE_RESTORE){
+            showProgressDialog("Recovering");
+            WalletApi.checkWalletUtxo(new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if(yesOrNo){
+                        UIUtils.showToastCenter("Recover Success");
+                        refreshData();
+                    }else {
+                        UIUtils.showToastCenter("Recover Failed");
+                    }
+                    dismissProgressDialog();
+                }
+            });
+        }else {
+            mSrTx.setRefreshing(true);
+            refreshData();
+        }
+    }
+
+    public void showNewTxPop(){
+        if(popUtil != null && popUtil.isShowing())return;
+        final ServerTransaction recentTx = ServerTxManager.getInstance().getRecentTx();
+        if(recentTx != null){
+            popUtil = PopUtil.get(WalletMainActivity.this).setConfirmListener(new PopUtil.PopOnCall() {
+                @Override
+                public void onConfirm() {
+                    Intent intent = new Intent();
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_SERVER);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,recentTx);
+                    nv(intent);
+                }
+            });
+            popUtil.show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ServerTxManager.getInstance().startWork();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ServerTxManager.getInstance().stopWork();
     }
 
     private void initHeaderView() {
@@ -139,11 +206,13 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         mTvAvailable.setText(WalletApi.nanoToVcash(balanceInfo.spendable) + "");
         mTvUnconfirmed.setText(WalletApi.nanoToVcash(balanceInfo.unconfirmed) + "");
 
-        mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
     }
 
     @Override
     public void onRefresh() {
+
+        ServerTxManager.getInstance().fetchTxStatus(true);
+
         refreshData();
     }
 
@@ -225,5 +294,11 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         nv(VcashReceiveActivity.class);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        refreshData();
+        showNewTxPop();
+    }
 }

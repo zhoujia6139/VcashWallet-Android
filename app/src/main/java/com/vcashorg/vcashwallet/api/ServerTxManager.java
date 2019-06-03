@@ -13,6 +13,9 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServerTxManager {
     final private static long TimerInterval = 30;
@@ -21,6 +24,11 @@ public class ServerTxManager {
     private ArrayList<ServerTransaction> txArr = new ArrayList<ServerTransaction>();
     private long lastFetch = 0;
 
+
+    private LinkedBlockingQueue<ServerTransaction> txQueue = new LinkedBlockingQueue<>();
+    private ServerTxCallBack callBack;
+
+
     public static ServerTxManager getInstance(){
         if (instance == null){
             instance = new ServerTxManager();
@@ -28,12 +36,31 @@ public class ServerTxManager {
         return instance;
     }
 
+    public void addNewTxCallBack(ServerTxCallBack callBack){
+        this.callBack = callBack;
+    }
+
+    private Timer timer;
+    private TimerTask timerTask;
+
+    class ServerTxTimer extends TimerTask{
+
+        @Override
+        public void run() {
+            fetchTxStatus(false);
+        }
+    }
+
     public void startWork(){
+        timer = new Timer();
+        timerTask = new ServerTxTimer();
+        timer.schedule(timerTask,0,30000);
 
     }
 
     public void stopWork(){
-
+        timer.cancel();
+        timerTask.cancel();
     }
 
     public void fetchTxStatus(boolean force){
@@ -46,6 +73,7 @@ public class ServerTxManager {
 
                     if (yesOrNo){
                         lastFetch = AppUtil.getCurrentTimeSecs();
+                        boolean hasNewData = false;
                         for (ServerTransaction item:txs){
                             Gson gson = new Gson();
                             item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
@@ -64,7 +92,6 @@ public class ServerTxManager {
                                                 case TxCanceled:
                                                     txLog.tx_type = VcashTxLog.TxLogEntryType.TxReceivedCancelled;
                                                     break;
-
                                                     default:
                                                         break;
                                             }
@@ -106,11 +133,16 @@ public class ServerTxManager {
 
                                 if (!isRepeat){
                                     txArr.add(item);
+                                    txQueue.offer(item);
+                                    hasNewData = true;
                                 }
                             }
                             else {
                                 Log.e(Tag, String.format("receive a illegal tx"));
                             }
+                        }
+                        if(hasNewData && callBack != null){
+                            callBack.onChecked();
                         }
                     } else {
                         lastFetch = 0;
@@ -120,7 +152,11 @@ public class ServerTxManager {
         }
     }
 
-    private void handleServerTx(){
+    public interface ServerTxCallBack{
+        void onChecked();
+    }
 
+    public ServerTransaction getRecentTx(){
+        return txQueue.poll();
     }
 }

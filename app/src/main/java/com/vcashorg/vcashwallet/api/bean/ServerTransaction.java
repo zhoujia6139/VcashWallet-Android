@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 
-public class ServerTransaction {
+import java.io.Serializable;
+
+public class ServerTransaction implements Serializable {
 
     public String tx_id;
     public String sender_id;

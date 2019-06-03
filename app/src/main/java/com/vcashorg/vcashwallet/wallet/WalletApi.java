@@ -91,7 +91,6 @@ public class WalletApi {
 
     public static void clearWallet(){
         EncryptedDBHelper.getsInstance().clearAllData();
-        return;
     }
 
     public static String getWalletUserId(){
@@ -449,6 +448,11 @@ public class WalletApi {
     public static double nanoToVcash(long nano){
         return (double)nano/VCASH_BASE;
     }
+
+    public static String nanoToVcashString(long nano){
+        return nanoToVcash(nano) + "";
+    }
+
 
     public static long vcashToNano(double vcash){
         return (long)(vcash*VCASH_BASE);

@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
@@ -202,7 +203,9 @@ public class PasswordActivity extends ToolBarActivity {
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
-                        nv(WalletMainActivity.class);
+                        Intent intent = new Intent(PasswordActivity.this,WalletMainActivity.class);
+                        intent.putExtra(PARAM_MODE,mode);
+                        nv(intent);
                         finish();
                     }
                 });

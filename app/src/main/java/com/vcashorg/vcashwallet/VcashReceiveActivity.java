@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.mylhyl.zxing.scanner.encode.QREncode;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -28,9 +29,11 @@ public class VcashReceiveActivity extends ToolBarActivity {
 
         Bitmap bitmap = new QREncode.Builder(this)
                 .setColor(UIUtils.getColor(R.color.black))//二维码颜色
-                .setContents(mWalletId.getText().toString())//二维码内容
+                .setContents(WalletApi.getWalletUserId())//二维码内容
                 .build().encodeAsBitmap();
         mQrcode.setImageBitmap(bitmap);
+
+        mWalletId.setText(WalletApi.getWalletUserId());
     }
 
     @Override
