@@ -14,6 +14,8 @@ import com.vcashorg.vcashwallet.net.RetrofitUtils;
 import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.util.ArrayList;
 
 import okhttp3.ResponseBody;
@@ -44,6 +46,9 @@ public class ServerApi {
     public static void sendTransaction(ServerTransaction tx, final WalletCallback callback) {
         Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
         String jsonStr = gson.toJson(tx);
+        jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
+        jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
+        Log.d(Tag, jsonStr);
 
         RetrofitUtils.getServerApiUrl().sendTransaction(jsonStr)
                 .compose(RxHelper.<ResponseBody>io2main())

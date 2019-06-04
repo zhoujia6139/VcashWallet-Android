@@ -16,6 +16,8 @@ import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 import com.vcashorg.vcashwallet.wallet.VcashKeychainPath;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -258,16 +260,14 @@ public class VcashSlate {
             jsonWriter.name("version").value(slate.slate_version);
             Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
             String jsonStr = gson.toJson(slate.tx);
-            jsonWriter.name("tx").value(jsonStr);
+            jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
+            jsonWriter.name("tx").jsonValue(jsonStr);
 
-            ArrayList<String> pData = new ArrayList<String>();
-            for (ParticipantData data:slate.participant_data){
-                Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
-                pData.add(datagson.toJson(data));
-            }
-            Gson gson1 = new Gson();
-            String jsonStr1 = gson1.toJson(pData, new TypeToken<ArrayList<String>>(){}.getType());
-            jsonWriter.name("participant_data").value(jsonStr1);
+            ParticipantData data = slate.participant_data.get(0);
+            Gson gson1 = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
+            String jsonStr1 = gson1.toJson(slate.participant_data, new TypeToken<ArrayList<ParticipantData>>(){}.getType());
+            jsonStr1 = StringEscapeUtils.unescapeJson(jsonStr1);
+            jsonWriter.name("participant_data").jsonValue(jsonStr1);
             jsonWriter.endObject();
         }
 
@@ -334,16 +334,16 @@ public class VcashSlate {
             public void write(JsonWriter jsonWriter, ParticipantData data) throws IOException {
                 jsonWriter.beginObject();
                 jsonWriter.name("id").value(data.pId);
-                jsonWriter.name("message").value(data.message);
+                jsonWriter.name("message").jsonValue(data.message);
                 Gson gson = new Gson();
                 String public_blind_excessStr = gson.toJson(data.public_blind_excess, byte[].class);
-                jsonWriter.name("public_blind_excess").value(public_blind_excessStr);
+                jsonWriter.name("public_blind_excess").jsonValue(public_blind_excessStr);
                 String public_nonceStr = gson.toJson(data.public_nonce, byte[].class);
-                jsonWriter.name("public_nonce").value(public_nonceStr);
+                jsonWriter.name("public_nonce").jsonValue(public_nonceStr);
                 String part_sigStr = gson.toJson(data.part_sig, byte[].class);
-                jsonWriter.name("part_sig").value(part_sigStr);
+                jsonWriter.name("part_sig").jsonValue(part_sigStr);
                 String message_sigStr = gson.toJson(data.message_sig, byte[].class);
-                jsonWriter.name("message_sig").value(message_sigStr);
+                jsonWriter.name("message_sig").jsonValue(message_sigStr);
                 jsonWriter.endObject();
             }
 

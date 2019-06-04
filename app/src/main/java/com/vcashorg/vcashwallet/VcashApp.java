@@ -30,26 +30,26 @@ public class VcashApp extends Application {
 
         WalletApi.setWalletContext(getApplicationContext());
         registerActivityLifecycleCallbacks(lifecycleCallbacks);
-//        WalletApi.createWallet(null, null);
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
-//                    @Override
-//                    public void onCall(boolean yesOrNo, Object data) {
-//                        if (yesOrNo){
-//                            WalletApi.sendTransaction((VcashSlate) data, "acf39ed33ddb35196b0a", new WalletCallback() {
-//                                @Override
-//                                public void onCall(boolean yesOrNo, Object data) {
-//
-//                                }
-//                            });
-//                        }
-//
-//                    }
-//                });
-//            }
-//        }, 20*1000);
+        WalletApi.createWallet(null, null);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
+                    @Override
+                    public void onCall(boolean yesOrNo, Object data) {
+                        if (yesOrNo){
+                            WalletApi.sendTransaction((VcashSlate) data, "acf39ed33ddb35196b0a", new WalletCallback() {
+                                @Override
+                                public void onCall(boolean yesOrNo, Object data) {
+
+                                }
+                            });
+                        }
+
+                    }
+                });
+            }
+        }, 10*1000);
 
     }
 

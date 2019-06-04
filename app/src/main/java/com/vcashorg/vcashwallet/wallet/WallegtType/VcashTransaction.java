@@ -2,13 +2,18 @@ package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import android.util.Log;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
+import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.bitcoin.protocols.payments.Protos;
 
 import java.io.IOException;
@@ -111,10 +116,13 @@ public class VcashTransaction extends VcashTxBaseObject {
         public void write(JsonWriter jsonWriter, VcashTransaction tx) throws IOException {
             Gson gson = new Gson();
             String offsetStr = gson.toJson(tx.offset, byte[].class);
-            String bodyStr = gson.toJson(tx.body, TransactionBody.class);
+            offsetStr = StringEscapeUtils.unescapeJson(offsetStr);
+            Gson gson1 = new GsonBuilder().registerTypeAdapter(TransactionBody.class, tx.body.new TransactionBodyTypeAdapter()).create();
+            String bodyStr = gson1.toJson(tx.body, TransactionBody.class);
+            bodyStr = StringEscapeUtils.unescapeJson(bodyStr);
             jsonWriter.beginObject();
-            jsonWriter.name("offset").value(offsetStr);
-            jsonWriter.name("body").value(bodyStr);
+            jsonWriter.name("offset").jsonValue(offsetStr);
+            jsonWriter.name("body").jsonValue(bodyStr);
             jsonWriter.endObject();
         }
 
@@ -173,6 +181,82 @@ public class VcashTransaction extends VcashTxBaseObject {
             }
 
             return buf.array();
+        }
+
+        public class TransactionBodyTypeAdapter extends TypeAdapter<TransactionBody> {
+            @Override
+            public void write(JsonWriter jsonWriter, TransactionBody body) throws IOException {
+                Input input = body.inputs.get(0);
+                Gson inputGson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
+                String inputsStr = inputGson.toJson(body.inputs, new TypeToken<ArrayList<Input>>(){}.getType());
+                inputsStr = StringEscapeUtils.unescapeJson(inputsStr);
+
+                Output output = body.outputs.get(0);
+                Gson outputGson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
+                String outputsStr = outputGson.toJson(body.outputs, new TypeToken<ArrayList<Output>>(){}.getType());
+                outputsStr = StringEscapeUtils.unescapeJson(outputsStr);
+
+                TxKernel kernel = body.kernels.get(0);
+                Gson kernelGson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
+                String kernelsStr = kernelGson.toJson(body.kernels, new TypeToken<ArrayList<TxKernel>>(){}.getType());
+                kernelsStr = StringEscapeUtils.unescapeJson(kernelsStr);
+                jsonWriter.beginObject();
+                jsonWriter.name("inputs").jsonValue(inputsStr);
+                jsonWriter.name("outputs").jsonValue(outputsStr);
+                jsonWriter.name("kernels").jsonValue(kernelsStr);
+                jsonWriter.endObject();
+            }
+
+            @Override
+            public TransactionBody read(JsonReader jsonReader) throws IOException {
+                TransactionBody body = new TransactionBody();
+                jsonReader.beginObject();
+                while (jsonReader.hasNext()){
+                    switch (jsonReader.nextName()){
+                        case "inputs": {
+                            String dataStr = jsonReader.nextString();
+                            Gson gson1 = new Gson();
+                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
+                            }.getType());
+                            for (String item : datas) {
+                                Input input = null;
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
+                                input = datagson.fromJson(item, Input.class);
+                                body.inputs.add(input);
+                            }
+                        }
+                            break;
+                        case "outputs": {
+                            String dataStr = jsonReader.nextString();
+                            Gson gson1 = new Gson();
+                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
+                            }.getType());
+                            for (String item : datas) {
+                                Output output = null;
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
+                                output = datagson.fromJson(item, Output.class);
+                                body.outputs.add(output);
+                            }
+                        }
+                            break;
+                        case "kernels": {
+                            String dataStr = jsonReader.nextString();
+                            Gson gson1 = new Gson();
+                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
+                            }.getType());
+                            for (String item : datas) {
+                                TxKernel kernel = null;
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
+                                kernel = datagson.fromJson(item, TxKernel.class);
+                                body.kernels.add(kernel);
+                            }
+                        }
+                            break;
+                    }
+                }
+                jsonReader.endObject();
+                return body;
+            }
         }
     }
 
@@ -243,7 +327,9 @@ public class VcashTransaction extends VcashTxBaseObject {
             public void write(JsonWriter jsonWriter, TxKernel kernel) throws IOException {
                 Gson gson = new Gson();
                 String excessStr = gson.toJson(kernel.excess, byte[].class);
+                excessStr = StringEscapeUtils.unescapeJson(excessStr);
                 String excessSigStr = gson.toJson(kernel.excess_sig, byte[].class);
+                excessSigStr = StringEscapeUtils.unescapeJson(excessSigStr);
                 String featureStr = null;
                 if (kernel.features == KernelFeatures.KernelFeaturePlain) {
                     featureStr = "Plain";
@@ -253,8 +339,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "HeightLocked";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("excess").value(excessStr);
-                jsonWriter.name("excess_sig").value(excessSigStr);
+                jsonWriter.name("excess").jsonValue(excessStr);
+                jsonWriter.name("excess_sig").jsonValue(excessSigStr);
                 jsonWriter.name("features").value(featureStr);
                 jsonWriter.name("fee").value(kernel.fee);
                 jsonWriter.name("lock_height").value(kernel.lock_height);
@@ -328,7 +414,9 @@ public class VcashTransaction extends VcashTxBaseObject {
             public void write(JsonWriter jsonWriter, Output output) throws IOException {
                 Gson gson = new Gson();
                 String commitStr = gson.toJson(output.commit, byte[].class);
+                commitStr = StringEscapeUtils.unescapeJson(commitStr);
                 String proofStr = gson.toJson(output.proof, byte[].class);
+                proofStr = StringEscapeUtils.unescapeJson(proofStr);
                 String featureStr = null;
                 if (output.features == OutputFeatures.OutputFeaturePlain){
                     featureStr = "Plain";
@@ -337,9 +425,9 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").value("commitStr");
+                jsonWriter.name("commit").jsonValue("commitStr");
                 jsonWriter.name("features").value("featureStr");
-                jsonWriter.name("proof").value("proofStr");
+                jsonWriter.name("proof").jsonValue("proofStr");
                 jsonWriter.endObject();
             }
 
@@ -395,6 +483,7 @@ public class VcashTransaction extends VcashTxBaseObject {
             public void write(JsonWriter jsonWriter, Input input) throws IOException {
                 Gson gson = new Gson();
                 String commitStr = gson.toJson(input.commit, byte[].class);
+                commitStr = StringEscapeUtils.unescapeJson(commitStr);
                 String featureStr = null;
                 if (input.features == OutputFeatures.OutputFeaturePlain){
                     featureStr = "Plain";
@@ -403,7 +492,7 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").value(commitStr);
+                jsonWriter.name("commit").jsonValue(commitStr);
                 jsonWriter.name("features").value(featureStr);
                 jsonWriter.endObject();
             }
