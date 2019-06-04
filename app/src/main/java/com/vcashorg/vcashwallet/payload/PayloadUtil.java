@@ -60,17 +60,25 @@ public class PayloadUtil {
     }
 
 
-    //File fs = new File(Environment.getExternalStorageDirectory()+"/msc/" + fileName);
     public boolean saveMnemonicToSDCard(String content) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             UIUtils.showToast("No SDCard");
             return false;
         }
 
-        File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
-        File sdFile = new File(sdCardDir, strFilename);
+        String filePath = Environment.getExternalStorageDirectory().getPath() + "/vcashwallet/";
+
+        File dictionaryFile = new File(filePath);
+        if(!dictionaryFile.exists()){
+            dictionaryFile.mkdirs();
+        }
+
+        File sdFile = new File(filePath + strFilename);
 
         try {
+            if(!sdFile.exists()){
+                sdFile.createNewFile();
+            }
             FileOutputStream fos = new FileOutputStream(sdFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(content);
@@ -89,8 +97,8 @@ public class PayloadUtil {
 
     public String readMnemonicFromSDCard() {
         String content = null;
-        File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
-        File sdFile = new File(sdCardDir, strFilename);
+
+        File sdFile = new File(Environment.getExternalStorageDirectory().getPath() + "/vcashwallet/" + strFilename);
 
         try {
             FileInputStream fis = new FileInputStream(sdFile);
@@ -109,7 +117,7 @@ public class PayloadUtil {
 
     public boolean ifMnemonicFileExist() {
         try {
-            File f = new File(Environment.getExternalStorageDirectory(), strFilename);
+            File f = new File(Environment.getExternalStorageDirectory().getPath() + "/vcashwallet/" + strFilename);
             if (!f.exists()) {
                 return false;
             }

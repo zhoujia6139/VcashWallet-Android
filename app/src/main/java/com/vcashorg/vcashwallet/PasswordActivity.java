@@ -157,7 +157,7 @@ public class PasswordActivity extends ToolBarActivity {
         Observable.create(new ObservableOnSubscribe() {
 
             @Override
-            public void subscribe(ObservableEmitter emitter) throws Exception {
+            public void subscribe(ObservableEmitter emitter) {
 //                String guid = AccessFactory.getInstance(PasswordCreateActivity.this).createGUID();
 //                String hash = AccessFactory.getInstance(PasswordCreateActivity.this).getHash(guid, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
 //                SPUtil.getInstance(PasswordCreateActivity.this).setValue(SPUtil.ACCESS_HASH, hash);
@@ -169,13 +169,19 @@ public class PasswordActivity extends ToolBarActivity {
 ////                            new CharSequenceX(AccessFactory.getInstance(PasswordCreateActivity.this).getGUID() + psw));
                     String json = new Gson().toJson(words);
                     Log.i("yjq","JSON: " + json);
-                    String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                    Log.i("yjq","Encrypt: " + encrypt);
-                    PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
-
-                    SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
-
-                    emitter.onComplete();
+                    try {
+                        String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+                        Log.i("yjq","Encrypt: " + encrypt);
+                        boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
+                        if(save){
+                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
+                            emitter.onComplete();
+                        }else {
+                            emitter.onError(null);
+                        }
+                    }catch (Exception e){
+                        emitter.onError(null);
+                    }
                 }else {
                     emitter.onError(null);
                 }

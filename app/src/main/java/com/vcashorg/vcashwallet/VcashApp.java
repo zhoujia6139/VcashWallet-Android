@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.vcashorg.vcashwallet.utils.SPUtil;
@@ -19,6 +20,8 @@ public class VcashApp extends Application {
 
     private static Context mContext;
 
+    private ArrayMap<String,String> passwordFilter = new ArrayMap<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -27,26 +30,26 @@ public class VcashApp extends Application {
 
         WalletApi.setWalletContext(getApplicationContext());
         registerActivityLifecycleCallbacks(lifecycleCallbacks);
-        WalletApi.createWallet(null, null);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
-                    @Override
-                    public void onCall(boolean yesOrNo, Object data) {
-                        if (yesOrNo){
-                            WalletApi.sendTransaction((VcashSlate) data, "acf39ed33ddb35196b0a", new WalletCallback() {
-                                @Override
-                                public void onCall(boolean yesOrNo, Object data) {
-
-                                }
-                            });
-                        }
-
-                    }
-                });
-            }
-        }, 20*1000);
+//        WalletApi.createWallet(null, null);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
+//                    @Override
+//                    public void onCall(boolean yesOrNo, Object data) {
+//                        if (yesOrNo){
+//                            WalletApi.sendTransaction((VcashSlate) data, "acf39ed33ddb35196b0a", new WalletCallback() {
+//                                @Override
+//                                public void onCall(boolean yesOrNo, Object data) {
+//
+//                                }
+//                            });
+//                        }
+//
+//                    }
+//                });
+//            }
+//        }, 20*1000);
 
     }
 
@@ -107,4 +110,17 @@ public class VcashApp extends Application {
 
         }
     };
+
+    public void addToPasswordFilter(Class<? extends Activity> clazz){
+        String key = clazz.getName();
+        String activityName = clazz.getSimpleName();
+        if(!passwordFilter.containsKey(key)){
+            passwordFilter.put(key,activityName);
+        }
+    }
+
+    public void removeFromPasswordFilter(){
+
+    }
+
 }
