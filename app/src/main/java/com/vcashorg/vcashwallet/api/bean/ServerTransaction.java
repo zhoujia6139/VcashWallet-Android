@@ -29,7 +29,7 @@ public class ServerTransaction implements Serializable {
         tx_id = sla.uuid;
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, sla.new VcashSlateTypeAdapter()).create();
         slate = gson.toJson(sla);
-        slate = StringEscapeUtils.unescapeJson(slate);
+        //slate = StringEscapeUtils.unescapeJson(slate);
     }
 
     private ServerTransaction(){

@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet.api;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.vcashorg.vcashwallet.api.bean.FinalizeTxInfo;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 
@@ -19,17 +21,17 @@ public interface ServerApiUrl {
     Observable<ArrayList<ServerTransaction>> checkStatus(@Path ("user_id") String user_id);
 
     @POST("/sendvcash")
-    Observable<ResponseBody> sendTransaction(@Body String tx);
+    Observable<ResponseBody> sendTransaction(@Body JsonElement tx);
 
     @POST("/receivevcash")
-    Observable receiveTransaction(@Body String tx);
+    Observable<ResponseBody> receiveTransaction(@Body JsonElement tx);
 
     @POST("/finalizevcash")
-    Observable filanizeTransaction(@Body String tx);
+    Observable<ResponseBody> filanizeTransaction(@Body JsonElement tx);
 
     @POST("/finalizevcash")
-    Observable cancelTransaction(@Body String tx);
+    Observable<ResponseBody> cancelTransaction(@Body JsonElement tx);
 
     @POST("/finalizevcash")
-    Observable closeTransaction(@Body String tx);
+    Observable<ResponseBody> closeTransaction(@Body JsonElement tx);
 }

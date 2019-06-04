@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.vcashorg.vcashwallet.api.bean.FinalizeTxInfo;
 import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
@@ -45,10 +46,9 @@ public class ServerApi {
 
     public static void sendTransaction(ServerTransaction tx, final WalletCallback callback) {
         Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
-        String jsonStr = gson.toJson(tx);
-        jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
-        jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
-        Log.d(Tag, jsonStr);
+        JsonElement jsonStr = gson.toJsonTree(tx);
+        //jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
+        //Log.d(Tag, jsonStr);
 
         RetrofitUtils.getServerApiUrl().sendTransaction(jsonStr)
                 .compose(RxHelper.<ResponseBody>io2main())
@@ -73,12 +73,12 @@ public class ServerApi {
 
     public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback) {
         Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
-        String jsonStr = gson.toJson(tx);
+        JsonElement jsonStr = gson.toJsonTree(tx);
         RetrofitUtils.getServerApiUrl().receiveTransaction(jsonStr)
-                .compose(RxHelper.io2main())
-                .subscribe(new CommonObserver<Object>() {
+                .compose(RxHelper.<ResponseBody>io2main())
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(ResponseBody result) {
                         Log.d(Tag, "receiveTransaction suc");
                         if (callback != null){
                             callback.onCall(true, null);
@@ -100,12 +100,12 @@ public class ServerApi {
         tx.code = ServerTxStatus.TxFinalized;
         tx.tx_id = tx_id;
         Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
-        String jsonStr = gson.toJson(tx);
+        JsonElement jsonStr = gson.toJsonTree(tx);
         RetrofitUtils.getServerApiUrl().filanizeTransaction(jsonStr)
-                .compose(RxHelper.io2main())
-                .subscribe(new CommonObserver<Object>() {
+                .compose(RxHelper.<ResponseBody>io2main())
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(ResponseBody result) {
                         Log.d(Tag, "filanizeTransaction suc");
                         if (callback != null){
                             callback.onCall(true, null);
@@ -125,13 +125,14 @@ public class ServerApi {
     public static void cancelTransaction(String tx_id, final WalletCallback callback) {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxCanceled;
-        tx.tx_id = tx_id;        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
-        String jsonStr = gson.toJson(tx);
+        tx.tx_id = tx_id;
+        Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
+        JsonElement jsonStr = gson.toJsonTree(tx);
         RetrofitUtils.getServerApiUrl().cancelTransaction(jsonStr)
-                .compose(RxHelper.io2main())
-                .subscribe(new CommonObserver<Object>() {
+                .compose(RxHelper.<ResponseBody>io2main())
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(ResponseBody result) {
                         Log.d(Tag, "cancelTransaction suc");
                         if (callback != null){
                             callback.onCall(true, null);
@@ -153,12 +154,12 @@ public class ServerApi {
         tx.code = ServerTxStatus.TxClosed;
         tx.tx_id = tx_id;
         Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, tx.new FinalizeTxInfoTypeAdapter()).create();
-        String jsonStr = gson.toJson(tx);
+        JsonElement jsonStr = gson.toJsonTree(tx);
         RetrofitUtils.getServerApiUrl().closeTransaction(jsonStr)
-                .compose(RxHelper.io2main())
-                .subscribe(new CommonObserver<Object>() {
+                .compose(RxHelper.<ResponseBody>io2main())
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(ResponseBody result) {
                         Log.d(Tag, "closeTransaction suc");
                         if (callback != null){
                             callback.onCall(true, null);

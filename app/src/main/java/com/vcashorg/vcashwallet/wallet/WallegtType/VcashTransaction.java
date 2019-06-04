@@ -264,8 +264,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         public KernelFeatures features;
         public long fee;
         public long lock_height;
-        public byte[] excess = AppUtil.zeroByteArray(64);
-        public byte[] excess_sig;
+        public byte[] excess = AppUtil.zeroByteArray(32);
+        public byte[] excess_sig = AppUtil.zeroByteArray(64);;
 
         public KernelFeatures featureWithLockHeight(long lock_height){
             return lock_height>0?KernelFeatures.KernelFeatureHeightLocked:KernelFeatures.KernelFeaturePlain;
@@ -425,9 +425,9 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").jsonValue("commitStr");
-                jsonWriter.name("features").value("featureStr");
-                jsonWriter.name("proof").jsonValue("proofStr");
+                jsonWriter.name("commit").jsonValue(commitStr);
+                jsonWriter.name("features").value(featureStr);
+                jsonWriter.name("proof").jsonValue(proofStr);
                 jsonWriter.endObject();
             }
 

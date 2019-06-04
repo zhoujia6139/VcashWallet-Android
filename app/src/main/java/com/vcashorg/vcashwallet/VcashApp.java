@@ -13,8 +13,11 @@ import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.TimeOutUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
+
+import java.util.ArrayList;
 
 public class VcashApp extends Application {
 
@@ -34,6 +37,11 @@ public class VcashApp extends Application {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                ArrayList<VcashTxLog> logs =  WalletApi.getTransationArr();
+                for (VcashTxLog log:logs){
+                    WalletApi.cancelTransaction(log);
+                }
+
                 WalletApi.createSendTransaction("acf39ed33ddb35196b0a", WalletApi.vcashToNano(1), 0, new WalletCallback() {
                     @Override
                     public void onCall(boolean yesOrNo, Object data) {
