@@ -51,10 +51,16 @@ public class NativeSecp256k1 {
     }
 
     public byte[] getCompressedPubkey(byte[] pubkey){
+        if (pubkey == null){
+            return null;
+        }
         return this.secp256k1_get_compressed_pubkey(mContext, pubkey);
     }
 
     public byte[] pubkeyFromCompressedKey(byte[] compressedKey) {
+        if (compressedKey == null){
+            return null;
+        }
         return this.secp256k1_pubkey_from_compressed_key(mContext, compressedKey);
     }
 
@@ -75,10 +81,16 @@ public class NativeSecp256k1 {
     }
 
     public byte[] signatureToCompactData(byte[] signature){
+        if (signature == null){
+            return null;
+        }
         return this.secp256k1_signature_to_compactData(mContext, signature);
     }
 
     public byte[] compactDataToSignature(byte[] compaceData){
+        if (compaceData == null){
+            return null;
+        }
         return this.secp256k1_compact_data_to_signature(mContext, compaceData);
     }
 
