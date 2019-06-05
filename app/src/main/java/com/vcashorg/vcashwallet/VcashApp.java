@@ -19,6 +19,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import org.bitcoinj.wallet.Protos;
+import org.bitcoinj.wallet.Wallet;
 
 import java.util.ArrayList;
 
@@ -61,6 +62,7 @@ public class VcashApp extends Application {
 //
 //                    }
 //                });
+                WalletApi.getCurChainHeight();
                 ServerTxManager.getInstance().fetchTxStatus(true);
             }
         }, 10*1000);

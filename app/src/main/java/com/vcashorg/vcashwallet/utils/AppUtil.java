@@ -114,4 +114,16 @@ public class AppUtil {
         String retStr = gson.toJson(intArr, int[].class);
         return retStr;
     }
+
+    public static byte[] BufferToByteArr(ByteBuffer byteBuffer){
+        int len = byteBuffer.limit() - byteBuffer.position();
+        byte[] bytes = new byte[len];
+
+        if(byteBuffer.isReadOnly()){
+            return null;
+        }else {
+            byteBuffer.get(bytes);
+        }
+        return bytes;
+    }
 }

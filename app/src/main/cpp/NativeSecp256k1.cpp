@@ -41,12 +41,14 @@ void createRandomBytesOfLength(char* buf, size_t length) {
 unsigned char* ConvertJByteaArrayToUnsingedChars(JNIEnv *env, jbyteArray bytearray)
 {
     unsigned char *chars = NULL;
-    jbyte *bytes = env->GetByteArrayElements(bytearray, 0);
-    int chars_len = env->GetArrayLength(bytearray);
-    chars = new unsigned char[chars_len];
-    memcpy(chars, bytes, chars_len);
+    if (bytearray != nullptr){
+        jbyte *bytes = env->GetByteArrayElements(bytearray, 0);
+        int chars_len = env->GetArrayLength(bytearray);
+        chars = new unsigned char[chars_len];
+        memcpy(chars, bytes, chars_len);
 
-    env->ReleaseByteArrayElements(bytearray, bytes, 0);
+        env->ReleaseByteArrayElements(bytearray, bytes, 0);
+    }
 
     return chars;
 }
@@ -581,7 +583,10 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
     unsigned char* input = ConvertJByteaArrayToUnsingedChars(env, inputData);
     size_t inputLength = env->GetArrayLength(inputData);
     unsigned char* key = ConvertJByteaArrayToUnsingedChars(env, keyData);
-    size_t keyLength = env->GetArrayLength(keyData);
+    size_t keyLength = 0;
+    if (key != nullptr){
+        keyLength = env->GetArrayLength(keyData);
+    }
     int ret = blake2b(retData, input, key, 32, inputLength, keyLength);
     delete input;
     delete key;

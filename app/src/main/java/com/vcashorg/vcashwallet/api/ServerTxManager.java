@@ -12,6 +12,7 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -122,6 +123,8 @@ public class ServerTxManager {
                                         EncryptedDBHelper.getsInstance().saveTx(txLog);
                                     }
                                 }
+
+                                WalletApi.finalizeTransaction(item, null);
 
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
                                 boolean isRepeat = false;

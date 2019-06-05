@@ -18,7 +18,7 @@ public interface ServerApiUrl {
     public static final String BaseUrl = "http://47.75.163.56:13515";
 
     @GET("/statecheck/{user_id}")
-    Observable<ArrayList<ServerTransaction>> checkStatus(@Path ("user_id") String user_id);
+    Observable<ArrayList<JsonElement>> checkStatus(@Path ("user_id") String user_id);
 
     @POST("/sendvcash")
     Observable<ResponseBody> sendTransaction(@Body JsonElement tx);

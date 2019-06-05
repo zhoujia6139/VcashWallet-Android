@@ -25,12 +25,18 @@ public class ServerApi {
     static private String Tag = "------ServerApi";
     public static void checkStatus(String userId, final WalletCallback callback) {
         RetrofitUtils.getServerApiUrl().checkStatus(userId)
-                .compose(RxHelper.<ArrayList<ServerTransaction>>io2main())
-                .subscribe(new CommonObserver<ArrayList<ServerTransaction>>() {
+                .compose(RxHelper.<ArrayList<JsonElement>>io2main())
+                .subscribe(new CommonObserver<ArrayList<JsonElement>>() {
                     @Override
-                    public void onSuccess(ArrayList<ServerTransaction> result) {
+                    public void onSuccess(ArrayList<JsonElement> result) {
+                        ArrayList<ServerTransaction> txs = new ArrayList<>();
+                        ServerTransaction tx = new ServerTransaction();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, tx.new ServerTransactionTypeAdapter()).create();
+                        for (JsonElement item :result){
+                            txs.add(gson.fromJson(item, ServerTransaction.class));
+                        }
                         if (callback != null){
-                            callback.onCall(true, result);
+                            callback.onCall(true, txs);
                         }
                     }
 

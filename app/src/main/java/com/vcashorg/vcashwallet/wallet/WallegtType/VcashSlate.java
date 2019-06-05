@@ -301,9 +301,8 @@ public class VcashSlate {
                         slate.slate_version = jsonReader.nextLong();
                         break;
                     case "tx":
-                        String txStr = jsonReader.nextString();
                         Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
-                        slate.tx = gson.fromJson(txStr, VcashTransaction.class);
+                        slate.tx = gson.fromJson(jsonReader, VcashTransaction.class);
                         break;
                     case "participant_data":
                         jsonReader.beginArray();

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
@@ -25,7 +26,6 @@ import java.util.Comparator;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 
 public class VcashTransaction extends VcashTxBaseObject {
-    final public static int COMMITMENT_SIZE = 32;
     final public static int PEDERSEN_COMMITMENT_SIZE = 33;
     final public static int SIGNATURE_SIZE = 64;
     final public static int MAX_PROOF_SIZE = 5134;
@@ -128,18 +128,28 @@ public class VcashTransaction extends VcashTxBaseObject {
         @Override
         public VcashTransaction read(JsonReader jsonReader) throws IOException {
             VcashTransaction tx = new VcashTransaction();
-            Gson gson = new Gson();
             jsonReader.beginObject();
             while (jsonReader.hasNext()){
                 switch (jsonReader.nextName()){
                     case "offset":
-//                        String offsetStr = jsonReader.nextString();
-//                        tx.offset = AppUtil.byteStrToByteArr(offsetStr);
+                        if (jsonReader.peek() != JsonToken.NULL){
+                            jsonReader.beginArray();
+                            ArrayList<Integer> arrayList3 = new ArrayList<>();
+                            while(jsonReader.hasNext()){
+                                arrayList3.add(jsonReader.nextInt());
+                            }
+                            jsonReader.endArray();
+                            tx.offset = AppUtil.intArrToByteArr(arrayList3);
+                        }
+                        else{
+                            jsonReader.nextNull();
+                        }
                         break;
 
                     case "body":
-                        String bodyStr = jsonReader.nextString();
-                        tx.body = gson.fromJson(bodyStr, TransactionBody.class);
+                        TransactionBody body = new TransactionBody();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(TransactionBody.class, body.new TransactionBodyTypeAdapter()).create();
+                        tx.body = gson.fromJson(jsonReader, TransactionBody.class);
                         break;
                 }
             }
@@ -154,7 +164,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         buf.put(offset);
         buf.put(body.computePayload(isForHash));
 
-        return buf.array();
+        buf.flip();
+        return AppUtil.BufferToByteArr(buf);
     }
 
     public class TransactionBody extends VcashTxBaseObject{
@@ -179,7 +190,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                 buf.put(item.computePayload(isForHash));
             }
 
-            return buf.array();
+            buf.flip();
+            return AppUtil.BufferToByteArr(buf);
         }
 
         public class TransactionBodyTypeAdapter extends TypeAdapter<TransactionBody> {
@@ -213,42 +225,36 @@ public class VcashTransaction extends VcashTxBaseObject {
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "inputs": {
-                            String dataStr = jsonReader.nextString();
-                            Gson gson1 = new Gson();
-                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
-                            }.getType());
-                            for (String item : datas) {
-                                Input input = null;
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                Input input = new Input();
                                 Gson datagson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
-                                input = datagson.fromJson(item, Input.class);
+                                input = datagson.fromJson(jsonReader, Input.class);
                                 body.inputs.add(input);
                             }
+                            jsonReader.endArray();
                         }
                             break;
                         case "outputs": {
-                            String dataStr = jsonReader.nextString();
-                            Gson gson1 = new Gson();
-                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
-                            }.getType());
-                            for (String item : datas) {
-                                Output output = null;
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                Output output = new Output();
                                 Gson datagson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
-                                output = datagson.fromJson(item, Output.class);
+                                output = datagson.fromJson(jsonReader, Output.class);
                                 body.outputs.add(output);
                             }
+                            jsonReader.endArray();
                         }
                             break;
                         case "kernels": {
-                            String dataStr = jsonReader.nextString();
-                            Gson gson1 = new Gson();
-                            ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>() {
-                            }.getType());
-                            for (String item : datas) {
-                                TxKernel kernel = null;
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                TxKernel kernel = new TxKernel();
                                 Gson datagson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
-                                kernel = datagson.fromJson(item, TxKernel.class);
+                                kernel = datagson.fromJson(jsonReader, TxKernel.class);
                                 body.kernels.add(kernel);
                             }
+                            jsonReader.endArray();
                         }
                             break;
                     }
@@ -271,21 +277,26 @@ public class VcashTransaction extends VcashTxBaseObject {
         }
 
         public byte[] kernelMsgToSign(){
-            ByteBuffer buf = ByteBuffer.allocate(20);
-            buf.order(BIG_ENDIAN);
+            ByteBuffer buf = null;
             switch (features){
                 case KernelFeaturePlain:
+                    buf = ByteBuffer.allocate(9);
+                    buf.order(BIG_ENDIAN);
                     if (lock_height == 0){
                         buf.put((byte)features.ordinal());
                         buf.putLong(fee);
                     }
                     break;
                 case KernelFeatureCoinbase:
+                    buf = ByteBuffer.allocate(1);
+                    buf.order(BIG_ENDIAN);
                     if (fee == 0 && lock_height == 0){
                         buf.put((byte)features.ordinal());
                     }
                     break;
                 case KernelFeatureHeightLocked:
+                    buf = ByteBuffer.allocate(17);
+                    buf.order(BIG_ENDIAN);
                     buf.put((byte)features.ordinal());
                     buf.putLong(fee);
                     buf.putLong(lock_height);
@@ -352,13 +363,33 @@ public class VcashTransaction extends VcashTxBaseObject {
                 while (jsonReader.hasNext()) {
                     switch (jsonReader.nextName()) {
                         case "excess":
-//                            String excessStr = jsonReader.nextString();
-//                            kernel.excess = AppUtil.byteStrToByteArr(excessStr);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                kernel.excess = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "excess_sig":
-//                            String excessSigStr = jsonReader.nextString();
-//                            kernel.excess_sig = AppUtil.byteStrToByteArr(excessSigStr);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                kernel.excess_sig = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":
@@ -393,7 +424,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         public byte[] proof;
 
         public byte[] computePayload(boolean isForHash){
-            ByteBuffer buf = ByteBuffer.allocate(1+COMMITMENT_SIZE+8+MAX_PROOF_SIZE);
+            int length = 1+PEDERSEN_COMMITMENT_SIZE+8+MAX_PROOF_SIZE;
+            ByteBuffer buf = ByteBuffer.allocate(length);
             buf.order(BIG_ENDIAN);
             byte feature = (byte)features.ordinal();
             buf.put(feature);
@@ -403,7 +435,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                 buf.put(proof);
             }
 
-            return buf.array();
+            buf.flip();
+            return AppUtil.BufferToByteArr(buf);
         }
 
         public class OutputTypeAdapter extends TypeAdapter<Output> {
@@ -434,13 +467,33 @@ public class VcashTransaction extends VcashTxBaseObject {
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "commit":
-//                            String commitStr = jsonReader.nextString();
-//                            output.commit = AppUtil.byteStrToByteArr(commitStr);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                output.commit = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "proof":
-//                            String proofStr = jsonReader.nextString();
-//                            output.proof = AppUtil.byteStrToByteArr(proofStr);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                output.proof = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":
@@ -465,7 +518,7 @@ public class VcashTransaction extends VcashTxBaseObject {
         public byte[] commit;
 
         public byte[] computePayload(boolean isForHash){
-            ByteBuffer buf = ByteBuffer.allocate(COMMITMENT_SIZE+1);
+            ByteBuffer buf = ByteBuffer.allocate(PEDERSEN_COMMITMENT_SIZE+1);
             byte feature = (byte)features.ordinal();
             buf.put(feature);
             buf.put(commit);
@@ -498,8 +551,18 @@ public class VcashTransaction extends VcashTxBaseObject {
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "commit":
-//                            String commitStr = jsonReader.nextString();
-//                            input.commit = AppUtil.byteStrToByteArr(commitStr);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                input.commit = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":
