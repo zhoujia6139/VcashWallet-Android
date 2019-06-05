@@ -29,7 +29,11 @@ public class VcashApp extends Application {
         mContext = getApplicationContext();
 
         WalletApi.setWalletContext(getApplicationContext());
+
         registerActivityLifecycleCallbacks(lifecycleCallbacks);
+        addFilter();
+
+
 //        WalletApi.createWallet(null, null);
 //        new Handler().postDelayed(new Runnable() {
 //            @Override
@@ -49,7 +53,7 @@ public class VcashApp extends Application {
 //                    }
 //                });
 //            }
-//        }, 20*1000);
+//        }, 10*1000);
 
     }
 
@@ -70,10 +74,9 @@ public class VcashApp extends Application {
         public void onActivityStarted(Activity activity) {
             mFinalCount++;
             Log.e("VcashApp", "onActivityStarted: " + activity.getClass().getSimpleName() + ">>>" + mFinalCount);
-            if(mFinalCount == 1){
+            if(mFinalCount == 1 && canShowPassword(activity.getClass())){
                 if(TimeOutUtil.getInstance().isTimeOut()
-                        && SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)
-                        && !(activity instanceof VcashValidateActivity)){
+                        && SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)){
                     Intent intent = new Intent(activity, VcashValidateActivity.class);
                     intent.putExtra(VcashValidateActivity.PARAM_MODE,VcashValidateActivity.MODE_TIMEOUT_VALIDATE);
                     activity.startActivity(intent);
@@ -119,8 +122,26 @@ public class VcashApp extends Application {
         }
     }
 
-    public void removeFromPasswordFilter(){
-
+    public void removeFromPasswordFilter(Class<? extends Activity> clazz){
+        String key = clazz.getName();
+        if(passwordFilter.containsKey(key)){
+            passwordFilter.remove(key);
+        }
     }
 
+    private void addFilter(){
+        addToPasswordFilter(LauncherActivity.class);
+        addToPasswordFilter(MnemonicConfirmActivity.class);
+        addToPasswordFilter(MnemonicCreateActivity.class);
+        addToPasswordFilter(MnemonicRestoreActivity.class);
+        addToPasswordFilter(PasswordActivity.class);
+        addToPasswordFilter(VcashStartActivity.class);
+        addToPasswordFilter(WalletCreateActivity.class);
+        addToPasswordFilter(VcashValidateActivity.class);
+    }
+
+    private boolean canShowPassword(Class<? extends Activity> clazz){
+        String key = clazz.getName();
+        return !passwordFilter.containsKey(key);
+    }
 }
