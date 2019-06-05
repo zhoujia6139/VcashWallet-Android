@@ -127,6 +127,14 @@ public class ServerTxManager {
                                 }
 
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
+
+                                //process special case here
+                                //if tx confirmed by net, finalize directly
+                                if (txLog != null && txLog.confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed){
+                                    ServerApi.filanizeTransaction(txLog.tx_slate_id, null);
+                                    continue;
+                                }
+
                                 boolean isRepeat = false;
                                 for (ServerTransaction tx : txArr) {
                                     if (tx.tx_id.equals(item.tx_id)) {

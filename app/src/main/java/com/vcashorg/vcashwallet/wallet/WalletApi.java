@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vcashorg.vcashwallet.api.NodeApi;
 import com.vcashorg.vcashwallet.api.ServerApi;
 import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
@@ -251,7 +252,7 @@ public class WalletApi {
             return;
         }
 
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         tx.slate = gson.toJson(tx.slateObj);
         tx.status = ServerTxStatus.TxReceiverd;
         ServerApi.receiveTransaction(tx, new WalletCallback() {
@@ -412,6 +413,7 @@ public class WalletApi {
                                 if (tx != null){
                                     tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                                     tx.confirm_time = AppUtil.getCurrentTimeSecs();
+                                    tx.server_status = ServerTxStatus.TxFinalized;
                                 }
                                 item.height = nodeOutput.height;
                                 item.status = VcashOutput.OutputStatus.Unspent;

@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet.api;
 
 import android.util.Log;
 
+import com.google.gson.JsonObject;
 import com.vcashorg.vcashwallet.api.bean.NodeChainInfo;
 import com.vcashorg.vcashwallet.api.bean.NodeOutputs;
 import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
@@ -62,8 +63,10 @@ public class NodeApi {
             sb.append(item);
             sb.append(",");
         }
+        String param = sb.toString();
+        param = param.substring(0,  param.length()-1);
 
-        RetrofitUtils.getNodeApiUrl().getOutputsByCommitArr(sb.toString())
+        RetrofitUtils.getNodeApiUrl().getOutputsByCommitArr(param)
                 .compose(RxHelper.<ArrayList<NodeRefreshOutput>>io2main())
                 .subscribe(new CommonObserver<ArrayList<NodeRefreshOutput>>() {
                     @Override
@@ -113,9 +116,11 @@ public class NodeApi {
     }
 
     public static void postTx(String tx, final WalletCallback callback){
-        Map<String, String> map = new HashMap<>();
-        map.put("tx_hex", tx);
-        RetrofitUtils.getNodeApiUrl().postTx(map)
+//        Map<String, String> map = new HashMap<>();
+//        map.put("tx_hex", tx);
+        JsonObject body = new JsonObject();
+        body.addProperty("tx_hex",tx);
+        RetrofitUtils.getNodeApiUrl().postTx(body)
                 .compose(RxHelper.<ResponseBody>io2main())
                 .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
