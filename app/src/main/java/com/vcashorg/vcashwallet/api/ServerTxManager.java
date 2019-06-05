@@ -124,8 +124,6 @@ public class ServerTxManager {
                                     }
                                 }
 
-                                WalletApi.finalizeTransaction(item, null);
-
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
                                 boolean isRepeat = false;
                                 for (ServerTransaction tx :txArr){
