@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet;
 
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -229,8 +230,11 @@ public class TxDetailsActivity extends ToolBarActivity {
                     public void onCall(boolean yesOrNo, Object data) {
                         if(yesOrNo){
                             UIUtils.showToastCenter("Receive Success");
+                            Log.i("yjq","Receive Success");
+                            finish();
                         }else {
                             UIUtils.showToastCenter("Receive Failed");
+                            Log.i("yjq","Receive Failed");
                         }
                     }
                 });

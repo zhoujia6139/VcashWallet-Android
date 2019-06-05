@@ -125,7 +125,7 @@ public class ServerTxManager {
                                         EncryptedDBHelper.getsInstance().saveTx(txLog);
                                     }
                                 }
-                                
+
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
                                 boolean isRepeat = false;
                                 for (ServerTransaction tx : txArr) {

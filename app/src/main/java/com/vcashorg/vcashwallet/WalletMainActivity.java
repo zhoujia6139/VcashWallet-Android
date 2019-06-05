@@ -191,25 +191,22 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
-                if(yesOrNo){
-                    mDatas = WalletApi.getTransationArr();
-                    if(mDatas== null || mDatas.size() == 0){
-                        adapter.getFooterLayout().setVisibility(View.VISIBLE);
-                    }else {
-                        adapter.getFooterLayout().setVisibility(View.GONE);
-                    }
-                    adapter.setNewData(mDatas);
+
+                mDatas = WalletApi.getTransationArr();
+                if(mDatas== null || mDatas.size() == 0){
+                    adapter.getFooterLayout().setVisibility(View.VISIBLE);
                 }else {
-                    UIUtils.showToastCenter("Error");
+                    adapter.getFooterLayout().setVisibility(View.GONE);
                 }
+                adapter.setNewData(mDatas);
                 mSrTx.setRefreshing(false);
+
+                WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
+                mTvBalance.setText(WalletApi.nanoToVcash(balanceInfo.locked) + "");
+                mTvAvailable.setText(WalletApi.nanoToVcash(balanceInfo.spendable) + "");
+                mTvUnconfirmed.setText(WalletApi.nanoToVcash(balanceInfo.unconfirmed) + "");
             }
         });
-
-        WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-        mTvBalance.setText(WalletApi.nanoToVcash(balanceInfo.locked) + "");
-        mTvAvailable.setText(WalletApi.nanoToVcash(balanceInfo.spendable) + "");
-        mTvUnconfirmed.setText(WalletApi.nanoToVcash(balanceInfo.unconfirmed) + "");
 
     }
 

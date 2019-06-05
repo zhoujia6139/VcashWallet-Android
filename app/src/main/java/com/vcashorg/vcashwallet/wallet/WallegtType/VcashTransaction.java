@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
@@ -91,24 +92,10 @@ public class VcashTransaction extends VcashTxBaseObject {
                 return 0;
             }
         };
-        Input[] inputs = (Input[])body.inputs.toArray();
-        Arrays.sort(inputs, comparator);
-        body.inputs = new ArrayList<Input>();
-        for (int i=0; i<inputs.length; i++){
-            body.inputs.add(inputs[i]);
-        }
-        Output[] outputs = (Output[])body.outputs.toArray();
-        Arrays.sort(outputs, comparator);
-        body.outputs = new ArrayList<Output>();
-        for (int i=0; i<outputs.length; i++){
-            body.outputs.add(outputs[i]);
-        }
-        TxKernel[] kernels = (TxKernel[])body.kernels.toArray();
-        Arrays.sort(kernels, comparator);
-        body.kernels = new ArrayList<TxKernel>();
-        for (int i=0; i<kernels.length; i++){
-            body.kernels.add(kernels[i]);
-        }
+
+        Collections.sort(body.inputs,comparator);
+        Collections.sort(body.outputs,comparator);
+        Collections.sort(body.kernels,comparator);
     }
 
     public class VcashTransactionTypeAdapter extends TypeAdapter<VcashTransaction> {
