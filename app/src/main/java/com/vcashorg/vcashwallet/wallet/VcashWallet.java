@@ -111,6 +111,7 @@ public class VcashWallet {
 
     public void setChainOutputs(ArrayList<VcashOutput> chainOutputs){
         outputs = chainOutputs;
+
         VcashKeychainPath maxKeyPath = new VcashKeychainPath(3, 0, 0, 0, 0);
         for (VcashOutput item :outputs){
             VcashKeychainPath keyPath = new VcashKeychainPath(3, AppUtil.decode(item.keyPath));
@@ -142,7 +143,10 @@ public class VcashWallet {
     }
 
     public void reloadOutputInfo(){
-        outputs = EncryptedDBHelper.getsInstance().getActiveOutputData();
+        ArrayList<VcashOutput> outputData = EncryptedDBHelper.getsInstance().getActiveOutputData();
+        if(outputData != null){
+            outputs = EncryptedDBHelper.getsInstance().getActiveOutputData();
+        }
     }
 
     public VcashOutput identifyUtxoOutput(NodeOutputs.NodeOutput nodeOutput){
