@@ -191,13 +191,18 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
-                mDatas = WalletApi.getTransationArr();
-                if(mDatas== null || mDatas.size() == 0){
-                    adapter.getFooterLayout().setVisibility(View.VISIBLE);
+                if(yesOrNo){
+                    mDatas = WalletApi.getTransationArr();
+                    if(mDatas== null || mDatas.size() == 0){
+                        adapter.getFooterLayout().setVisibility(View.VISIBLE);
+                    }else {
+                        adapter.getFooterLayout().setVisibility(View.GONE);
+                    }
+                    adapter.setNewData(mDatas);
                 }else {
-                    adapter.getFooterLayout().setVisibility(View.GONE);
+                    UIUtils.showToastCenter("Error");
                 }
-                adapter.setNewData(mDatas);
+                mSrTx.setRefreshing(false);
             }
         });
 
