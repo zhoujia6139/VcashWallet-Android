@@ -20,6 +20,7 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStat
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeatureCoinbase;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeaturePlain;
 
-public class VcashSlate {
+public class VcashSlate implements Serializable {
     public String uuid = AppUtil.hex(AppUtil.randomBytes(16));
     public short num_participants;
     public long amount;
@@ -321,7 +322,7 @@ public class VcashSlate {
         }
     }
 
-    public class ParticipantData{
+    public class ParticipantData implements Serializable{
         public short pId;
         public byte[] public_blind_excess;
         public byte[] public_nonce;

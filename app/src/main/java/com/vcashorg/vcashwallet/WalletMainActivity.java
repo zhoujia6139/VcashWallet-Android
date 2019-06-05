@@ -85,7 +85,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 VcashTxLog vcashTxLog = (VcashTxLog) adapter.getData().get(position);
-                Intent intent = new Intent();
+                Intent intent = new Intent(WalletMainActivity.this,TxDetailsActivity.class);
                 intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                 intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
                 nv(intent);
@@ -154,7 +154,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             popUtil = PopUtil.get(WalletMainActivity.this).setConfirmListener(new PopUtil.PopOnCall() {
                 @Override
                 public void onConfirm() {
-                    Intent intent = new Intent();
+                    Intent intent = new Intent(WalletMainActivity.this,TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_SERVER);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,recentTx);
                     nv(intent);

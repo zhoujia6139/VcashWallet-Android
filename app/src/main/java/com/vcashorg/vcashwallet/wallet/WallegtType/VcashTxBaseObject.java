@@ -2,7 +2,9 @@ package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 
-public abstract class VcashTxBaseObject {
+import java.io.Serializable;
+
+public abstract class VcashTxBaseObject implements Serializable {
 
     abstract public byte[] computePayload(boolean isForHash);
 
