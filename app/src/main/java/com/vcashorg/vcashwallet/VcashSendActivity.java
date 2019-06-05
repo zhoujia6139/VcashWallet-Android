@@ -80,6 +80,7 @@ public class VcashSendActivity extends ToolBarActivity {
                 btnState();
             }
         });
+        mEtAddress.setText("acf39ed33ddb35196b0a");
     }
 
     private void btnState() {
@@ -99,7 +100,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                     public void onCall(boolean yesOrNo, Object data) {
                                         if(yesOrNo){
                                             VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
-                                            Intent intent = new Intent();
+                                            Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                             intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                             intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
                                             nv(intent);

@@ -84,6 +84,7 @@ public class ServerTxManager {
 
                                 //check as receiver
                                 if (item.receiver_id.equals(VcashWallet.getInstance().mUserId)) {
+                                    item.isSend = false;
                                     if (item.status == ServerTxStatus.TxFinalized ||
                                             item.status == ServerTxStatus.TxCanceled) {
                                         if (txLog != null && txLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState) {
@@ -106,6 +107,7 @@ public class ServerTxManager {
                                 }
                                 //check as sender
                                 else if (item.sender_id.equals(VcashWallet.getInstance().mUserId)) {
+                                    item.isSend = true;
                                     //check is cancelled
                                     if (txLog.server_status == ServerTxStatus.TxCanceled) {
                                         ServerApi.cancelTransaction(txLog.tx_slate_id, null);

@@ -139,11 +139,10 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     }
 
     private ArrayList<String> buildMnemonicList(){
-        ArrayList<String> result = MnemonicHelper.split("layer floor valley flag dawn dress sponsor whale illegal session juice beef scout mammal snake cage river lemon easily away title else layer limit");
-//        ArrayList<String> result = new ArrayList<>();
-//        for (MnemonicData data : restoreMnemonicData){
-//            result.add(data.data);
-//        }
+        ArrayList<String> result = new ArrayList<>();
+        for (MnemonicData data : restoreMnemonicData){
+            result.add(data.data);
+        }
         return result;
     }
 }
