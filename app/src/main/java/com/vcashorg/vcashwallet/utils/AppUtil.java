@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet.utils;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
 import com.vcashorg.vcashwallet.prng.PRNGFixes;
 
 import org.bitcoinj.core.Utils;
@@ -87,28 +88,42 @@ public class AppUtil {
         return retArr;
     }
 
-    public static byte[] getDataFromArray(ArrayList<Integer> array) {
-        if (array == null || !(array instanceof ArrayList) ){
-            return null;
+    public static byte[] intArrToByteArr(ArrayList<Integer> intArr) {
+        byte[] byteArr = new byte[intArr.size()];
+        int i = 0;
+        for (int item :intArr){
+            byte temp = (byte)(item & 0xff);
+            byteArr[i] = temp;
+            i++;
         }
-        ByteBuffer buf = ByteBuffer.allocate(1024);
-        for (Integer item : array){
-            byte bit = (byte) item.intValue();
-            buf.put(bit);
-        }
-        return buf.array();
+        return byteArr;
     }
 
-    public static ArrayList<Integer> getArrFromData(byte[] data){
+    public static String getByteStrFromByteArr(byte[] data){
         if (data == null){
             return null;
         }
-        ArrayList<Integer> ret = new ArrayList<Integer>();
+        int[] intArr = new int[data.length];
         for (int i=0; i<data.length; i++){
             byte item = data[i];
-            ret.add(new Integer(item));
+            int temp = item & 0xff;
+            intArr[i] = temp;
         }
 
-        return ret;
+        Gson gson = new Gson();
+        String retStr = gson.toJson(intArr, int[].class);
+        return retStr;
+    }
+
+    public static byte[] BufferToByteArr(ByteBuffer byteBuffer){
+        int len = byteBuffer.limit() - byteBuffer.position();
+        byte[] bytes = new byte[len];
+
+        if(byteBuffer.isReadOnly()){
+            return null;
+        }else {
+            byteBuffer.get(bytes);
+        }
+        return bytes;
     }
 }

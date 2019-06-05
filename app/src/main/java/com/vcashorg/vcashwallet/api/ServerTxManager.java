@@ -3,6 +3,7 @@ package com.vcashorg.vcashwallet.api;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
@@ -11,6 +12,7 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -68,14 +70,14 @@ public class ServerTxManager {
             ServerApi.checkStatus(VcashWallet.getInstance().mUserId, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
-                    ArrayList<ServerTransaction> txs = (ArrayList<ServerTransaction>)data;
-                    Log.i(Tag, String.format("check status ret %d tx", txs.size()));
-
                     if (yesOrNo){
+                        ArrayList<ServerTransaction> txs = (ArrayList<ServerTransaction>)data;
+                        Log.i(Tag, String.format("check status ret %d tx", txs.size()));
+
                         lastFetch = AppUtil.getCurrentTimeSecs();
                         boolean hasNewData = false;
                         for (ServerTransaction item:txs){
-                            Gson gson = new Gson();
+                            Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
                             item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
                             if (item.slateObj != null){
                                 VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(item.slateObj.uuid);
@@ -121,6 +123,8 @@ public class ServerTxManager {
                                         EncryptedDBHelper.getsInstance().saveTx(txLog);
                                     }
                                 }
+
+                                WalletApi.finalizeTransaction(item, null);
 
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
                                 boolean isRepeat = false;

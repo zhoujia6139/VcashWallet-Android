@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -25,6 +27,7 @@ public interface NodeApiUrl {
     @GET("/v1/chain")
     Observable<NodeChainInfo> getChainHeight();
 
+    @FormUrlEncoded
     @POST("/v1/pool/push?fluff")
-    Observable postTx(@FieldMap Map<String, String>map);
+    Observable<ResponseBody> postTx(@FieldMap Map<String, String>map);
 }

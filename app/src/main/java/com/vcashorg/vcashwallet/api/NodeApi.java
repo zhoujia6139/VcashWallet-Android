@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
+
 public class NodeApi {
     static private String Tag = "------NodeApi";
     static private long curHeight = 0;
@@ -114,10 +116,10 @@ public class NodeApi {
         Map<String, String> map = new HashMap<>();
         map.put("tx_hex", tx);
         RetrofitUtils.getNodeApiUrl().postTx(map)
-                .compose(RxHelper.io2main())
-                .subscribe(new CommonObserver() {
+                .compose(RxHelper.<ResponseBody>io2main())
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(Object result) {
+                    public void onSuccess(ResponseBody result) {
                         if (callback != null){
                             callback.onCall(true, null);
                         }

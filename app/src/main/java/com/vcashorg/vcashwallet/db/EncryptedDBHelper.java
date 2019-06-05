@@ -225,12 +225,12 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             item.amount_debited = cursor.getLong(cursor.getColumnIndex("amount_debited"));
             item.fee = cursor.getLong(cursor.getColumnIndex("fee"));
             String inputStr = cursor.getString(cursor.getColumnIndex("inputs"));
-            for (int startIndex=0; startIndex<inputStr.length(); startIndex+=64){
-                item.appendInput(inputStr.substring(startIndex, startIndex+64));
+            for (int startIndex=0; startIndex<inputStr.length(); startIndex+=66){
+                item.appendInput(inputStr.substring(startIndex, startIndex+66));
             }
             String outputStr = cursor.getString(cursor.getColumnIndex("outputs"));
-            for (int startIndex=0; startIndex<outputStr.length(); startIndex+=64){
-                item.appendOutput(outputStr.substring(startIndex, startIndex+64));
+            for (int startIndex=0; startIndex<outputStr.length(); startIndex+=66){
+                item.appendOutput(outputStr.substring(startIndex, startIndex+66));
             }
             return item;
         }

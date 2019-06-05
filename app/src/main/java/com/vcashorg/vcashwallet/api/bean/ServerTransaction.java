@@ -7,6 +7,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -28,7 +31,7 @@ public class ServerTransaction implements Serializable {
         slate = gson.toJson(sla);
     }
 
-    private ServerTransaction(){
+    public ServerTransaction(){
 
     }
 

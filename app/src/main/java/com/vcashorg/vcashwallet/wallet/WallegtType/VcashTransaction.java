@@ -2,13 +2,19 @@ package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import android.util.Log;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
+import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.bitcoin.protocols.payments.Protos;
 
 import java.io.IOException;
@@ -20,7 +26,6 @@ import java.util.Comparator;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 
 public class VcashTransaction extends VcashTxBaseObject {
-    final public static int COMMITMENT_SIZE = 32;
     final public static int PEDERSEN_COMMITMENT_SIZE = 33;
     final public static int SIGNATURE_SIZE = 64;
     final public static int MAX_PROOF_SIZE = 5134;
@@ -109,30 +114,42 @@ public class VcashTransaction extends VcashTxBaseObject {
     public class VcashTransactionTypeAdapter extends TypeAdapter<VcashTransaction> {
         @Override
         public void write(JsonWriter jsonWriter, VcashTransaction tx) throws IOException {
-            Gson gson = new Gson();
-            String offsetStr = gson.toJson(tx.offset, byte[].class);
-            String bodyStr = gson.toJson(tx.body, TransactionBody.class);
+            String offsetStr = AppUtil.getByteStrFromByteArr(tx.offset);
+            offsetStr = StringEscapeUtils.unescapeJson(offsetStr);
+            Gson gson1 = new GsonBuilder().registerTypeAdapter(TransactionBody.class, tx.body.new TransactionBodyTypeAdapter()).create();
+            String bodyStr = gson1.toJson(tx.body, TransactionBody.class);
+            bodyStr = StringEscapeUtils.unescapeJson(bodyStr);
             jsonWriter.beginObject();
-            jsonWriter.name("offset").value(offsetStr);
-            jsonWriter.name("body").value(bodyStr);
+            jsonWriter.name("offset").jsonValue(offsetStr);
+            jsonWriter.name("body").jsonValue(bodyStr);
             jsonWriter.endObject();
         }
 
         @Override
         public VcashTransaction read(JsonReader jsonReader) throws IOException {
             VcashTransaction tx = new VcashTransaction();
-            Gson gson = new Gson();
             jsonReader.beginObject();
             while (jsonReader.hasNext()){
                 switch (jsonReader.nextName()){
                     case "offset":
-                        String offsetStr = jsonReader.nextString();
-                        tx.offset = gson.fromJson(offsetStr, byte[].class);
+                        if (jsonReader.peek() != JsonToken.NULL){
+                            jsonReader.beginArray();
+                            ArrayList<Integer> arrayList3 = new ArrayList<>();
+                            while(jsonReader.hasNext()){
+                                arrayList3.add(jsonReader.nextInt());
+                            }
+                            jsonReader.endArray();
+                            tx.offset = AppUtil.intArrToByteArr(arrayList3);
+                        }
+                        else{
+                            jsonReader.nextNull();
+                        }
                         break;
 
                     case "body":
-                        String bodyStr = jsonReader.nextString();
-                        tx.body = gson.fromJson(bodyStr, TransactionBody.class);
+                        TransactionBody body = new TransactionBody();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(TransactionBody.class, body.new TransactionBodyTypeAdapter()).create();
+                        tx.body = gson.fromJson(jsonReader, TransactionBody.class);
                         break;
                 }
             }
@@ -147,7 +164,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         buf.put(offset);
         buf.put(body.computePayload(isForHash));
 
-        return buf.array();
+        buf.flip();
+        return AppUtil.BufferToByteArr(buf);
     }
 
     public class TransactionBody extends VcashTxBaseObject{
@@ -172,7 +190,78 @@ public class VcashTransaction extends VcashTxBaseObject {
                 buf.put(item.computePayload(isForHash));
             }
 
-            return buf.array();
+            buf.flip();
+            return AppUtil.BufferToByteArr(buf);
+        }
+
+        public class TransactionBodyTypeAdapter extends TypeAdapter<TransactionBody> {
+            @Override
+            public void write(JsonWriter jsonWriter, TransactionBody body) throws IOException {
+                Input input = body.inputs.get(0);
+                Gson inputGson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
+                String inputsStr = inputGson.toJson(body.inputs, new TypeToken<ArrayList<Input>>(){}.getType());
+                inputsStr = StringEscapeUtils.unescapeJson(inputsStr);
+
+                Output output = body.outputs.get(0);
+                Gson outputGson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
+                String outputsStr = outputGson.toJson(body.outputs, new TypeToken<ArrayList<Output>>(){}.getType());
+                outputsStr = StringEscapeUtils.unescapeJson(outputsStr);
+
+                TxKernel kernel = body.kernels.get(0);
+                Gson kernelGson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
+                String kernelsStr = kernelGson.toJson(body.kernels, new TypeToken<ArrayList<TxKernel>>(){}.getType());
+                kernelsStr = StringEscapeUtils.unescapeJson(kernelsStr);
+                jsonWriter.beginObject();
+                jsonWriter.name("inputs").jsonValue(inputsStr);
+                jsonWriter.name("outputs").jsonValue(outputsStr);
+                jsonWriter.name("kernels").jsonValue(kernelsStr);
+                jsonWriter.endObject();
+            }
+
+            @Override
+            public TransactionBody read(JsonReader jsonReader) throws IOException {
+                TransactionBody body = new TransactionBody();
+                jsonReader.beginObject();
+                while (jsonReader.hasNext()){
+                    switch (jsonReader.nextName()){
+                        case "inputs": {
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                Input input = new Input();
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
+                                input = datagson.fromJson(jsonReader, Input.class);
+                                body.inputs.add(input);
+                            }
+                            jsonReader.endArray();
+                        }
+                            break;
+                        case "outputs": {
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                Output output = new Output();
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
+                                output = datagson.fromJson(jsonReader, Output.class);
+                                body.outputs.add(output);
+                            }
+                            jsonReader.endArray();
+                        }
+                            break;
+                        case "kernels": {
+                            jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                TxKernel kernel = new TxKernel();
+                                Gson datagson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
+                                kernel = datagson.fromJson(jsonReader, TxKernel.class);
+                                body.kernels.add(kernel);
+                            }
+                            jsonReader.endArray();
+                        }
+                            break;
+                    }
+                }
+                jsonReader.endObject();
+                return body;
+            }
         }
     }
 
@@ -180,29 +269,34 @@ public class VcashTransaction extends VcashTxBaseObject {
         public KernelFeatures features;
         public long fee;
         public long lock_height;
-        public byte[] excess = AppUtil.zeroByteArray(64);
-        public byte[] excess_sig;
+        public byte[] excess = AppUtil.zeroByteArray(32);
+        public byte[] excess_sig = AppUtil.zeroByteArray(64);;
 
         public KernelFeatures featureWithLockHeight(long lock_height){
             return lock_height>0?KernelFeatures.KernelFeatureHeightLocked:KernelFeatures.KernelFeaturePlain;
         }
 
         public byte[] kernelMsgToSign(){
-            ByteBuffer buf = ByteBuffer.allocate(20);
-            buf.order(BIG_ENDIAN);
+            ByteBuffer buf = null;
             switch (features){
                 case KernelFeaturePlain:
+                    buf = ByteBuffer.allocate(9);
+                    buf.order(BIG_ENDIAN);
                     if (lock_height == 0){
                         buf.put((byte)features.ordinal());
                         buf.putLong(fee);
                     }
                     break;
                 case KernelFeatureCoinbase:
+                    buf = ByteBuffer.allocate(1);
+                    buf.order(BIG_ENDIAN);
                     if (fee == 0 && lock_height == 0){
                         buf.put((byte)features.ordinal());
                     }
                     break;
                 case KernelFeatureHeightLocked:
+                    buf = ByteBuffer.allocate(17);
+                    buf.order(BIG_ENDIAN);
                     buf.put((byte)features.ordinal());
                     buf.putLong(fee);
                     buf.putLong(lock_height);
@@ -241,9 +335,10 @@ public class VcashTransaction extends VcashTxBaseObject {
         public class TxKernelTypeAdapter extends TypeAdapter<TxKernel> {
             @Override
             public void write(JsonWriter jsonWriter, TxKernel kernel) throws IOException {
-                Gson gson = new Gson();
-                String excessStr = gson.toJson(kernel.excess, byte[].class);
-                String excessSigStr = gson.toJson(kernel.excess_sig, byte[].class);
+                String excessStr = AppUtil.getByteStrFromByteArr(kernel.excess);
+                excessStr = StringEscapeUtils.unescapeJson(excessStr);
+                String excessSigStr = AppUtil.getByteStrFromByteArr(kernel.excess_sig);
+                excessSigStr = StringEscapeUtils.unescapeJson(excessSigStr);
                 String featureStr = null;
                 if (kernel.features == KernelFeatures.KernelFeaturePlain) {
                     featureStr = "Plain";
@@ -253,8 +348,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "HeightLocked";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("excess").value(excessStr);
-                jsonWriter.name("excess_sig").value(excessSigStr);
+                jsonWriter.name("excess").jsonValue(excessStr);
+                jsonWriter.name("excess_sig").jsonValue(excessSigStr);
                 jsonWriter.name("features").value(featureStr);
                 jsonWriter.name("fee").value(kernel.fee);
                 jsonWriter.name("lock_height").value(kernel.lock_height);
@@ -265,17 +360,36 @@ public class VcashTransaction extends VcashTxBaseObject {
             public TxKernel read(JsonReader jsonReader) throws IOException {
                 TxKernel kernel = new TxKernel();
                 jsonReader.beginObject();
-                Gson gson = new Gson();
                 while (jsonReader.hasNext()) {
                     switch (jsonReader.nextName()) {
                         case "excess":
-                            String excessStr = jsonReader.nextString();
-                            kernel.excess = gson.fromJson(excessStr, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                kernel.excess = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "excess_sig":
-                            String excessSigStr = jsonReader.nextString();
-                            kernel.excess_sig = gson.fromJson(excessSigStr, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                kernel.excess_sig = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":
@@ -310,7 +424,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         public byte[] proof;
 
         public byte[] computePayload(boolean isForHash){
-            ByteBuffer buf = ByteBuffer.allocate(1+COMMITMENT_SIZE+8+MAX_PROOF_SIZE);
+            int length = 1+PEDERSEN_COMMITMENT_SIZE+8+MAX_PROOF_SIZE;
+            ByteBuffer buf = ByteBuffer.allocate(length);
             buf.order(BIG_ENDIAN);
             byte feature = (byte)features.ordinal();
             buf.put(feature);
@@ -320,15 +435,17 @@ public class VcashTransaction extends VcashTxBaseObject {
                 buf.put(proof);
             }
 
-            return buf.array();
+            buf.flip();
+            return AppUtil.BufferToByteArr(buf);
         }
 
         public class OutputTypeAdapter extends TypeAdapter<Output> {
             @Override
             public void write(JsonWriter jsonWriter, Output output) throws IOException {
-                Gson gson = new Gson();
-                String commitStr = gson.toJson(output.commit, byte[].class);
-                String proofStr = gson.toJson(output.proof, byte[].class);
+                String commitStr = AppUtil.getByteStrFromByteArr(output.commit);
+                commitStr = StringEscapeUtils.unescapeJson(commitStr);
+                String proofStr = AppUtil.getByteStrFromByteArr(output.proof);
+                proofStr = StringEscapeUtils.unescapeJson(proofStr);
                 String featureStr = null;
                 if (output.features == OutputFeatures.OutputFeaturePlain){
                     featureStr = "Plain";
@@ -337,9 +454,9 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").value("commitStr");
-                jsonWriter.name("features").value("featureStr");
-                jsonWriter.name("proof").value("proofStr");
+                jsonWriter.name("commit").jsonValue(commitStr);
+                jsonWriter.name("features").value(featureStr);
+                jsonWriter.name("proof").jsonValue(proofStr);
                 jsonWriter.endObject();
             }
 
@@ -347,17 +464,36 @@ public class VcashTransaction extends VcashTxBaseObject {
             public Output read(JsonReader jsonReader) throws IOException {
                 Output output = new Output();
                 jsonReader.beginObject();
-                Gson gson = new Gson();
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "commit":
-                            String commitStr = jsonReader.nextString();
-                            output.commit = gson.fromJson(commitStr, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                output.commit = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "proof":
-                            String proofStr = jsonReader.nextString();
-                            output.proof = gson.fromJson(proofStr, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                output.proof = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":
@@ -382,7 +518,7 @@ public class VcashTransaction extends VcashTxBaseObject {
         public byte[] commit;
 
         public byte[] computePayload(boolean isForHash){
-            ByteBuffer buf = ByteBuffer.allocate(COMMITMENT_SIZE+1);
+            ByteBuffer buf = ByteBuffer.allocate(PEDERSEN_COMMITMENT_SIZE+1);
             byte feature = (byte)features.ordinal();
             buf.put(feature);
             buf.put(commit);
@@ -393,8 +529,8 @@ public class VcashTransaction extends VcashTxBaseObject {
         public class InputTypeAdapter extends TypeAdapter<Input> {
             @Override
             public void write(JsonWriter jsonWriter, Input input) throws IOException {
-                Gson gson = new Gson();
-                String commitStr = gson.toJson(input.commit, byte[].class);
+                String commitStr = AppUtil.getByteStrFromByteArr(input.commit);
+                commitStr = StringEscapeUtils.unescapeJson(commitStr);
                 String featureStr = null;
                 if (input.features == OutputFeatures.OutputFeaturePlain){
                     featureStr = "Plain";
@@ -403,7 +539,7 @@ public class VcashTransaction extends VcashTxBaseObject {
                     featureStr = "Coinbase";
                 }
                 jsonWriter.beginObject();
-                jsonWriter.name("commit").value(commitStr);
+                jsonWriter.name("commit").jsonValue(commitStr);
                 jsonWriter.name("features").value(featureStr);
                 jsonWriter.endObject();
             }
@@ -415,9 +551,18 @@ public class VcashTransaction extends VcashTxBaseObject {
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "commit":
-                            String commitStr = jsonReader.nextString();
-                            Gson gson = new Gson();
-                            input.commit = gson.fromJson(commitStr, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                input.commit = AppUtil.intArrToByteArr(arrayList3);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
 
                         case "features":

@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet.wallet;
 
 import android.util.Log;
 
+import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
 
 import org.bitcoinj.crypto.DeterministicKey;
@@ -16,13 +17,15 @@ public class VcashKeychain {
 
     public byte[] deriveBindKey(long amount, VcashKeychainPath path){
         DeterministicKey key = this.deriveKey(path);
+        String temp = AppUtil.hex(key.getPrivKeyBytes());
         byte[] data = NativeSecp256k1.instance().bindSwitch(amount, key.getPrivKeyBytes());
         return data;
     }
 
     public byte[] createCommitment(long amount, VcashKeychainPath path) {
-        DeterministicKey key = this.deriveKey(path);
-        byte[] data = NativeSecp256k1.instance().getCommitment(amount, key.getPrivKeyBytes());
+        byte[] key = this.deriveBindKey(amount, path);
+        String temp = AppUtil.hex(key);
+        byte[] data = NativeSecp256k1.instance().getCommitment(amount, key);
         return data;
     }
 

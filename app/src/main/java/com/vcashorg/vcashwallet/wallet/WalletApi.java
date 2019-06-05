@@ -59,7 +59,8 @@ public class WalletApi {
 
     public static boolean createWallet(List<String> wordsArr, String password){
         if (wordsArr == null){
-            wordsArr = MnemonicHelper.split("layer floor valley flag dawn dress sponsor whale illegal session juice beef scout mammal snake cage river lemon easily away title else layer limit");
+            //wordsArr = MnemonicHelper.split("layer floor valley flag dawn dress sponsor whale illegal session juice beef scout mammal snake cage river lemon easily away title else layer limit");
+            wordsArr = MnemonicHelper.split("note waste grunt mansion couple surge insect nasty mimic breeze ranch select where wave middle inmate chunk shy virus recall matrix report credit deposit");
         }
         byte[] entropy = MnemonicHelper.instance(context).toEntropy(wordsArr);
         if (entropy != null){

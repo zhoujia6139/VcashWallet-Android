@@ -9,12 +9,15 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 import com.vcashorg.vcashwallet.wallet.VcashKeychainPath;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +66,7 @@ public class VcashSlate {
 
             VcashKeychainPath keypath = new VcashKeychainPath(3, AppUtil.decode(item.keyPath));
             byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(item.value, keypath);
+            String temp = AppUtil.hex(commitment);
             VcashTransaction.Input input = tx.new Input();
             input.commit = commitment;
             input.features = (item.is_coinbase?OutputFeatureCoinbase:OutputFeaturePlain);
@@ -258,16 +262,14 @@ public class VcashSlate {
             jsonWriter.name("version").value(slate.slate_version);
             Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
             String jsonStr = gson.toJson(slate.tx);
-            jsonWriter.name("tx").value(jsonStr);
+            jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
+            jsonWriter.name("tx").jsonValue(jsonStr);
 
-            ArrayList<String> pData = new ArrayList<String>();
-            for (ParticipantData data:slate.participant_data){
-                Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
-                pData.add(datagson.toJson(data));
-            }
-            Gson gson1 = new Gson();
-            String jsonStr1 = gson1.toJson(pData, new TypeToken<ArrayList<String>>(){}.getType());
-            jsonWriter.name("participant_data").value(jsonStr1);
+            ParticipantData data = slate.participant_data.get(0);
+            Gson gson1 = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
+            String jsonStr1 = gson1.toJson(slate.participant_data, new TypeToken<ArrayList<ParticipantData>>(){}.getType());
+            jsonStr1 = StringEscapeUtils.unescapeJson(jsonStr1);
+            jsonWriter.name("participant_data").jsonValue(jsonStr1);
             jsonWriter.endObject();
         }
 
@@ -299,20 +301,18 @@ public class VcashSlate {
                         slate.slate_version = jsonReader.nextLong();
                         break;
                     case "tx":
-                        String txStr = jsonReader.nextString();
                         Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
-                        slate.tx = gson.fromJson(txStr, VcashTransaction.class);
+                        slate.tx = gson.fromJson(jsonReader, VcashTransaction.class);
                         break;
                     case "participant_data":
-                        String dataStr = jsonReader.nextString();
-                        Gson gson1 = new Gson();
-                        ArrayList<String> datas = gson1.fromJson(dataStr, new TypeToken<ArrayList<String>>(){}.getType());
-                        for (String item:datas){
-                            ParticipantData pData = null;
+                        jsonReader.beginArray();
+                        while(jsonReader.hasNext()){
+                            ParticipantData pData = new ParticipantData();
                             Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, pData.new ParticipantDataTypeAdapter()).create();
-                            pData = datagson.fromJson(item, ParticipantData.class);
+                            pData = datagson.fromJson(jsonReader, ParticipantData.class);
                             slate.participant_data.add(pData);
                         }
+                        jsonReader.endArray();
                         break;
                 }
             }
@@ -334,23 +334,26 @@ public class VcashSlate {
             public void write(JsonWriter jsonWriter, ParticipantData data) throws IOException {
                 jsonWriter.beginObject();
                 jsonWriter.name("id").value(data.pId);
-                jsonWriter.name("message").value(data.message);
-                Gson gson = new Gson();
-                String public_blind_excessStr = gson.toJson(data.public_blind_excess, byte[].class);
-                jsonWriter.name("public_blind_excess").value(public_blind_excessStr);
-                String public_nonceStr = gson.toJson(data.public_nonce, byte[].class);
-                jsonWriter.name("public_nonce").value(public_nonceStr);
-                String part_sigStr = gson.toJson(data.part_sig, byte[].class);
-                jsonWriter.name("part_sig").value(part_sigStr);
-                String message_sigStr = gson.toJson(data.message_sig, byte[].class);
-                jsonWriter.name("message_sig").value(message_sigStr);
+                jsonWriter.name("message").jsonValue(data.message);
+                byte[] compressKey = NativeSecp256k1.instance().getCompressedPubkey(data.public_blind_excess);
+                String public_blind_excessStr = AppUtil.getByteStrFromByteArr(compressKey);
+                jsonWriter.name("public_blind_excess").jsonValue(public_blind_excessStr);
+                compressKey = NativeSecp256k1.instance().getCompressedPubkey(data.public_nonce);
+                String public_nonceStr = AppUtil.getByteStrFromByteArr(compressKey);
+                jsonWriter.name("public_nonce").jsonValue(public_nonceStr);
+
+                byte[] compressSig = NativeSecp256k1.instance().signatureToCompactData(data.part_sig);
+                String part_sigStr = AppUtil.getByteStrFromByteArr(compressSig);
+                jsonWriter.name("part_sig").jsonValue(part_sigStr);
+                compressSig = NativeSecp256k1.instance().signatureToCompactData(data.message_sig);
+                String message_sigStr = AppUtil.getByteStrFromByteArr(compressSig);
+                jsonWriter.name("message_sig").jsonValue(message_sigStr);
                 jsonWriter.endObject();
             }
 
             @Override
             public ParticipantData read(JsonReader jsonReader) throws IOException {
                 ParticipantData data = new ParticipantData();
-                Gson gson = new Gson();
                 jsonReader.beginObject();
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
@@ -361,20 +364,68 @@ public class VcashSlate {
                             data.message = jsonReader.nextString();
                             break;
                         case "public_blind_excess":
-                            String public_blind_excess = jsonReader.nextString();
-                            data.public_blind_excess = gson.fromJson(public_blind_excess, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                byte[] compressedKey = AppUtil.intArrToByteArr(arrayList);
+                                data.public_blind_excess = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressedKey);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
+
                             break;
                         case "public_nonce":
-                            String public_nonce = jsonReader.nextString();
-                            data.public_nonce = gson.fromJson(public_nonce, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList1 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList1.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                byte[] compressedKey1 = AppUtil.intArrToByteArr(arrayList1);
+                                data.public_nonce = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressedKey1);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
+
                             break;
                         case "part_sig":
-                            String part_sig = jsonReader.nextString();
-                            data.part_sig = gson.fromJson(part_sig, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList2 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList2.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                byte[] compressedData = AppUtil.intArrToByteArr(arrayList2);
+                                data.part_sig = NativeSecp256k1.instance().compactDataToSignature(compressedData);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
+
                             break;
                         case "message_sig":
-                            String message_sig = jsonReader.nextString();
-                            data.message_sig = gson.fromJson(message_sig, byte[].class);
+                            if (jsonReader.peek() != JsonToken.NULL){
+                                jsonReader.beginArray();
+                                ArrayList<Integer> arrayList3 = new ArrayList<>();
+                                while(jsonReader.hasNext()){
+                                    arrayList3.add(jsonReader.nextInt());
+                                }
+                                jsonReader.endArray();
+                                byte[] compressedData1 = AppUtil.intArrToByteArr(arrayList3);
+                                data.message_sig = NativeSecp256k1.instance().compactDataToSignature(compressedData1);
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
+
                             break;
                     }
                 }
