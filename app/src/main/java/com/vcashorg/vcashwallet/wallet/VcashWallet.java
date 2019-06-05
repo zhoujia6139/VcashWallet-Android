@@ -34,7 +34,7 @@ public class VcashWallet {
     final private long DEFAULT_BASE_FEE = 1000000;
     private static VcashWallet instance = null;
     public VcashKeychain mKeyChain;
-    private VcashKeychainPath mKeyPath;
+    private VcashKeychainPath mKeyPath = new VcashKeychainPath(3, 0, 0, 0, 0);
     private long mChainHeight;
     private short mCurTxLogId;
     public String mUserId = null;
