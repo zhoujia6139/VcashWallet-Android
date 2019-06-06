@@ -76,8 +76,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                 byte[] hash1 = arg1.blake2bHash();
                 byte[] hash2 = arg2.blake2bHash();
                 for (int i=0; i<hash1.length; i++){
-                    byte byte1 = hash1[i];
-                    byte byte2 = hash2[i];
+                    int byte1 = hash1[i] & 0xff;
+                    int byte2 = hash2[i] & 0xff;
                     if (byte1 > byte2){
                         return 1;
                     }
