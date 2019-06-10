@@ -116,7 +116,7 @@ public class PasswordActivity extends ToolBarActivity {
 
     private void btnState() {
         if (!et_psw.getText().toString().trim().equals("") && !et_psw_confirm.getText().toString().trim().equals("")) {
-            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
+            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
         } else {
             btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
         }

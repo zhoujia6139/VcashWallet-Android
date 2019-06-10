@@ -64,6 +64,7 @@ public class VcashApp extends Application {
                     Intent intent = new Intent(activity, VcashValidateActivity.class);
                     intent.putExtra(VcashValidateActivity.PARAM_MODE,VcashValidateActivity.MODE_TIMEOUT_VALIDATE);
                     activity.startActivity(intent);
+                    activity.overridePendingTransition(0,0);
                 }
             }
 

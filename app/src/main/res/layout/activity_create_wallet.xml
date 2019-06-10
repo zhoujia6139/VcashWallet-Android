@@ -110,7 +110,7 @@
         android:layout_marginLeft="28dp"
         android:layout_marginRight="28dp"
         android:layout_marginBottom="40dp"
-        android:background="@drawable/selector_home_create"
+        android:background="@drawable/selector_orange"
         android:text="I Agree"
         android:textAllCaps="false"
         android:textColor="@color/white"

@@ -201,8 +201,8 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
         try {
-            db.execSQL(String.format("delete from VcashTxLog WHERE tx_slate_id = %s", slate_id), null);
-        }catch (SQLException e){
+            db.execSQL("DELETE FROM VcashTxLog WHERE tx_slate_id = ?", new String[]{slate_id});
+        }catch (Exception e){
             isSuc = false;
             e.printStackTrace();
         }

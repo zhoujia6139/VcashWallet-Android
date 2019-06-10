@@ -85,9 +85,9 @@ public class VcashSendActivity extends ToolBarActivity {
     private void btnState() {
         if (!mEtAmount.getText().toString().trim().equals("")
                 && !mEtAddress.getText().toString().trim().equals("")) {
-            mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_green_round_rect));
+            mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
         } else {
-            mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
+            mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_orange_light_round_rect));
         }
     }
 

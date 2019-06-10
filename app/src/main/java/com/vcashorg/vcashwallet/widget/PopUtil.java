@@ -17,7 +17,7 @@ public class PopUtil extends PopupWindow {
 
     private Activity activity;
     private View mPopWindow;
-    public TextView tvConfirm, tvCancel;
+    private TextView tvConfirm, tvCancel;
 
     public interface PopOnCall {
 
@@ -57,6 +57,7 @@ public class PopUtil extends PopupWindow {
 
     public static PopUtil get(Activity activity) {
         PopUtil popUtil = new PopUtil(activity);
+        popUtil.setAnimationStyle(R.style.pop_anim_style);
         return popUtil;
     }
 

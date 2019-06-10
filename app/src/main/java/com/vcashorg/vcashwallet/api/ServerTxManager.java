@@ -170,4 +170,13 @@ public class ServerTxManager {
     public ServerTransaction getRecentTx() {
         return txQueue.poll();
     }
+
+    public ServerTransaction getServerTxByTxId(String slateId){
+        for (ServerTransaction tx : txArr){
+            if(tx.tx_id.equals(slateId)){
+                return tx;
+            }
+        }
+        return null;
+    }
 }

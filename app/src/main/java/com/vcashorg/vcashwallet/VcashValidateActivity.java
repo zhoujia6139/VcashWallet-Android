@@ -5,10 +5,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -78,7 +76,7 @@ public class VcashValidateActivity extends BaseActivity {
                 if(s.toString().equals("")){
                     mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
                 }else {
-                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
+                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
                 }
             }
         });

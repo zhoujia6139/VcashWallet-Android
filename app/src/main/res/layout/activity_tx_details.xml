@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <include layout="@layout/layout_toolbar" />
@@ -61,8 +61,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="08e37083ac8f3032c4dbf3bca1a9d22ae92df3d6da4689220714fb3194523c234e"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="08e37083ac8f3032c4dbf3bca1a9d22ae92df3d6da4689220714fb3194523c234e" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,8 +84,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="ecc7c627c32e6a2023ed"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="ecc7c627c32e6a2023ed" />
         </LinearLayout>
 
         <LinearLayout
@@ -107,8 +107,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="e9d8ce89ecc7c627c32e"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="e9d8ce89ecc7c627c32e" />
         </LinearLayout>
 
         <LinearLayout
@@ -130,8 +130,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="5.23122 Vcash"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="5.23122 Vcash" />
         </LinearLayout>
 
         <LinearLayout
@@ -153,8 +153,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="0.03122 Vcash"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="0.03122 Vcash" />
         </LinearLayout>
 
         <LinearLayout
@@ -176,8 +176,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="2"
-                tools:text="2019-05-15 11:09:22"
-                android:textColor="@color/A10" />
+                android:textColor="@color/A10"
+                tools:text="2019-05-15 11:09:22" />
         </LinearLayout>
 
     </LinearLayout>
@@ -185,6 +185,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
         android:background="@color/white"
         android:orientation="vertical">
 
@@ -194,7 +195,8 @@
             android:layout_height="44dp"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:background="@drawable/bg_orange_round_rect">
+            android:background="@drawable/selector_orange"
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/tv_sign"
@@ -216,8 +218,8 @@
             android:layout_marginLeft="30dp"
             android:layout_marginTop="16dp"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="40dp"
-            android:background="@drawable/bg_white_red_border_round_rect">
+            android:background="@drawable/bg_white_red_border_round_rect"
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/tv_cancel"

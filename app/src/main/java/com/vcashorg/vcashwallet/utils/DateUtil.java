@@ -16,4 +16,15 @@ public class DateUtil {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return format.format(date);
     }
+
+    /**
+     * 时间戳转年月日
+     * @param mills 毫秒时间戳
+     * @return
+     */
+    public static String formatDateTimeStamp2(long mills) {
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return format.format(date);
+    }
 }

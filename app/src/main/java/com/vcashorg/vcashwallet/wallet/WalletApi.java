@@ -456,6 +456,10 @@ public class WalletApi {
         return nanoToVcash(nano) + "";
     }
 
+    public static String nanoToVcashWithUnit(long nano){
+        return nanoToVcash(nano) + " Vcash";
+    }
+
 
     public static long vcashToNano(double vcash){
         return (long)(vcash*VCASH_BASE);
