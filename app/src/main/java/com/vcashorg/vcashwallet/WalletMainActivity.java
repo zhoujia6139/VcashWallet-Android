@@ -117,12 +117,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
         mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
 
-        mTvHeight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopUtil.get(WalletMainActivity.this).show();
-            }
-        });
         //HEIGHT
         WalletApi.addChainHeightListener(new WalletNoParamCallBack() {
             @Override
