@@ -214,6 +214,7 @@ public class PasswordActivity extends ToolBarActivity {
                         }
                         Intent intent = new Intent(PasswordActivity.this,WalletMainActivity.class);
                         intent.putExtra(PARAM_MODE,mode);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         nv(intent);
                         finish();
                     }

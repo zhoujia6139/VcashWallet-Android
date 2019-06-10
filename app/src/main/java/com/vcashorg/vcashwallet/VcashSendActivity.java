@@ -139,8 +139,11 @@ public class VcashSendActivity extends ToolBarActivity {
     }
 
     private boolean validate(){
-        if (mEtAmount.getText().toString().trim().equals("")){
-            UIUtils.showToastCenter("Input cant be empty");
+        if(mEtAddress.getText().toString().trim().equals("")){
+            UIUtils.showToastCenter("Address cant be empty");
+            return false;
+        }else if (mEtAmount.getText().toString().trim().equals("")){
+            UIUtils.showToastCenter("Amount cant be empty");
             return false;
         }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
             UIUtils.showToastCenter("Input cant be 0");

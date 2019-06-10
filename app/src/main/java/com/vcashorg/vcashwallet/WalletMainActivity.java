@@ -111,6 +111,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         String userid = WalletApi.getWalletUserId();
         Log.i("yjq","userid: " + userid);
 
+        mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
         //HEIGHT
         WalletApi.addChainHeightListener(new WalletNoParamCallBack() {
             @Override
@@ -193,16 +194,14 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             public void onCall(boolean yesOrNo, Object data) {
 
                 mDatas = WalletApi.getTransationArr();
-                if(mDatas== null || mDatas.size() == 0){
-                    adapter.getFooterLayout().setVisibility(View.VISIBLE);
-                }else {
-                    adapter.getFooterLayout().setVisibility(View.GONE);
+                if (mDatas != null && mDatas.size() != 0) {
+                    adapter.removeFooterView(footerView);
                 }
                 adapter.setNewData(mDatas);
                 mSrTx.setRefreshing(false);
 
                 WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-                mTvBalance.setText(WalletApi.nanoToVcash(balanceInfo.locked) + "");
+                mTvBalance.setText(WalletApi.nanoToVcash(balanceInfo.total) + "");
                 mTvAvailable.setText(WalletApi.nanoToVcash(balanceInfo.spendable) + "");
                 mTvUnconfirmed.setText(WalletApi.nanoToVcash(balanceInfo.unconfirmed) + "");
             }
