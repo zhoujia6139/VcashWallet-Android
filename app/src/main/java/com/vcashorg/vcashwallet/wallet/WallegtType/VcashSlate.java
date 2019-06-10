@@ -95,7 +95,7 @@ public class VcashSlate implements Serializable {
         }
 
         //lockheight
-        kernel.lock_height = lock_height;
+        kernel.setLock_height(lock_height);
         tx.body.kernels.add(kernel);
 
         return NativeSecp256k1.instance().bindSum(positiveArr, negativeArr);
