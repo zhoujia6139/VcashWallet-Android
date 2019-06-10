@@ -80,46 +80,14 @@ public class VcashSendActivity extends ToolBarActivity {
                 btnState();
             }
         });
-        mEtAddress.setText("acf39ed33ddb35196b0a");
     }
 
     private void btnState() {
         if (!mEtAmount.getText().toString().trim().equals("")
                 && !mEtAddress.getText().toString().trim().equals("")) {
             mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_green_round_rect));
-            mBtnSend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    WalletApi.createSendTransaction(mEtAddress.getText().toString(), 0, 0, new WalletCallback() {
-                        @Override
-                        public void onCall(boolean yesOrNo, Object data) {
-                            if(yesOrNo){
-                                final VcashSlate slate = (VcashSlate) data;
-                                WalletApi.sendTransaction(slate, mEtAddress.getText().toString(), new WalletCallback() {
-                                    @Override
-                                    public void onCall(boolean yesOrNo, Object data) {
-                                        if(yesOrNo){
-                                            VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
-                                            Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
-                                            intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
-                                            intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-                                            nv(intent);
-                                            finish();
-                                        }else {
-                                            UIUtils.showToastCenter("Send Failed");
-                                        }
-                                    }
-                                });
-                            }else {
-                                UIUtils.showToastCenter("Send Failed");
-                            }
-                        }
-                    });
-                }
-            });
         } else {
             mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
-            mBtnSend.setOnClickListener(null);
         }
     }
 
@@ -137,6 +105,48 @@ public class VcashSendActivity extends ToolBarActivity {
                     }
                 })
                 .start();
+    }
+
+    @OnClick(R.id.btn_send)
+    public void onSendClick(){
+        if(validate()){
+            WalletApi.createSendTransaction(mEtAddress.getText().toString(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if(yesOrNo){
+                        final VcashSlate slate = (VcashSlate) data;
+                        WalletApi.sendTransaction(slate, mEtAddress.getText().toString(), new WalletCallback() {
+                            @Override
+                            public void onCall(boolean yesOrNo, Object data) {
+                                if(yesOrNo){
+                                    VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                    Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
+                                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                    nv(intent);
+                                    finish();
+                                }else {
+                                    UIUtils.showToastCenter("Send Failed");
+                                }
+                            }
+                        });
+                    }else {
+                        UIUtils.showToastCenter("Send Failed");
+                    }
+                }
+            });
+        }
+    }
+
+    private boolean validate(){
+        if (mEtAmount.getText().toString().trim().equals("")){
+            UIUtils.showToastCenter("Input cant be empty");
+            return false;
+        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
+            UIUtils.showToastCenter("Input cant be 0");
+            return false;
+        }
+        return true;
     }
 
     @Override
