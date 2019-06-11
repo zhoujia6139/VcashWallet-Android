@@ -50,7 +50,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
     TextView mTvHeight;
 
     WalletDrawer walletDrawer;
-    VcashTxAdapter2 adapter;
+    VcashTxAdapter adapter;
 
     View headerView;
     View footerView;
@@ -59,8 +59,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
     TextView mTvBalance;
     TextView mTvAvailable;
     TextView mTvUnconfirmed;
-
-    private List<VcashTxLog> mDatas = new ArrayList<>();
 
     private List<WalletTxEntity> mData = new ArrayList<>();
 
@@ -85,7 +83,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         divider.setMarginRight(12);
         mRvTx.addItemDecoration(divider);
 
-        adapter = new VcashTxAdapter2(mData);
+        adapter = new VcashTxAdapter(mData);
 
         adapter.addHeaderView(headerView);
         adapter.addFooterView(footerView);
@@ -278,7 +276,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         ServerTxManager.getInstance().fetchTxStatus(true);
     }
 
-    class VcashTxAdapter2 extends BaseMultiItemQuickAdapter<WalletTxEntity, BaseViewHolder> {
+    class VcashTxAdapter extends BaseMultiItemQuickAdapter<WalletTxEntity, BaseViewHolder> {
 
         /**
          * Same as QuickAdapter#QuickAdapter(Context,int) but with
@@ -286,7 +284,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
          *
          * @param data A new list is created out of this one to avoid mutable list
          */
-        public VcashTxAdapter2(List<WalletTxEntity> data) {
+        public VcashTxAdapter(List<WalletTxEntity> data) {
             super(data);
             addItemType(WalletTxEntity.TYPE_SERVER_TX, R.layout.item_vcash_tx);
             addItemType(WalletTxEntity.TYPE_TX_LOG, R.layout.item_vcash_tx);
@@ -305,9 +303,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     TextView txState1 = helper.getView(R.id.tv_tx_state);
                     txState1.setCompoundDrawablesWithIntrinsicBounds(
                             UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
-                    TextView v1 = helper.getView(R.id.v);
-                    v1.setCompoundDrawablesWithIntrinsicBounds(
-                          null, null,   UIUtils.getResource().getDrawable(R.drawable.ic_red_circle_notify), null);
                     helper.setText(R.id.tv_tx_time, "Now");
                     break;
                 case WalletTxEntity.TYPE_TX_LOG:
@@ -339,8 +334,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
                     TextView txState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
-                    TextView v = helper.getView(R.id.v);
-                    v.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
                     switch (confirmState) {
                         case DefaultState:
@@ -363,69 +356,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
                     }
                     break;
-            }
-
-            if (helper.getAdapterPosition() == getData().size()) {
-                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow_2);
-            } else {
-                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow);
-            }
-        }
-    }
-
-    class VcashTxAdapter extends BaseQuickAdapter<VcashTxLog, BaseViewHolder> {
-
-        public VcashTxAdapter(int layoutResId, @Nullable List<VcashTxLog> data) {
-            super(layoutResId, data);
-        }
-
-        @Override
-        protected void convert(BaseViewHolder helper, VcashTxLog item) {
-            VcashTxLog.TxLogEntryType txType = item.tx_type;
-            switch (txType) {
-                case ConfirmedCoinbase:
-                case TxReceived:
-                case TxReceivedCancelled:
-                    helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
-                    break;
-                case TxSent:
-                case TxSentCancelled:
-                    helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
-                    break;
-            }
-
-            String txId = item.tx_slate_id;
-            if (!TextUtils.isEmpty(txId)) {
-                helper.setText(R.id.tv_tx_id, txId);
-            } else {
-                helper.setText(R.id.tv_tx_id, "");
-            }
-
-            long amount = item.amount_credited - item.amount_debited;
-            helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcash(amount) + "");
-            helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(item.create_time));
-
-            VcashTxLog.TxLogConfirmType confirmState = item.confirm_state;
-            TextView txState = helper.getView(R.id.tv_tx_state);
-            switch (confirmState) {
-                case DefaultState:
-                case LoalConfirmed://waiting confirm
-                    if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
-                        helper.setText(R.id.tv_tx_state, "Canceled");
-                        txState.setCompoundDrawablesWithIntrinsicBounds(
-                                UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
-                    } else {
-                        helper.setText(R.id.tv_tx_state, "Ongoing");
-                        txState.setCompoundDrawablesWithIntrinsicBounds(
-                                UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
-                    }
-                    break;
-                case NetConfirmed:
-                    helper.setText(R.id.tv_tx_state, "Confirmed");
-                    txState.setCompoundDrawablesWithIntrinsicBounds(
-                            UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
-                    break;
-
             }
 
             if (helper.getAdapterPosition() == getData().size()) {

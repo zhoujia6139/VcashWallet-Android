@@ -74,9 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:text="V"
-                android:drawableRight="@drawable/ic_red_circle_notify"
                 android:textColor="@color/A2" />
-
 
         </LinearLayout>
 

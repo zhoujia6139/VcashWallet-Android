@@ -12,6 +12,7 @@ import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.utils.CoinUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
@@ -453,11 +454,11 @@ public class WalletApi {
     }
 
     public static String nanoToVcashString(long nano){
-        return nanoToVcash(nano) + "";
+        return CoinUtils.format(nanoToVcash(nano));
     }
 
     public static String nanoToVcashWithUnit(long nano){
-        return nanoToVcash(nano) + " Vcash";
+        return nanoToVcashString(nano) + " Vcash";
     }
 
 

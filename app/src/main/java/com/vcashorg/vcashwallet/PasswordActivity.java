@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -143,6 +145,26 @@ public class PasswordActivity extends ToolBarActivity {
     public void onBtnStartClick() {
         if (validatePassword()) {
             create(et_psw.getText().toString());
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mode == MODE_CREATE){
+            new AlertDialog.Builder(this)
+                    .setTitle("Return to seed phrase")
+                    .setMessage("If you return to seed phrase,it would be changed and yout local password won't be saved")
+                    .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            nv(WalletCreateActivity.class);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Cancel",null)
+                    .show();
+        }else {
+            super.onBackPressed();
         }
     }
 
