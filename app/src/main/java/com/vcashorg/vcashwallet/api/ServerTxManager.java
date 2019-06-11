@@ -84,7 +84,6 @@ public class ServerTxManager {
 
                                 //check as receiver
                                 if (item.receiver_id.equals(VcashWallet.getInstance().mUserId)) {
-                                    item.isSend = false;
                                     if (item.status == ServerTxStatus.TxFinalized ||
                                             item.status == ServerTxStatus.TxCanceled) {
                                         if (txLog != null && txLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState) {
@@ -107,7 +106,6 @@ public class ServerTxManager {
                                 }
                                 //check as sender
                                 else if (item.sender_id.equals(VcashWallet.getInstance().mUserId)) {
-                                    item.isSend = true;
                                     //check is cancelled
                                     if (txLog.server_status == ServerTxStatus.TxCanceled) {
                                         ServerApi.cancelTransaction(txLog.tx_slate_id, null);
@@ -127,6 +125,11 @@ public class ServerTxManager {
                                 }
 
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
+                                item.isSend = (item.status == ServerTxStatus.TxReceiverd);
+                                if (!item.isValidTxSignature()){
+                                    Log.e(Tag, String.format("receive a invalid tx"));
+                                    continue;
+                                }
 
                                 //process special case here
                                 //if tx confirmed by net, finalize directly

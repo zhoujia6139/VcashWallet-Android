@@ -169,6 +169,22 @@ JNIEXPORT jobject JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_s
 
 /*
  * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
+ * Method:    secp256k1_ecdsa_sign
+ * Signature: (J[B[B)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1ecdsa_1sign
+        (JNIEnv *, jobject, jlong, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
+ * Method:    secp256k1_ecdsa_verify
+ * Signature: (J[B[B[B)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1ecdsa_1verify
+        (JNIEnv *, jobject, jlong, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
  * Method:    blake_2b
  * Signature: ([B[B)[B
  */

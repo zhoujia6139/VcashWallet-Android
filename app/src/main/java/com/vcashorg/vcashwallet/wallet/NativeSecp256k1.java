@@ -112,15 +112,21 @@ public class NativeSecp256k1 {
 
     public VcashProofInfo rewindBulletProof(byte[] commitment, byte[] nounce, byte[] proof){
         VcashProofInfo retData = this.secp256k1_rewind_bullet_proof(mContext, commitment, nounce, proof);
-//        byte[] msg = new byte[16];
-//        System.arraycopy(retData, 0, msg, 0, 16);
-//        VcashKeychainPath keychainPath = new VcashKeychainPath(3, msg);
-//
-//        ByteBuffer buf = ByteBuffer.wrap(retData, 16, 8);
-//        buf.order(ByteOrder.nativeOrder());
-//        long value = buf.getLong();
-
         return retData;
+    }
+
+    public byte[] ecdsaSign(byte[] msgdata, byte[] seckey){
+        if (msgdata != null && seckey != null){
+            return this.secp256k1_ecdsa_sign(mContext, msgdata, seckey);
+        }
+        return null;
+    }
+
+    public boolean ecdsaVerify(byte[] msgdata, byte[] sigData, byte[] pubkey){
+        if (msgdata != null && sigData != null && pubkey != null){
+            return this.secp256k1_ecdsa_verify(mContext, msgdata, sigData, pubkey);
+        }
+        return false;
     }
 
     public byte[] blake2b(byte[] inputData, byte[] key){
@@ -166,6 +172,10 @@ public class NativeSecp256k1 {
     private native boolean secp256k1_verify_bullet_proof(long context, byte[] commitment, byte[] proof);
 
     private native VcashProofInfo secp256k1_rewind_bullet_proof(long context, byte[] commitment, byte[] nounce, byte[] proof);
+
+    private native byte[] secp256k1_ecdsa_sign(long context, byte[] msgdata, byte[] seckey);
+
+    private native boolean secp256k1_ecdsa_verify(long context, byte[] msgdata, byte[] sigData, byte[] pubkey);
 
     private native byte[] blake_2b(byte[] inputData, byte[] key);
 }
