@@ -458,7 +458,7 @@ public class WalletApi {
     }
 
     public static String nanoToVcashWithUnit(long nano){
-        return nanoToVcashString(nano) + " Vcash";
+        return nanoToVcashString(nano) + " VCash";
     }
 
 

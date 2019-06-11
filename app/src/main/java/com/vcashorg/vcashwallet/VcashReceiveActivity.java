@@ -21,7 +21,7 @@ public class VcashReceiveActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Receive Vcash");
+        setToolBarTitle("Receive VCash");
     }
 
     @Override

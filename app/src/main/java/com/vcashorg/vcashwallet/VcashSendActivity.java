@@ -38,7 +38,7 @@ public class VcashSendActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Send Vcash");
+        setToolBarTitle("Send VCash");
     }
 
     @Override
@@ -155,7 +155,11 @@ public class VcashSendActivity extends ToolBarActivity {
         }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) < 0.01){
             UIUtils.showToastCenter("Amount cant less than 0.01");
             return false;
+        }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){
+            UIUtils.showToastCenter("Sorry,You can't send VCash to yourself");
+            return false;
         }
+
         return true;
     }
 
