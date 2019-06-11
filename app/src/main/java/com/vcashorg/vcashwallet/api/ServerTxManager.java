@@ -15,6 +15,12 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,11 +29,13 @@ public class ServerTxManager {
     final private static long TimerInterval = 30;
     private static ServerTxManager instance;
     static private String Tag = "------ServerTxManager";
-    private ArrayList<ServerTransaction> txArr = new ArrayList<ServerTransaction>();
     private long lastFetch = 0;
 
 
+    private Map<String,ServerTransaction> txMap = new LinkedHashMap<>();
+    private Map<String,ServerTransaction> txBlackListMap = new LinkedHashMap<>();
     private LinkedBlockingQueue<ServerTransaction> txQueue = new LinkedBlockingQueue<>();
+
     private ServerTxCallBack callBack;
 
 
@@ -65,7 +73,7 @@ public class ServerTxManager {
         timerTask.cancel();
     }
 
-    public void fetchTxStatus(boolean force) {
+    public void fetchTxStatus(final boolean force) {
         if (force || (AppUtil.getCurrentTimeSecs() - lastFetch) >= (TimerInterval - 1)) {
             ServerApi.checkStatus(VcashWallet.getInstance().mUserId, new WalletCallback() {
                 @Override
@@ -76,6 +84,8 @@ public class ServerTxManager {
 
                         lastFetch = AppUtil.getCurrentTimeSecs();
                         boolean hasNewData = false;
+                        txMap.clear();
+
                         for (ServerTransaction item : txs) {
                             Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
                             item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
@@ -135,28 +145,29 @@ public class ServerTxManager {
                                     continue;
                                 }
 
-                                boolean isRepeat = false;
-                                for (ServerTransaction tx : txArr) {
-                                    if (tx.tx_id.equals(item.tx_id)) {
-                                        isRepeat = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!isRepeat) {
-                                    txArr.add(item);
+                                txMap.put(item.tx_id,item);
+                                if(!txBlackListMap.containsKey(item.tx_id)){
                                     txQueue.offer(item);
                                     hasNewData = true;
                                 }
+
                             } else {
                                 Log.e(Tag, String.format("receive a illegal tx"));
                             }
                         }
+
                         if (hasNewData && callBack != null) {
                             callBack.onChecked();
+                        }else{
+                            if(force && callBack != null){
+                                callBack.onForceRefresh();
+                            }
                         }
                     } else {
                         lastFetch = 0;
+                        if(force && callBack != null){
+                            callBack.onForceRefresh();
+                        }
                     }
                 }
             });
@@ -165,6 +176,8 @@ public class ServerTxManager {
 
     public interface ServerTxCallBack {
         void onChecked();
+
+        void onForceRefresh();
     }
 
     public ServerTransaction getRecentTx() {
@@ -172,11 +185,44 @@ public class ServerTxManager {
     }
 
     public ServerTransaction getServerTxByTxId(String slateId){
-        for (ServerTransaction tx : txArr){
-            if(tx.tx_id.equals(slateId)){
-                return tx;
-            }
-        }
-        return null;
+        return txMap.get(slateId);
     }
+
+    public void addBlackList(ServerTransaction serverTx){
+        if(serverTx != null){
+            txBlackListMap.put(serverTx.tx_id,serverTx);
+        }
+    }
+
+    public boolean inServerTxList(String tx_id){
+        return txMap.containsKey(tx_id);
+    }
+
+    public void removeServerTx(String tx_id){
+        txMap.remove(tx_id);
+    }
+
+    public List<ServerTransaction> getSeverTxList(){
+        List<ServerTransaction> list = new ArrayList<>();
+        //List<ServerTransaction> blacklist = new ArrayList<>();
+        List<ServerTransaction> normallist = new ArrayList<>();
+
+        Set<Map.Entry<String, ServerTransaction>> entrySet = txMap.entrySet();
+
+        for (Map.Entry<String,ServerTransaction> entry : entrySet){
+
+            normallist.add(entry.getValue());
+
+        }
+
+        //Collections.reverse(blacklist);
+        Collections.reverse(normallist);
+
+        //list.addAll(blacklist);
+        list.addAll(normallist);
+
+        return list;
+    }
+
+
 }

@@ -64,7 +64,6 @@ public class TxDetailsActivity extends ToolBarActivity {
     @Override
     protected void initToolBar() {
         setToolBarTitle("Transaction Details");
-        setToolBarBgColor(R.color.white);
     }
 
     @Override
@@ -224,6 +223,9 @@ public class TxDetailsActivity extends ToolBarActivity {
                         dismissProgressDialog();
                         if(yesOrNo){
                             UIUtils.showToastCenter("Finalize Success");
+                            if(serverTx != null){
+                                ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
+                            }
                             finish();
                         }else {
                             UIUtils.showToastCenter("Finalize Failed");
@@ -237,6 +239,9 @@ public class TxDetailsActivity extends ToolBarActivity {
                         dismissProgressDialog();
                         if(yesOrNo){
                             UIUtils.showToastCenter("Receive Success");
+                            if(serverTx != null){
+                                ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
+                            }
                             finish();
                         }else {
                             UIUtils.showToastCenter("Receive Failed");
@@ -285,6 +290,9 @@ public class TxDetailsActivity extends ToolBarActivity {
     public void cancelTransaction(VcashTxLog vcashTxLog){
         if(WalletApi.cancelTransaction(vcashTxLog)){
             UIUtils.showToastCenter("Tx Cancel Success");
+            if(serverTx != null){
+                ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
+            }
             finish();
         }else {
             UIUtils.showToastCenter("Tx Cancel Failed");
