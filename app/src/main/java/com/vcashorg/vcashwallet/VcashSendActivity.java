@@ -110,6 +110,7 @@ public class VcashSendActivity extends ToolBarActivity {
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(validate()){
+            showProgressDialog(R.string.wait);
             WalletApi.createSendTransaction(mEtAddress.getText().toString(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
@@ -118,11 +119,13 @@ public class VcashSendActivity extends ToolBarActivity {
                         WalletApi.sendTransaction(slate, mEtAddress.getText().toString(), new WalletCallback() {
                             @Override
                             public void onCall(boolean yesOrNo, Object data) {
+                                dismissProgressDialog();
                                 if(yesOrNo){
                                     VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
                                     Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                    intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
                                     nv(intent);
                                     finish();
                                 }else {
@@ -131,6 +134,7 @@ public class VcashSendActivity extends ToolBarActivity {
                             }
                         });
                     }else {
+                        dismissProgressDialog();
                         UIUtils.showToastCenter("Send Failed");
                     }
                 }
@@ -146,7 +150,10 @@ public class VcashSendActivity extends ToolBarActivity {
             UIUtils.showToastCenter("Amount cant be empty");
             return false;
         }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
-            UIUtils.showToastCenter("Input cant be 0");
+            UIUtils.showToastCenter("Amount cant be 0");
+            return false;
+        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) < 0.01){
+            UIUtils.showToastCenter("Amount cant less than 0.01");
             return false;
         }
         return true;

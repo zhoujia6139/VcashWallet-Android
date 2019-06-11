@@ -29,6 +29,7 @@ public class TxDetailsActivity extends ToolBarActivity {
 
     public static final String PARAM_TX_TYPE = "tx_type";
     public static final String PARAM_TX_DATA = "tx_data";
+    public static final String PARAM_TX_SENDER = "tx_sender";
 
     @BindView(R.id.tv_tx_id)
     TextView mTvTxId;
@@ -60,10 +61,16 @@ public class TxDetailsActivity extends ToolBarActivity {
     VcashTxLog vcashTxLog;
     ServerTransaction serverTx;
 
+    protected boolean sender;
 
     @Override
     protected void initToolBar() {
         setToolBarTitle("Transaction Details");
+    }
+
+    @Override
+    protected boolean isShowBacking() {
+        return !sender;
     }
 
     @Override
@@ -76,6 +83,18 @@ public class TxDetailsActivity extends ToolBarActivity {
         }else {
             vcashTxLog = (VcashTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
             configDataFromVcashTxLog();
+        }
+        sender = intent.getBooleanExtra(PARAM_TX_SENDER,false);
+        if(sender){
+            TextView tvRight = getSubTitle();
+            tvRight.setText("Done");
+            tvRight.setTextColor(UIUtils.getColor(R.color.orange));
+            tvRight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
         }
     }
 

@@ -117,12 +117,12 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     @OnClick(R.id.btn_next)
     public void onNextClick(){
-        //if(validate()){
+        if(validate()){
             Intent intent = new Intent(this, PasswordActivity.class);
             intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,buildMnemonicList());
             intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_RESTORE);
             nv(intent);
-        //}
+        }
     }
 
     private boolean validate(){

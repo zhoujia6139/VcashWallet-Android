@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.base;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -145,20 +146,21 @@ public abstract class BaseActivity extends AppCompatActivity {
         ft.commitAllowingStateLoss();
     }
 
+    ProgressDialog progressDialog;
+
     public void showProgressDialog() {
-        this.showProgressDialog((String) null);
+        this.showProgressDialog("");
     }
 
-    public void showProgressDialog(DialogInterface.OnCancelListener listener) {
-        ProgressDialogFragment dialogFragment = new ProgressDialogFragment();
-        dialogFragment.setOnCancelListener(listener);
-        this.showDialog((DialogFragment) dialogFragment, "progress_dialog");
-    }
 
     public void showProgressDialog(String text) {
-        ProgressDialogFragment dialogFragment = new ProgressDialogFragment();
-        dialogFragment.setTitle(text);
-        this.showDialog((DialogFragment) dialogFragment, "progress_dialog");
+//        ProgressDialogFragment dialogFragment = new ProgressDialogFragment();
+//        dialogFragment.setTitle(text);
+//        this.showDialog((DialogFragment) dialogFragment, "progress_dialog");
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("");
+        progressDialog.setMessage(text);
+        progressDialog.show();
     }
 
     public void showProgressDialog(int id) {
@@ -166,7 +168,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     public void dismissProgressDialog() {
-        this.dismissDialog("progress_dialog");
+//        this.dismissDialog("progress_dialog");
+        if(progressDialog != null){
+            progressDialog.cancel();
+        }
     }
 
     public void dismissDialog(String tag) {
