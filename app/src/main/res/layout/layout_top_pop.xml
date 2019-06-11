@@ -1,54 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="124dp"
-    android:background="@color/white"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:lineSpacingMultiplier="1.2"
-        android:text="You have received a new transaction, Waiting for you to sign"
-        android:textColor="@color/A4"
-        android:textSize="15sp" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="124dp"
+        android:background="@drawable/bg_pop"
+        android:orientation="vertical"
+        android:paddingLeft="24dp"
+        android:paddingTop="16dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="16dp">
 
         <TextView
-            android:id="@+id/tv_confirm"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:drawableRight="@drawable/ic_arrow_right_orange"
-            android:drawablePadding="9dp"
-            android:text="Go and see"
-            android:textColor="@color/orange" />
+            android:lineSpacingMultiplier="1.2"
+            android:text="You have received a new transaction, Waiting for you to sign"
+            android:textColor="@color/A4"
+            android:textSize="15sp" />
 
-        <View
-            android:id="@+id/divider"
-            android:layout_width="1px"
-            android:layout_height="20dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_toLeftOf="@+id/tv_confirm"
-            android:background="@color/A2" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@+id/divider"
-            android:drawablePadding="9dp"
-            android:text="Not processed yet"
-            android:textColor="@color/A10" />
+            <TextView
+                android:id="@+id/tv_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/selector_orange"
+                android:drawableRight="@drawable/ic_arrow_white_right"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:text="Go and see"
+                android:textColor="@color/white" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="18dp"
+                android:layout_toLeftOf="@+id/tv_confirm"
+                android:drawablePadding="9dp"
+                android:gravity="center_vertical"
+                android:text="Not processed yet"
+                android:textColor="@color/A10" />
 
-</LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+</FrameLayout>

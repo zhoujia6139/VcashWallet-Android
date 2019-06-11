@@ -71,15 +71,18 @@ public class WalletDrawer {
                 TextView tv = convertView.findViewById(R.id.tv_menu);
                 LinearLayout bg = convertView.findViewById(R.id.ll_menu_bg);
                 tv.setText(item.name);
-                if (item.checked) {
-                    tv.setTextColor(UIUtils.getColor(R.color.orange));
-                    iv.setImageResource(item.checkId);
-                    bg.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
-                } else {
-                    tv.setTextColor(UIUtils.getColor(R.color.A10));
-                    iv.setImageResource(item.uncheckId);
-                    bg.setBackgroundColor(UIUtils.getColor(R.color.white));
-                }
+//                if (item.checked) {
+//                    tv.setTextColor(UIUtils.getColor(R.color.orange));
+//                    iv.setImageResource(item.checkId);
+//                    bg.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
+//                } else {
+//                    tv.setTextColor(UIUtils.getColor(R.color.A10));
+//                    iv.setImageResource(item.uncheckId);
+//                    bg.setBackgroundColor(UIUtils.getColor(R.color.white));
+//                }
+                tv.setTextColor(UIUtils.getColor(R.color.A10));
+                iv.setImageResource(item.uncheckId);
+                bg.setBackgroundColor(UIUtils.getColor(R.color.white));
                 return convertView;
             }
 

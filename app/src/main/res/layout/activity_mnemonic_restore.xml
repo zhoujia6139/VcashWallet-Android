@@ -52,7 +52,7 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="40dp"
-                android:background="@drawable/selector_home_create"
+                android:background="@drawable/selector_orange"
                 android:text="Next"
                 android:layout_gravity="center_horizontal"
                 android:textAllCaps="false"

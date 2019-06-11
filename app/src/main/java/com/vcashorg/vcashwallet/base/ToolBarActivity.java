@@ -12,6 +12,8 @@ import android.widget.TextView;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 
 public abstract class ToolBarActivity extends BaseActivity{
@@ -96,6 +98,14 @@ public abstract class ToolBarActivity extends BaseActivity{
                 });
             }
 
+        }else {
+            setSupportActionBar(mToolbar);
+            ActionBar actionBar = getSupportActionBar();
+
+            if(actionBar != null){
+                actionBar.setTitle("");
+                actionBar.setDisplayHomeAsUpEnabled(false);
+            }
         }
     }
 

@@ -79,6 +79,7 @@ public class MnemonicCreateActivity extends ToolBarActivity {
                         Intent intent = new Intent(MnemonicCreateActivity.this,MnemonicConfirmActivity.class);
                         intent.putStringArrayListExtra(MnemonicConfirmActivity.PARAM_MNEMONIC_LIST,mnemonicListData);
                         nv(intent);
+                        finish();
                     }
                 })
                 .setNegativeButton("Cancel",null)

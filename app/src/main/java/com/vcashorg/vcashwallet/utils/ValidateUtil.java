@@ -25,7 +25,7 @@ public class ValidateUtil {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 e.printStackTrace();
@@ -43,7 +43,7 @@ public class ValidateUtil {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 e.printStackTrace();

@@ -21,7 +21,7 @@ public class VcashReceiveActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Receive Vcash");
+        setToolBarTitle("Receive VCash");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class VcashReceiveActivity extends ToolBarActivity {
     }
 
     @OnClick(R.id.iv_copy)
-    public void onCopyClick(){
-        UIUtils.copyText(this,mWalletId.getText().toString());
+    public void onCopyClick() {
+        UIUtils.copyText(this, mWalletId.getText().toString());
     }
 }

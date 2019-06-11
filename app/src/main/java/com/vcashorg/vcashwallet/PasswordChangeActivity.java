@@ -7,13 +7,11 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.utils.ValidateUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -56,7 +54,7 @@ public class PasswordChangeActivity extends ToolBarActivity {
                 if(s.toString().equals("")){
                     btnNext.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
                 }else {
-                    btnNext.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
+                    btnNext.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
                 }
             }
         });

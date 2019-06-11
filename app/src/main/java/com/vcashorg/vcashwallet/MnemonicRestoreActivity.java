@@ -117,21 +117,21 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     @OnClick(R.id.btn_next)
     public void onNextClick(){
-        //if(validate()){
+        if(validate()){
             Intent intent = new Intent(this, PasswordActivity.class);
             intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,buildMnemonicList());
             intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_RESTORE);
             nv(intent);
-        //}
+        }
     }
 
     private boolean validate(){
         for (MnemonicData data : restoreMnemonicData){
             if(data.state == MnemonicData.STATE_UNCHECK){
-                UIUtils.showToast("Have Empty Word");
+                UIUtils.showToastCenter("Have Empty Word");
                 return false;
             }else if(data.state == MnemonicData.STATE_CHECK_FALSE){
-                UIUtils.showToast("Have Incorrect Word");
+                UIUtils.showToastCenter("Have Incorrect Word");
                 return false;
             }
         }

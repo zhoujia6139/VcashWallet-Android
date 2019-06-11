@@ -12,28 +12,31 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.R;
+import com.vcashorg.vcashwallet.api.ServerTxManager;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 
 public class PopUtil extends PopupWindow {
 
     private Activity activity;
     private View mPopWindow;
-    public TextView tvConfirm, tvCancel;
+    private TextView tvConfirm, tvCancel;
+    private ServerTransaction ServerTx;
 
     public interface PopOnCall {
 
         void onConfirm();
     }
 
-    public PopUtil(Activity activity) {
+    public PopUtil(Activity activity, ServerTransaction serverTx) {
         this.activity = activity;
-//        LayoutInflater inflater = LayoutInflater.from(activity);
-//        mPopWindow = inflater.inflate(R.layout.login_pop_toast, null);//使用LoginActivity加载不到布局资源
+        this.ServerTx = serverTx;
         mPopWindow = LayoutInflater.from(activity).inflate(R.layout.layout_top_pop, null);
-        tvConfirm = (TextView) mPopWindow.findViewById(R.id.tv_confirm);
-        tvCancel = (TextView) mPopWindow.findViewById(R.id.tv_cancel);
+        tvConfirm = mPopWindow.findViewById(R.id.tv_confirm);
+        tvCancel = mPopWindow.findViewById(R.id.tv_cancel);
         tvCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ServerTxManager.getInstance().addBlackList(ServerTx);
                 if(isShowing()){
                     dismiss();
                 }
@@ -55,8 +58,9 @@ public class PopUtil extends PopupWindow {
         this.setBackgroundDrawable(new ColorDrawable(0x00000000));
     }
 
-    public static PopUtil get(Activity activity) {
-        PopUtil popUtil = new PopUtil(activity);
+    public static PopUtil get(Activity activity,ServerTransaction serverTx) {
+        PopUtil popUtil = new PopUtil(activity,serverTx);
+        popUtil.setAnimationStyle(R.style.pop_anim_style);
         return popUtil;
     }
 
@@ -66,6 +70,7 @@ public class PopUtil extends PopupWindow {
                 @Override
                 public void onClick(View v) {
                     popOnCall.onConfirm();
+                    ServerTxManager.getInstance().addBlackList(ServerTx);
                     if(isShowing()){
                         dismiss();
                     }

@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -116,7 +118,7 @@ public class PasswordActivity extends ToolBarActivity {
 
     private void btnState() {
         if (!et_psw.getText().toString().trim().equals("") && !et_psw_confirm.getText().toString().trim().equals("")) {
-            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
+            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
         } else {
             btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
         }
@@ -143,6 +145,26 @@ public class PasswordActivity extends ToolBarActivity {
     public void onBtnStartClick() {
         if (validatePassword()) {
             create(et_psw.getText().toString());
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mode == MODE_CREATE){
+            new AlertDialog.Builder(this)
+                    .setTitle("Return to seed phrase")
+                    .setMessage("If you return to seed phrase,it would be changed and yout local password won't be saved")
+                    .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            nv(WalletCreateActivity.class);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Cancel",null)
+                    .show();
+        }else {
+            super.onBackPressed();
         }
     }
 
@@ -200,7 +222,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToast("Create Wallet Error");
+                        UIUtils.showToastCenter("Create Wallet Error");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -208,12 +230,13 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToast("Create Wallet Success");
+                        UIUtils.showToastCenter("Create Wallet Success");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
                         Intent intent = new Intent(PasswordActivity.this,WalletMainActivity.class);
                         intent.putExtra(PARAM_MODE,mode);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         nv(intent);
                         finish();
                     }

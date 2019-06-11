@@ -19,4 +19,7 @@
     <string name="password_create_1">Create password to access your wallet</string>
 
     <string name="password_create_2">You are highly recommended to set a strong password, preferably with uppercase and lowercase letters and numbers.</string>
+
+
+    <string name="wait">Waiting…</string>
 </resources>

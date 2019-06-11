@@ -1,7 +1,6 @@
 package com.vcashorg.vcashwallet;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,12 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
+import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.base.BaseActivity;
-import com.vcashorg.vcashwallet.bean.VcashTx;
+import com.vcashorg.vcashwallet.bean.WalletTxEntity;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -28,12 +29,18 @@ import com.vcashorg.vcashwallet.widget.PopUtil;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener{
+public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    public static final int REQUEST_CODE_SERVER_TX = 101;
+    public static final int REQUEST_CODE_TX_LOG = 102;
+    public static final int REQUEST_CODE_TX_SEND = 103;
+    public static final int REQUEST_CODE_TX_RECEIVE = 104;
 
     @BindView(R.id.rv_tx)
     RecyclerView mRvTx;
@@ -53,7 +60,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
     TextView mTvAvailable;
     TextView mTvUnconfirmed;
 
-    private List<VcashTxLog> mDatas = new ArrayList<>();
+    private List<WalletTxEntity> mData = new ArrayList<>();
 
     private PopUtil popUtil;
 
@@ -76,7 +83,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         divider.setMarginRight(12);
         mRvTx.addItemDecoration(divider);
 
-        adapter = new VcashTxAdapter(R.layout.item_vcash_tx, mDatas);
+        adapter = new VcashTxAdapter(mData);
 
         adapter.addHeaderView(headerView);
         adapter.addFooterView(footerView);
@@ -84,11 +91,24 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                VcashTxLog vcashTxLog = (VcashTxLog) adapter.getData().get(position);
-                Intent intent = new Intent(WalletMainActivity.this,TxDetailsActivity.class);
-                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
-                intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-                nv(intent);
+                WalletTxEntity entity = (WalletTxEntity) adapter.getData().get(position);
+                if(entity.getItemType() == WalletTxEntity.TYPE_SERVER_TX){
+                    ServerTransaction serverTx = entity.getServerTxEntity();
+                    ServerTxManager.getInstance().addBlackList(serverTx);
+                    Intent intent = new Intent(WalletMainActivity.this, TxDetailsActivity.class);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, serverTx);
+                    nv2(intent, REQUEST_CODE_SERVER_TX);
+                }else {
+                    VcashTxLog vcashTxLog = entity.getTxLogEntity();
+                    Intent intent = new Intent(WalletMainActivity.this, TxDetailsActivity.class);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_LOG);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, vcashTxLog);
+                    nv2(intent, REQUEST_CODE_TX_LOG);
+                }
+                if (popUtil != null && popUtil.isShowing()){
+                    popUtil.dismiss();
+                }
             }
         });
 
@@ -102,6 +122,12 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             @Override
             public void onChecked() {
                 showNewTxPop();
+                refreshData();
+            }
+
+            @Override
+            public void onForceRefresh() {
+                refreshData();
             }
         });
     }
@@ -109,7 +135,9 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
     @Override
     public void initData() {
         String userid = WalletApi.getWalletUserId();
-        Log.i("yjq","userid: " + userid);
+        Log.i("yjq", "userid: " + userid);
+
+        mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
 
         //HEIGHT
         WalletApi.addChainHeightListener(new WalletNoParamCallBack() {
@@ -126,38 +154,38 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
             }
         });
 
-        int mode = getIntent().getIntExtra(PasswordActivity.PARAM_MODE,1);
-        if(mode == PasswordActivity.MODE_RESTORE){
+        int mode = getIntent().getIntExtra(PasswordActivity.PARAM_MODE, 1);
+        if (mode == PasswordActivity.MODE_RESTORE) {
             showProgressDialog("Recovering");
             WalletApi.checkWalletUtxo(new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
-                    if(yesOrNo){
+                    if (yesOrNo) {
                         UIUtils.showToastCenter("Recover Success");
                         refreshData();
-                    }else {
+                    } else {
                         UIUtils.showToastCenter("Recover Failed");
                     }
                     dismissProgressDialog();
                 }
             });
-        }else {
+        } else {
             mSrTx.setRefreshing(true);
             refreshData();
         }
     }
 
-    public void showNewTxPop(){
-        if(popUtil != null && popUtil.isShowing())return;
+    public void showNewTxPop() {
+        if (popUtil != null && popUtil.isShowing()) return;
         final ServerTransaction recentTx = ServerTxManager.getInstance().getRecentTx();
-        if(recentTx != null){
-            popUtil = PopUtil.get(WalletMainActivity.this).setConfirmListener(new PopUtil.PopOnCall() {
+        if (recentTx != null) {
+            popUtil = PopUtil.get(WalletMainActivity.this,recentTx).setConfirmListener(new PopUtil.PopOnCall() {
                 @Override
                 public void onConfirm() {
-                    Intent intent = new Intent(WalletMainActivity.this,TxDetailsActivity.class);
-                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_SERVER);
-                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,recentTx);
-                    nv(intent);
+                    Intent intent = new Intent(WalletMainActivity.this, TxDetailsActivity.class);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, recentTx);
+                    nv2(intent, REQUEST_CODE_SERVER_TX);
                 }
             });
             popUtil.show();
@@ -183,100 +211,157 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
         mTvUnconfirmed = headerView.findViewById(R.id.tv_unconfirmed);
     }
 
-    private void initFooterView(){
-        footerView =  LayoutInflater.from(this).inflate(R.layout.layout_tx_empty_footer, null);;
+    private void initFooterView() {
+        footerView = LayoutInflater.from(this).inflate(R.layout.layout_tx_empty_footer, null);
     }
 
-    private void refreshData(){
+    private void refreshData() {
         WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
 
-                mDatas = WalletApi.getTransationArr();
-                if(mDatas== null || mDatas.size() == 0){
-                    adapter.getFooterLayout().setVisibility(View.VISIBLE);
-                }else {
-                    adapter.getFooterLayout().setVisibility(View.GONE);
+                //refreshlist
+                List<VcashTxLog> txLogs = deleteDbTxLog(WalletApi.getTransationArr());
+                List<ServerTransaction> serverTxs = ServerTxManager.getInstance().getSeverTxList();
+                Collections.reverse(txLogs);
+
+                mData.clear();
+
+                for (int i = 0; i < serverTxs.size(); i++) {
+                    WalletTxEntity entity = new WalletTxEntity();
+                    entity.setItemType(WalletTxEntity.TYPE_SERVER_TX);
+                    entity.setServerTxEntity(serverTxs.get(i));
+                    mData.add(entity);
                 }
-                adapter.setNewData(mDatas);
+
+                for (int i = 0; i < txLogs.size(); i++) {
+                    WalletTxEntity entity = new WalletTxEntity();
+                    entity.setItemType(WalletTxEntity.TYPE_TX_LOG);
+                    entity.setTxLogEntity(txLogs.get(i));
+                    mData.add(entity);
+                }
+
+                if (mData != null && mData.size() != 0) {
+                    adapter.removeFooterView(footerView);
+                }
+                adapter.setNewData(mData);
                 mSrTx.setRefreshing(false);
 
+                //refreshbalance
                 WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-                mTvBalance.setText(WalletApi.nanoToVcash(balanceInfo.locked) + "");
-                mTvAvailable.setText(WalletApi.nanoToVcash(balanceInfo.spendable) + "");
-                mTvUnconfirmed.setText(WalletApi.nanoToVcash(balanceInfo.unconfirmed) + "");
+                mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
+                mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
+                mTvUnconfirmed.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
+
+                //refreshheight
+                mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
             }
         });
 
+    }
+
+    private List<VcashTxLog> deleteDbTxLog(ArrayList<VcashTxLog> txLogs) {
+        List<VcashTxLog> list = new ArrayList<>();
+        for (VcashTxLog txLog : txLogs) {
+            if (!ServerTxManager.getInstance().inServerTxList(txLog.tx_slate_id)) {
+                list.add(txLog);
+            }
+        }
+        return list;
     }
 
     @Override
     public void onRefresh() {
 
         ServerTxManager.getInstance().fetchTxStatus(true);
-
-        refreshData();
     }
 
-    class VcashTxAdapter extends BaseQuickAdapter<VcashTxLog, BaseViewHolder> {
+    class VcashTxAdapter extends BaseMultiItemQuickAdapter<WalletTxEntity, BaseViewHolder> {
 
-        public VcashTxAdapter(int layoutResId, @Nullable List<VcashTxLog> data) {
-            super(layoutResId, data);
+        /**
+         * Same as QuickAdapter#QuickAdapter(Context,int) but with
+         * some initialization data.
+         *
+         * @param data A new list is created out of this one to avoid mutable list
+         */
+        public VcashTxAdapter(List<WalletTxEntity> data) {
+            super(data);
+            addItemType(WalletTxEntity.TYPE_SERVER_TX, R.layout.item_vcash_tx);
+            addItemType(WalletTxEntity.TYPE_TX_LOG, R.layout.item_vcash_tx);
         }
 
         @Override
-        protected void convert(BaseViewHolder helper, VcashTxLog item) {
-            VcashTxLog.TxLogEntryType txType = item.tx_type;
-            switch (txType){
-                case ConfirmedCoinbase:
-                case TxReceived:
-                case TxReceivedCancelled:
-                    helper.setImageResource(R.id.iv_tx,R.drawable.ic_tx_down);
+        protected void convert(BaseViewHolder helper, WalletTxEntity item) {
+            switch (item.getItemType()) {
+                case WalletTxEntity.TYPE_SERVER_TX:
+                    ServerTransaction serverTx = item.getServerTxEntity();
+                    helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
+                    helper.setText(R.id.tv_tx_id, TextUtils.isEmpty(serverTx.tx_id) ? "" : serverTx.tx_id);
+                    helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(serverTx.slateObj.amount));
+                    helper.setText(R.id.tv_tx_state, "waiting for processing");
+                    helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
+                    TextView txState1 = helper.getView(R.id.tv_tx_state);
+                    txState1.setCompoundDrawablesWithIntrinsicBounds(
+                            UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                    helper.setText(R.id.tv_tx_time, "Now");
                     break;
-                case TxSent:
-                case TxSentCancelled:
-                    helper.setImageResource(R.id.iv_tx,R.drawable.ic_tx_up);
-                    break;
-            }
+                case WalletTxEntity.TYPE_TX_LOG:
+                    VcashTxLog txLog = item.getTxLogEntity();
+                    VcashTxLog.TxLogEntryType txType = txLog.tx_type;
+                    switch (txType) {
+                        case ConfirmedCoinbase:
+                        case TxReceived:
+                        case TxReceivedCancelled:
+                            helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
+                            break;
+                        case TxSent:
+                        case TxSentCancelled:
+                            helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
+                            break;
+                    }
 
-            String txId = item.tx_slate_id;
-            if(!TextUtils.isEmpty(txId)){
-                helper.setText(R.id.tv_tx_id,txId);
-            }else {
-                helper.setText(R.id.tv_tx_id,"");
-            }
+                    String txId = txLog.tx_slate_id;
+                    if (!TextUtils.isEmpty(txId)) {
+                        helper.setText(R.id.tv_tx_id, txId);
+                    } else {
+                        helper.setText(R.id.tv_tx_id, "");
+                    }
 
-            long amount = item.amount_credited - item.amount_debited;
-            helper.setText(R.id.tv_tx_amount,WalletApi.nanoToVcash(amount) + "");
-            helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(item.create_time));
+                    long amount = txLog.amount_credited - txLog.amount_debited;
+                    helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcash(amount) + "");
+                    helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
 
-            VcashTxLog.TxLogConfirmType confirmState = item.confirm_state;
-            TextView txState = helper.getView(R.id.tv_tx_state);
-            switch (confirmState){
-                case DefaultState:
-                case LoalConfirmed://waiting confirm
-                    if(txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled){
-                        helper.setText(R.id.tv_tx_state, "Canceled");
-                        txState.setCompoundDrawablesWithIntrinsicBounds(
-                                UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
-                    }else {
-                        helper.setText(R.id.tv_tx_state, "Ongoing");
-                        txState.setCompoundDrawablesWithIntrinsicBounds(
-                                UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                    VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
+                    TextView txState = helper.getView(R.id.tv_tx_state);
+                    helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
+                    helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
+                    switch (confirmState) {
+                        case DefaultState:
+                        case LoalConfirmed://waiting confirm
+                            if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
+                                helper.setText(R.id.tv_tx_state, "Canceled");
+                                txState.setCompoundDrawablesWithIntrinsicBounds(
+                                        UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
+                            } else {
+                                helper.setText(R.id.tv_tx_state, "Ongoing");
+                                txState.setCompoundDrawablesWithIntrinsicBounds(
+                                        UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                            }
+                            break;
+                        case NetConfirmed:
+                            helper.setText(R.id.tv_tx_state, "Confirmed");
+                            txState.setCompoundDrawablesWithIntrinsicBounds(
+                                    UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
+                            break;
+
                     }
                     break;
-                case NetConfirmed:
-                    helper.setText(R.id.tv_tx_state, "Confirmed");
-                    txState.setCompoundDrawablesWithIntrinsicBounds(
-                            UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
-                    break;
-
             }
 
-            if(helper.getAdapterPosition() == getData().size()){
-                helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow_2);
-            }else {
-                helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_shadow);
+            if (helper.getAdapterPosition() == getData().size()) {
+                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow_2);
+            } else {
+                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow);
             }
         }
     }
@@ -288,12 +373,12 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
     @OnClick(R.id.send)
     public void onVcashSendClick() {
-        nv(VcashSendActivity.class);
+        nv2(VcashSendActivity.class, REQUEST_CODE_TX_SEND);
     }
 
     @OnClick(R.id.receive)
     public void onVcashReceiveClick() {
-        nv(VcashReceiveActivity.class);
+        nv2(VcashReceiveActivity.class, REQUEST_CODE_TX_RECEIVE);
     }
 
     @Override

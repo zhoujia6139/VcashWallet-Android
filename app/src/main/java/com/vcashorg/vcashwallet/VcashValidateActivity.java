@@ -5,10 +5,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -78,7 +76,7 @@ public class VcashValidateActivity extends BaseActivity {
                 if(s.toString().equals("")){
                     mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
                 }else {
-                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_home_create));
+                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
                 }
             }
         });
@@ -115,7 +113,7 @@ public class VcashValidateActivity extends BaseActivity {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 e.printStackTrace();
@@ -138,7 +136,7 @@ public class VcashValidateActivity extends BaseActivity {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
                 Log.e("yjq","InvalidCipherTextException");
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 Log.e("yjq","DecryptionException");
@@ -181,7 +179,7 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToast("Validate Wallet Error");
+                        UIUtils.showToastCenter("Validate Wallet Error");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -189,7 +187,7 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToast("Validate Wallet Success");
+                        UIUtils.showToastCenter("Validate Wallet Success");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }

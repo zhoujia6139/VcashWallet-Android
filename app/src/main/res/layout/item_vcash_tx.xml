@@ -33,6 +33,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="middle"
             android:singleLine="true"
+            android:maxWidth="230dp"
             android:textColor="@color/A10"
             tools:text="s8dss8dse....2e6a202s8dse2e6a2022e6a202" />
 
@@ -46,17 +47,12 @@
             tools:text="2018-05-15" />
     </LinearLayout>
 
-    <!--<View-->
-    <!--android:layout_alignParentRight="true"-->
-    <!--android:layout_width="1dp"-->
-    <!--android:background="@color/grey_4"-->
-    <!--android:layout_height="match_parent"/>-->
-
     <LinearLayout
         android:id="@+id/ll_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:gravity="right"
         android:layout_centerVertical="true"
         android:layout_marginRight="12dp"
         android:orientation="vertical">
@@ -70,14 +66,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/A10"
-                tools:text="5.01223156" />
+                tools:text="3156" />
 
             <TextView
+                android:id="@+id/v"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:text="V"
                 android:textColor="@color/A2" />
+
         </LinearLayout>
 
 
