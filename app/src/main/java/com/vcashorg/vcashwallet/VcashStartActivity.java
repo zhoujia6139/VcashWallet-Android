@@ -38,7 +38,7 @@ public class VcashStartActivity extends BaseActivity {
                 .onDenied(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        UIUtils.showToast("Need Storage Permission");
+                        UIUtils.showToastCenter("Need Storage Permission");
                     }
                 })
                 .start();
@@ -59,7 +59,7 @@ public class VcashStartActivity extends BaseActivity {
                 .onDenied(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        UIUtils.showToast("Need Storage Permission");
+                        UIUtils.showToastCenter("Need Storage Permission");
                     }
                 })
                 .start();

@@ -222,7 +222,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToast("Create Wallet Error");
+                        UIUtils.showToastCenter("Create Wallet Error");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -230,7 +230,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToast("Create Wallet Success");
+                        UIUtils.showToastCenter("Create Wallet Success");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }

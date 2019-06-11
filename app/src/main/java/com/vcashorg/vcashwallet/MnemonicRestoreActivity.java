@@ -128,10 +128,10 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     private boolean validate(){
         for (MnemonicData data : restoreMnemonicData){
             if(data.state == MnemonicData.STATE_UNCHECK){
-                UIUtils.showToast("Have Empty Word");
+                UIUtils.showToastCenter("Have Empty Word");
                 return false;
             }else if(data.state == MnemonicData.STATE_CHECK_FALSE){
-                UIUtils.showToast("Have Incorrect Word");
+                UIUtils.showToastCenter("Have Incorrect Word");
                 return false;
             }
         }

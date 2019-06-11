@@ -113,7 +113,7 @@ public class VcashValidateActivity extends BaseActivity {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 e.printStackTrace();
@@ -136,7 +136,7 @@ public class VcashValidateActivity extends BaseActivity {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
                 Log.e("yjq","InvalidCipherTextException");
-                UIUtils.showToast("Incorrect Password");
+                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 Log.e("yjq","DecryptionException");
@@ -179,7 +179,7 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToast("Validate Wallet Error");
+                        UIUtils.showToastCenter("Validate Wallet Error");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -187,7 +187,7 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToast("Validate Wallet Success");
+                        UIUtils.showToastCenter("Validate Wallet Success");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
