@@ -262,9 +262,11 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
     private List<VcashTxLog> deleteDbTxLog(ArrayList<VcashTxLog> txLogs) {
         List<VcashTxLog> list = new ArrayList<>();
-        for (VcashTxLog txLog : txLogs) {
-            if (!ServerTxManager.getInstance().inServerTxList(txLog.tx_slate_id)) {
-                list.add(txLog);
+        if(txLogs != null){
+            for (VcashTxLog txLog : txLogs) {
+                if (!ServerTxManager.getInstance().inServerTxList(txLog.tx_slate_id)) {
+                    list.add(txLog);
+                }
             }
         }
         return list;

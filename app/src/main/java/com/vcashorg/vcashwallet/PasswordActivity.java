@@ -180,15 +180,9 @@ public class PasswordActivity extends ToolBarActivity {
 
             @Override
             public void subscribe(ObservableEmitter emitter) {
-//                String guid = AccessFactory.getInstance(PasswordCreateActivity.this).createGUID();
-//                String hash = AccessFactory.getInstance(PasswordCreateActivity.this).getHash(guid, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-//                SPUtil.getInstance(PasswordCreateActivity.this).setValue(SPUtil.ACCESS_HASH, hash);
 
                 boolean result = WalletApi.createWallet(words,psw);
                 if(result){
-//                    AccessFactory.getInstance(PasswordCreateActivity.this).setPIN(psw);
-////                    PayloadUtil.getInstance(PasswordCreateActivity.this).saveWalletToJSON(words,
-////                            new CharSequenceX(AccessFactory.getInstance(PasswordCreateActivity.this).getGUID() + psw));
                     String json = new Gson().toJson(words);
                     Log.i("yjq","JSON: " + json);
                     try {

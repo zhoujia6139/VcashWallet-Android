@@ -256,7 +256,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             intent.putExtra(PasswordActivity.PARAM_MNEMONIC_LIST, mnemonicList);
             intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_CREATE);
             nv(intent);
-            //finish();
+            finish();
         }
     }
 

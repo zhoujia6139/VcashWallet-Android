@@ -62,7 +62,6 @@ public class PayloadUtil {
 
     public boolean saveMnemonicToSDCard(String content) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            UIUtils.showToast("No SDCard");
             return false;
         }
 
@@ -90,7 +89,6 @@ public class PayloadUtil {
             e.printStackTrace();
             return false;
         }
-        UIUtils.showToast("SAVE SUCCESS");
         return true;
 
     }
