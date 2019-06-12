@@ -16,7 +16,7 @@
 #define MAX_PROOF_SIZE 5134
 #define BULLET_PROOF_MSG_SIZE 16
 
-#define TAG    "vwallet jni"
+#define TAG    "------vwallet jni"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
 
 
@@ -575,6 +575,64 @@ JNIEXPORT jobject JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_s
     }
 
     return nullptr;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1ecdsa_1sign
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray msgdata, jbyteArray seckey){
+    unsigned char* msg = ConvertJByteaArrayToUnsingedChars(env, msgdata);
+    size_t msgLength = env->GetArrayLength(msgdata);
+    unsigned char* secret = ConvertJByteaArrayToUnsingedChars(env, seckey);
+    secp256k1_ecdsa_signature sig;
+    uint8_t hash[32];
+    if( blake2b( hash, msg, nullptr, 32, msgLength, 0 ) < 0){
+        return nullptr;
+    }
+    int ret = secp256k1_ecdsa_sign((secp256k1_context*)(uintptr_t)context,
+                                   &sig,
+                                   hash,
+                                   secret,
+                                   NULL,
+                                   NULL);
+    delete msg;
+    delete secret;
+    if (ret == 1){
+        jbyteArray sigData = ConvertUnsignedCharsToJByteArray(env, sig.data, 64);
+        return Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1signature_1to_1compactData(env, claseObject, context, sigData);
+    }
+
+    return nullptr;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1ecdsa_1verify
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray msgdata, jbyteArray compactSig, jbyteArray pubkeyData){
+    unsigned char* msg = ConvertJByteaArrayToUnsingedChars(env, msgdata);
+    size_t msgLength = env->GetArrayLength(msgdata);
+    uint8_t hash[32];
+    if( blake2b( hash, msg, nullptr, 32, msgLength, 0 ) < 0){
+        return false;
+    }
+
+    jbyteArray sigData = Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1compact_1data_1to_1signature(env, claseObject, context, compactSig);
+    unsigned char* signature = ConvertJByteaArrayToUnsingedChars(env, sigData);
+
+    secp256k1_pubkey pubkey;
+    unsigned char* pubkey_data = ConvertJByteaArrayToUnsingedChars(env, pubkeyData);
+    size_t pubkeyLength = env->GetArrayLength(pubkeyData);
+    int ret = secp256k1_ec_pubkey_parse((secp256k1_context*)(uintptr_t)context,
+                                        &pubkey,
+                                        pubkey_data,
+                                        pubkeyLength);
+    if (ret == 1){
+        ret = secp256k1_ecdsa_verify((secp256k1_context*)(uintptr_t)context,
+                                     (secp256k1_ecdsa_signature*)signature,
+                                     hash,
+                                     &pubkey);
+    }
+    delete signature;
+    delete msg;
+    delete pubkey_data;
+
+    return (ret == 1);
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_blake_12b

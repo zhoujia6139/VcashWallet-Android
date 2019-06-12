@@ -52,7 +52,7 @@ public class VcashKeychain {
         return NativeSecp256k1.instance().rewindBulletProof(commit, nounce, proof);
     }
 
-    private DeterministicKey deriveKey(VcashKeychainPath path){
+    public DeterministicKey deriveKey(VcashKeychainPath path){
         DeterministicKey key = mMasterKey;
         for (int i=0; i<path.mDepth; i++){
             key = HDKeyDerivation.deriveChildKey(key, path.mPath[i]);

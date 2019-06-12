@@ -23,6 +23,8 @@ import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
+import org.bitcoinj.crypto.DeterministicKey;
+
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxReceived;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
@@ -61,6 +63,11 @@ public class VcashWallet {
 
     public static VcashWallet getInstance(){
         return instance;
+    }
+
+    public byte[] getSignerKey(){
+        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
+        return key.getPrivKeyBytes();
     }
 
     public long getChainHeight(){
@@ -326,8 +333,8 @@ public class VcashWallet {
     }
 
     private String createUserId(){
-        byte[] key = this.mKeyChain.deriveBindKey(0, new VcashKeychainPath(4, 0, 0, 0,0));
-        return AppUtil.hex(key);
+        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
+        return AppUtil.hex(key.getPubKey());
     }
 
     private void saveBaseInfo(){

@@ -6,12 +6,15 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 public class ServerTransaction implements Serializable {
     public String tx_id;
@@ -19,6 +22,8 @@ public class ServerTransaction implements Serializable {
     public String receiver_id;
     public String slate;
     public ServerTxStatus status;
+    public String msg_sig;
+    public String tx_sig;
 
     @Expose(serialize = false, deserialize = false)
     public VcashSlate slateObj;
@@ -35,6 +40,36 @@ public class ServerTransaction implements Serializable {
 
     }
 
+    public boolean isValidTxSignature(){
+        if (status == ServerTxStatus.TxDefaultStatus){
+            return true;
+        }
+        else if (status == ServerTxStatus.TxReceiverd){
+            return NativeSecp256k1.instance().ecdsaVerify(this.txDataToSign(), AppUtil.decode(tx_sig), AppUtil.decode(receiver_id));
+        }
+
+        return false;
+    }
+
+    public byte[] msgToSign(){
+        ByteBuffer buf = ByteBuffer.allocate(100);
+        buf.put(AppUtil.decode(tx_id));
+        buf.put(AppUtil.decode(sender_id));
+        buf.put(AppUtil.decode(receiver_id));
+        buf.flip();
+        return AppUtil.BufferToByteArr(buf);
+    }
+
+    public byte[] txDataToSign(){
+        ByteBuffer buf = ByteBuffer.allocate(20000);
+        buf.put(AppUtil.decode(tx_id));
+        buf.put(AppUtil.decode(sender_id));
+        buf.put(AppUtil.decode(receiver_id));
+        buf.put(slateObj.tx.computePayload(true));
+        buf.flip();
+        return AppUtil.BufferToByteArr(buf);
+    }
+
     public class ServerTransactionTypeAdapter extends TypeAdapter<ServerTransaction> {
         @Override
         public void write(JsonWriter jsonWriter, ServerTransaction tx) throws IOException {
@@ -44,6 +79,8 @@ public class ServerTransaction implements Serializable {
             jsonWriter.name("receiver_id").value(tx.receiver_id);
             jsonWriter.name("slate").value(tx.slate);
             jsonWriter.name("status").value(tx.status.ordinal());
+            jsonWriter.name("msg_sig").value(tx.msg_sig);
+            jsonWriter.name("tx_sig").value(tx.tx_sig);
             jsonWriter.endObject();
         }
 
@@ -67,6 +104,12 @@ public class ServerTransaction implements Serializable {
                         break;
                     case "status":
                         tx.status = ServerTxStatus.values()[jsonReader.nextInt()];
+                        break;
+                    case "msg_sig":
+                        tx.msg_sig = jsonReader.nextString();
+                        break;
+                    case "tx_sig":
+                        tx.tx_sig = jsonReader.nextString();
                         break;
                 }
             }

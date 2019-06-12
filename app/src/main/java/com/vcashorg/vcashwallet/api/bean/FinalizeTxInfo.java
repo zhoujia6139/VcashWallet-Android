@@ -3,12 +3,15 @@ package com.vcashorg.vcashwallet.api.bean;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.vcashorg.vcashwallet.utils.AppUtil;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class FinalizeTxInfo {
     public String tx_id;
     public ServerTxStatus code;
+    public String msg_sig;
 
     public class FinalizeTxInfoTypeAdapter extends TypeAdapter<FinalizeTxInfo> {
         @Override
@@ -16,6 +19,7 @@ public class FinalizeTxInfo {
             jsonWriter.beginObject();
             jsonWriter.name("tx_id").value(tx.tx_id);
             jsonWriter.name("code").value(tx.code.ordinal());
+            jsonWriter.name("msg_sig").value(tx.msg_sig);
             jsonWriter.endObject();
         }
 
@@ -31,10 +35,22 @@ public class FinalizeTxInfo {
                     case "code":
                         tx.code = ServerTxStatus.values()[jsonReader.nextInt()];
                         break;
+                    case "msg_sig":
+                        tx.msg_sig = jsonReader.nextString();
+                        break;
                 }
             }
             jsonReader.endObject();
             return tx;
         }
+    }
+
+    public byte[] msgToSign(){
+        ByteBuffer buf = ByteBuffer.allocate(100);
+        buf.put(AppUtil.decode(tx_id));
+        byte bit = (byte)(code.ordinal() & 0xff);
+        buf.put(bit);
+        buf.flip();
+        return AppUtil.BufferToByteArr(buf);
     }
 }
