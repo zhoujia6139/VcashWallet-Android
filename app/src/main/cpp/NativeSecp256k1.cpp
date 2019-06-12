@@ -16,7 +16,7 @@
 #define MAX_PROOF_SIZE 5134
 #define BULLET_PROOF_MSG_SIZE 16
 
-#define TAG    "vwallet jni"
+#define TAG    "------vwallet jni"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
 
 
@@ -627,10 +627,12 @@ JNIEXPORT jboolean JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_
                                      (secp256k1_ecdsa_signature*)signature,
                                      hash,
                                      &pubkey);
-        return (ret == 1);
     }
+    delete signature;
+    delete msg;
+    delete pubkey_data;
 
-    return false;
+    return (ret == 1);
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_blake_12b

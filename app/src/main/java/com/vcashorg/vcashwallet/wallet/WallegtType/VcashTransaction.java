@@ -307,7 +307,7 @@ public class VcashTransaction extends VcashTxBaseObject {
         }
 
         public byte[] computePayload(boolean isForHash){
-            ByteBuffer buf = ByteBuffer.allocate(1+8+8+PEDERSEN_COMMITMENT_SIZE+SIGNATURE_SIZE);
+            ByteBuffer buf = ByteBuffer.allocate(256);
             buf.order(BIG_ENDIAN);
             byte feature = (byte)features.ordinal();
             buf.put(feature);
@@ -316,7 +316,8 @@ public class VcashTransaction extends VcashTxBaseObject {
             buf.put(excess);
             buf.put(excess_sig);
 
-            return buf.array();
+            buf.flip();
+            return AppUtil.BufferToByteArr(buf);
         }
 
         public class TxKernelTypeAdapter extends TypeAdapter<TxKernel> {
