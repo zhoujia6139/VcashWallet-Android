@@ -228,7 +228,7 @@ public class PasswordActivity extends ToolBarActivity {
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
-                        Intent intent = new Intent(PasswordActivity.this,WalletMainActivity.class);
+                        Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
                         intent.putExtra(PARAM_MODE,mode);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

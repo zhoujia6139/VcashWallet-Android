@@ -6,10 +6,7 @@
     android:layout_height="match_parent">
 
     <!-- The main content view -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <include layout="@layout/activity_wallet_main"/>
 
     <!-- The navigation drawer -->
     <android.support.design.widget.NavigationView

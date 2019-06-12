@@ -71,18 +71,15 @@ public class WalletDrawer {
                 TextView tv = convertView.findViewById(R.id.tv_menu);
                 LinearLayout bg = convertView.findViewById(R.id.ll_menu_bg);
                 tv.setText(item.name);
-//                if (item.checked) {
-//                    tv.setTextColor(UIUtils.getColor(R.color.orange));
-//                    iv.setImageResource(item.checkId);
-//                    bg.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
-//                } else {
-//                    tv.setTextColor(UIUtils.getColor(R.color.A10));
-//                    iv.setImageResource(item.uncheckId);
-//                    bg.setBackgroundColor(UIUtils.getColor(R.color.white));
-//                }
-                tv.setTextColor(UIUtils.getColor(R.color.A10));
-                iv.setImageResource(item.uncheckId);
-                bg.setBackgroundColor(UIUtils.getColor(R.color.white));
+                if (item.checked) {
+                    tv.setTextColor(UIUtils.getColor(R.color.orange));
+                    iv.setImageResource(item.checkId);
+                    bg.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
+                } else {
+                    tv.setTextColor(UIUtils.getColor(R.color.A10));
+                    iv.setImageResource(item.uncheckId);
+                    bg.setBackgroundColor(UIUtils.getColor(R.color.white));
+                }
                 return convertView;
             }
 
@@ -100,9 +97,9 @@ public class WalletDrawer {
                     }
                     item.checked = true;
                     adapter.notifyDataSetChanged();
-                }
-                if(item.name.equals("Setting")){
-                    context.startActivity(new Intent(context,SettingActivity.class));
+                    if (listener != null){
+                        listener.onDrawerItemSelected(item.name);
+                    }
                 }
                 drawer.closeDrawers();
             }
@@ -148,5 +145,15 @@ public class WalletDrawer {
         itemList.add(item1);
         itemList.add(item2);
 //        itemList.add(item3);
+    }
+
+    public OnDrawerItemSelectListener listener;
+
+    public void addOnDrawerItemSelectListener(OnDrawerItemSelectListener listener){
+        this.listener = listener;
+    }
+
+    public interface OnDrawerItemSelectListener{
+        void onDrawerItemSelected(String name);
     }
 }

@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.base;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -118,4 +119,25 @@ public abstract class BaseFragment extends Fragment {
         startActivity(intent);
     }
 
+    public void nv2(Class targetActivity, int requestCode) {
+        startActivityForResult(new Intent(mActivity, targetActivity),requestCode);
+    }
+    public void nv2(Intent intent, int requestCode) {
+        startActivityForResult(intent,requestCode);
+    }
+
+    ProgressDialog progressDialog;
+
+    public void showProgressDialog(String text) {
+        progressDialog = new ProgressDialog(mActivity);
+        progressDialog.setTitle("");
+        progressDialog.setMessage(text);
+        progressDialog.show();
+    }
+
+    public void dismissProgressDialog() {
+        if(progressDialog != null){
+            progressDialog.cancel();
+        }
+    }
 }

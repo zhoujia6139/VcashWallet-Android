@@ -12,7 +12,7 @@
         android:id="@+id/iv_open_menu"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:src="@drawable/ic_menu" />
+        android:src="@drawable/ic_menu_white" />
 
     <TextView
         android:layout_width="0dp"

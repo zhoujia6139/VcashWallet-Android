@@ -2,7 +2,6 @@ package com.vcashorg.vcashwallet.base;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,11 +9,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
-import com.vcashorg.vcashwallet.MainActivity;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
-import com.vcashorg.vcashwallet.widget.ProgressDialogFragment;
 
 import java.util.LinkedList;
 import java.util.List;
