@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
+import com.vcashorg.vcashwallet.wallet.VcashWallet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,6 +41,30 @@ public class VcashTxLog implements Serializable {
         }
 
         return false;
+    }
+
+    public void cancelTxlog(){
+        ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
+        if (tx_type == TxLogEntryType.TxSent){
+            for (String commitment: inputs){
+                for (VcashOutput item:walletOutputs){
+                    if (commitment.equals(item.commitment)){
+                        item.status = VcashOutput.OutputStatus.Unspent;
+                    }
+                }
+            }
+        }
+
+        for (String commitment: outputs){
+            for (VcashOutput item:walletOutputs){
+                if (commitment.equals(item.commitment)){
+                    item.status = VcashOutput.OutputStatus.Spent;
+                }
+            }
+        }
+
+        tx_type = ((tx_type == VcashTxLog.TxLogEntryType.TxSent)?VcashTxLog.TxLogEntryType.TxSentCancelled:VcashTxLog.TxLogEntryType.TxReceivedCancelled);
+        server_status = ServerTxStatus.TxCanceled;
     }
 
 

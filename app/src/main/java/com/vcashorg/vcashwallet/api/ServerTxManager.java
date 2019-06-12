@@ -102,7 +102,7 @@ public class ServerTxManager {
                                                     txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
                                                     break;
                                                 case TxCanceled:
-                                                    txLog.tx_type = VcashTxLog.TxLogEntryType.TxReceivedCancelled;
+                                                    txLog.cancelTxlog();
                                                     break;
                                                 default:
                                                     break;

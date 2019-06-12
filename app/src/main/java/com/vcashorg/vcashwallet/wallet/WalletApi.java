@@ -323,28 +323,8 @@ public class WalletApi {
     }
 
     public static boolean cancelTransaction(VcashTxLog txLog){
-        ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
         if (txLog.isCanBeCanneled()){
-            if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxSent){
-                for (String commitment: txLog.inputs){
-                    for (VcashOutput item:walletOutputs){
-                        if (commitment.equals(item.commitment)){
-                            item.status = VcashOutput.OutputStatus.Unspent;
-                        }
-                    }
-                }
-            }
-
-            for (String commitment: txLog.outputs){
-                for (VcashOutput item:walletOutputs){
-                    if (commitment.equals(item.commitment)){
-                        item.status = VcashOutput.OutputStatus.Spent;
-                    }
-                }
-            }
-
-            txLog.tx_type = ((txLog.tx_type == VcashTxLog.TxLogEntryType.TxSent)?VcashTxLog.TxLogEntryType.TxSentCancelled:VcashTxLog.TxLogEntryType.TxReceivedCancelled);
-            txLog.server_status = ServerTxStatus.TxCanceled;
+            txLog.cancelTxlog();
             EncryptedDBHelper.getsInstance().saveTx(txLog);
             VcashWallet.getInstance().syncOutputInfo();
             ServerApi.cancelTransaction(txLog.tx_slate_id, new WalletCallback() {
