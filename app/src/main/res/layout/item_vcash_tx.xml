@@ -32,8 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
+            android:maxWidth="160dp"
             android:singleLine="true"
-            android:maxWidth="230dp"
             android:textColor="@color/A10"
             tools:text="s8dss8dse....2e6a202s8dse2e6a2022e6a202" />
 
@@ -52,9 +52,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:gravity="right"
         android:layout_centerVertical="true"
         android:layout_marginRight="12dp"
+        android:gravity="right"
         android:orientation="vertical">
 
         <LinearLayout
@@ -64,9 +64,9 @@
             <TextView
                 android:id="@+id/tv_tx_amount"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:textColor="@color/A10"
-                tools:text="3156" />
+                tools:text="3.156111111" />
 
             <TextView
                 android:id="@+id/v"

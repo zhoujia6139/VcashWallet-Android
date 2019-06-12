@@ -247,7 +247,11 @@ public class TxDetailsActivity extends ToolBarActivity {
                             }
                             finish();
                         }else {
-                            UIUtils.showToastCenter("Finalize Failed");
+                            if(data instanceof String){
+                                UIUtils.showToastCenter((String) data);
+                            }else {
+                                UIUtils.showToastCenter("Finalize Failed");
+                            }
                         }
                     }
                 });
@@ -263,7 +267,11 @@ public class TxDetailsActivity extends ToolBarActivity {
                             }
                             finish();
                         }else {
-                            UIUtils.showToastCenter("Receive Failed");
+                            if(data instanceof String){
+                                UIUtils.showToastCenter((String) data);
+                            }else {
+                                UIUtils.showToastCenter("Receive Failed");
+                            }
                         }
                     }
                 });

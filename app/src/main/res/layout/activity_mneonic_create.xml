@@ -40,7 +40,7 @@
                 android:id="@+id/rv_mneonic"
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
-                android:background="@drawable/bg_white_grey_border_round_rect"
+                android:background="@drawable/bg_white_grey4_border_round_rect"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

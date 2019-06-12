@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -202,9 +204,8 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             if (item.state == MnemonicData.STATE_CHECK_TRUE) {
                 helper.setBackgroundRes(R.id.tv_word, R.drawable.bg_grey_round_rect);
             } else {
-                helper.setBackgroundRes(R.id.tv_word, R.drawable.bg_white_black_border_round_rect);
+                helper.setBackgroundRes(R.id.tv_word, R.drawable.bg_white_grey10_border_round_rect);
             }
-
         }
     }
 
@@ -224,7 +225,17 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             for (MnemonicData item : confirmDataList) {
                 if (item.num == data.num) {
                     if (!item.data.equals(data.data)) {
-                        UIUtils.showToastCenter("Have Wrong Mnemonic");
+                        UIUtils.showToastCenter("The words are inconsistent with the seed phrase.please try again.");
+                        for (MnemonicData mnemonicData : confirmDataList){
+                            mnemonicData.state = MnemonicData.STATE_UNCHECK;
+                        }
+                        for (MnemonicData mnemonicData : ensureDataList){
+                            mnemonicData.state = MnemonicData.STATE_UNCHECK;
+                            mnemonicData.data = "";
+                        }
+                        ensureDataList.get(0).state = MnemonicData.STATE_CHECK_NEXT;
+                        ensureAdapter.notifyDataSetChanged();
+                        confirmAdapter.notifyDataSetChanged();
                         return false;
                     } else {
                         break;
@@ -260,6 +271,23 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Return to seed phrase")
+                .setMessage("Your current seed will become obsolete and the new seed will be generated")
+                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        nv(MnemonicCreateActivity.class);
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel",null)
+                .show();
+        //super.onBackPressed();
+    }
+
     /**
      * randomData
      *
@@ -277,7 +305,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             backSum = list.size();
         }
         for (int i = 0; i < backSum; i++) {
-//			随机数的范围为0-list.size()-1
+//			random range 0-list.size()-1
             int target = random.nextInt(list.size());
             backList.add(list.get(target));
             list.remove(target);

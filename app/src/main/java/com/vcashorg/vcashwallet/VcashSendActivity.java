@@ -129,13 +129,21 @@ public class VcashSendActivity extends ToolBarActivity {
                                     nv(intent);
                                     finish();
                                 }else {
-                                    UIUtils.showToastCenter("Send Failed");
+                                    if(data instanceof String){
+                                        UIUtils.showToastCenter((String) data);
+                                    }else {
+                                        UIUtils.showToastCenter("Send Failed");
+                                    }
                                 }
                             }
                         });
                     }else {
                         dismissProgressDialog();
-                        UIUtils.showToastCenter("Send Failed");
+                        if(data instanceof String){
+                            UIUtils.showToastCenter((String) data);
+                        }else {
+                            UIUtils.showToastCenter("Send Failed");
+                        }
                     }
                 }
             });

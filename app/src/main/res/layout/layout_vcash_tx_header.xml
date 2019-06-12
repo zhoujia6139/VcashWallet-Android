@@ -33,7 +33,7 @@
             android:drawableLeft="@drawable/ic_vcash_small"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"
-            android:text="Banlance"
+            android:text="Balance"
             android:textColor="#777777"
             android:textSize="14sp" />
     </LinearLayout>

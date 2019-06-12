@@ -196,4 +196,9 @@ public class VcashValidateActivity extends BaseActivity {
                     }
                 });
     }
+
+    @OnClick(R.id.tv_recover)
+    public void onRecoverClick(){
+        nv(MnemonicRestoreActivity.class);
+    }
 }

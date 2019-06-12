@@ -21,5 +21,6 @@ public class WalletCreateActivity extends ToolBarActivity {
     @OnClick(R.id.btn_agree)
     public void onAgreeClick(){
         nv(MnemonicCreateActivity.class);
+        finish();
     }
 }

@@ -164,7 +164,11 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                         UIUtils.showToastCenter("Recover Success");
                         refreshData();
                     } else {
-                        UIUtils.showToastCenter("Recover Failed");
+                        if(data instanceof String){
+                            UIUtils.showToastCenter((String) data);
+                        }else {
+                            UIUtils.showToastCenter("Recover Failed");
+                        }
                     }
                     dismissProgressDialog();
                 }
@@ -311,10 +315,10 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     VcashTxLog txLog = item.getTxLogEntity();
 
                     String txId = txLog.tx_slate_id;
-                    if (!TextUtils.isEmpty(txId)) {
-                        helper.setText(R.id.tv_tx_id, txId);
-                    } else {
+                    if (TextUtils.isEmpty(txId) || txId.equals("null")) {
                         helper.setText(R.id.tv_tx_id, "UnReachable");
+                    } else {
+                        helper.setText(R.id.tv_tx_id, txId);
                     }
 
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
@@ -335,7 +339,7 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
 
 
                     long amount = txLog.amount_credited - txLog.amount_debited;
-                    helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcash(amount) + "");
+                    helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
 
                     VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;

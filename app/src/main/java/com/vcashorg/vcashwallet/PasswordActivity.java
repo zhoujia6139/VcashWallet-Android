@@ -157,7 +157,7 @@ public class PasswordActivity extends ToolBarActivity {
                     .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            nv(WalletCreateActivity.class);
+                            nv(MnemonicCreateActivity.class);
                             finish();
                         }
                     })
@@ -231,6 +231,7 @@ public class PasswordActivity extends ToolBarActivity {
                         Intent intent = new Intent(PasswordActivity.this,WalletMainActivity.class);
                         intent.putExtra(PARAM_MODE,mode);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         nv(intent);
                         finish();
                     }
