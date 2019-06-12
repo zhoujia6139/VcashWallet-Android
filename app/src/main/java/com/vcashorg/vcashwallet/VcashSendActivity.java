@@ -156,7 +156,7 @@ public class VcashSendActivity extends ToolBarActivity {
             UIUtils.showToastCenter("Amount cant less than 0.01");
             return false;
         }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            UIUtils.showToastCenter("Sorry,You can't send VCash to yourself");
+            UIUtils.showToastCenter("Please don't send VCash to your own wallet address");
             return false;
         }
 

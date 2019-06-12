@@ -307,9 +307,20 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                     break;
                 case WalletTxEntity.TYPE_TX_LOG:
                     VcashTxLog txLog = item.getTxLogEntity();
+
+                    String txId = txLog.tx_slate_id;
+                    if (!TextUtils.isEmpty(txId)) {
+                        helper.setText(R.id.tv_tx_id, txId);
+                    } else {
+                        helper.setText(R.id.tv_tx_id, "UnReachable");
+                    }
+
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
                     switch (txType) {
                         case ConfirmedCoinbase:
+                            helper.setText(R.id.tv_tx_id, "CoinBase");
+                            helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
+                            break;
                         case TxReceived:
                         case TxReceivedCancelled:
                             helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
@@ -320,12 +331,6 @@ public class WalletMainActivity extends BaseActivity implements SwipeRefreshLayo
                             break;
                     }
 
-                    String txId = txLog.tx_slate_id;
-                    if (!TextUtils.isEmpty(txId)) {
-                        helper.setText(R.id.tv_tx_id, txId);
-                    } else {
-                        helper.setText(R.id.tv_tx_id, "");
-                    }
 
                     long amount = txLog.amount_credited - txLog.amount_debited;
                     helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcash(amount) + "");
