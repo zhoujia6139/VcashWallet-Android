@@ -18,10 +18,13 @@ import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AESUtil;
 import com.vcashorg.vcashwallet.utils.CharSequenceX;
+import com.vcashorg.vcashwallet.utils.DecryptionException;
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -144,7 +147,11 @@ public class PasswordActivity extends ToolBarActivity {
     @OnClick(R.id.btn_start)
     public void onBtnStartClick() {
         if (validatePassword()) {
-            create(et_psw.getText().toString());
+            if(mode == MODE_CREATE || mode == MODE_CHANGE_PSW){
+                create(et_psw.getText().toString());
+            }else {
+                recover(et_psw.getText().toString());
+            }
         }
     }
 
@@ -184,10 +191,10 @@ public class PasswordActivity extends ToolBarActivity {
                 boolean result = WalletApi.createWallet(words,psw);
                 if(result){
                     String json = new Gson().toJson(words);
-                    Log.i("yjq","JSON: " + json);
+                   // Log.i("yjq","JSON: " + json);
                     try {
                         String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                        Log.i("yjq","Encrypt: " + encrypt);
+                      //  Log.i("yjq","Encrypt: " + encrypt);
                         boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
                         if(save){
                             SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
@@ -216,7 +223,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToastCenter("Create Wallet Error");
+                        UIUtils.showToastCenter("Create Wallet Failed");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -234,6 +241,92 @@ public class PasswordActivity extends ToolBarActivity {
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         nv(intent);
                         finish();
+                    }
+                });
+    }
+
+    private void recover(final String psw){
+        final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
+        progress.setCancelable(false);
+        progress.setTitle(R.string.app_name);
+        progress.setMessage("Restoring wallet...Please do not close wallet");
+        progress.show();
+
+        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
+
+        Observable.create(new ObservableOnSubscribe() {
+
+            @Override
+            public void subscribe(ObservableEmitter emitter) {
+
+                boolean result = WalletApi.createWallet(words,psw);
+                if(result){
+                    emitter.onComplete();
+                }else {
+                    emitter.onError(null);
+                }
+
+            }
+        }).compose(RxHelper.io2main())
+                .subscribe(new Observer() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        UIUtils.showToastCenter("Restore Wallet Failed");
+                        if (progress.isShowing()) {
+                            progress.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        WalletApi.checkWalletUtxo(new WalletCallback() {
+                            @Override
+                            public void onCall(boolean yesOrNo, Object data) {
+                                if (yesOrNo) {
+                                    try {
+                                        String json = new Gson().toJson(words);
+                                        String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+                                        boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
+                                        if(save){
+                                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
+                                            if (progress.isShowing()) {
+                                                progress.dismiss();
+                                            }
+                                            Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
+                                            intent.putExtra(PARAM_MODE,mode);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            nv(intent);
+                                            finish();
+                                        }else {
+                                            UIUtils.showToastCenter("Restore Wallet Failed");
+                                        }
+                                    } catch (DecryptionException e) {
+                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                        e.printStackTrace();
+                                    } catch (UnsupportedEncodingException e) {
+                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                        e.printStackTrace();
+                                    }
+
+                                } else {
+                                    if(data instanceof String){
+                                        UIUtils.showToastCenter((String) data);
+                                    }else {
+                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                    }
+                                }
+                            }
+                        });
                     }
                 });
     }

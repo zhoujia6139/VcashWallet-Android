@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
-            android:maxWidth="130dp"
+            android:maxWidth="120dp"
             android:singleLine="true"
             android:textColor="@color/A10"
             tools:text="s8dss8dse....2e6a202s8dse2e6a2022e6a202" />

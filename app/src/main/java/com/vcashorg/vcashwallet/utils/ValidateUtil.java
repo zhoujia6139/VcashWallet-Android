@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
 
@@ -19,13 +20,15 @@ public class ValidateUtil {
             String words = PayloadUtil.getInstance(UIUtils.getContext()).readMnemonicFromSDCard();
             try {
                 String json = AESUtil.decrypt(words,new CharSequenceX(psw),AESUtil.DefaultPBKDF2Iterations);
-                if(!TextUtils.isEmpty(json)){
+                List<String> mnemonic = new Gson().fromJson(json, new TypeToken<List<String>>() {}.getType());
+                if(mnemonic != null && mnemonic.size() == 24){
                     return true;
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToastCenter("Incorrect Password");
+                e.printStackTrace();
+            } catch (JsonSyntaxException e){
                 e.printStackTrace();
             } catch (DecryptionException e) {
                 e.printStackTrace();
@@ -39,13 +42,17 @@ public class ValidateUtil {
             String words = PayloadUtil.getInstance(UIUtils.getContext()).readMnemonicFromSDCard();
             try {
                 String json = AESUtil.decrypt(words,new CharSequenceX(psw),AESUtil.DefaultPBKDF2Iterations);
-                return new Gson().fromJson(json, new TypeToken<List<String>>() {}.getType());
+                List<String> mnemonic = new Gson().fromJson(json, new TypeToken<List<String>>() {}.getType());
+                if(mnemonic != null && mnemonic.size() == 24){
+                    return mnemonic;
+                }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (InvalidCipherTextException e) {
-                UIUtils.showToastCenter("Incorrect Password");
                 e.printStackTrace();
-            } catch (DecryptionException e) {
+            } catch (JsonSyntaxException e){
+                e.printStackTrace();
+            }catch (DecryptionException e) {
                 e.printStackTrace();
             }
         }

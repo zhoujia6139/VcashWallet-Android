@@ -12,4 +12,13 @@
         <item name="android:windowEnterAnimation">@anim/pop_enter_anim</item>
         <item name="android:windowExitAnimation">@anim/pop_eixt_anim</item>
     </style>
+
+    <style name="textinputlayout_style" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorControlNormal">#666666</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="textinputlayout_error_style" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColor">@color/red</item>
+    </style>
 </resources>

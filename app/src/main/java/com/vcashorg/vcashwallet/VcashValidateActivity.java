@@ -1,6 +1,11 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -9,6 +14,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.net.RxHelper;
@@ -16,9 +22,14 @@ import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AESUtil;
 import com.vcashorg.vcashwallet.utils.CharSequenceX;
 import com.vcashorg.vcashwallet.utils.DecryptionException;
+import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.TimeOutUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.ValidateUtil;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
+import com.yanzhenjie.permission.Action;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
@@ -41,6 +52,9 @@ public class VcashValidateActivity extends BaseActivity {
     public static final int MODE_TIMEOUT_VALIDATE = 1;
 
     private int mode = MODE_TIMEOUT_VALIDATE;
+
+    @BindView(R.id.til_psw)
+    TextInputLayout mTilPsw;
 
     @BindView(R.id.et_validate)
     EditText mEtValidate;
@@ -68,7 +82,7 @@ public class VcashValidateActivity extends BaseActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                mTilPsw.setErrorEnabled(false);
             }
 
             @Override
@@ -101,48 +115,26 @@ public class VcashValidateActivity extends BaseActivity {
     }
 
     private void validateTimeOut(){
-        if(PayloadUtil.getInstance(this).ifMnemonicFileExist()){
-            String words = PayloadUtil.getInstance(this).readMnemonicFromSDCard();
-            String psw = mEtValidate.getText().toString();
-            try {
-                String json = AESUtil.decrypt(words,new CharSequenceX(psw),AESUtil.DefaultPBKDF2Iterations);
-                if(!TextUtils.isEmpty(json)){
-                    TimeOutUtil.getInstance().updateLastTime();
-                    finish();
-                }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (InvalidCipherTextException e) {
-                UIUtils.showToastCenter("Incorrect Password");
-                e.printStackTrace();
-            } catch (DecryptionException e) {
-                e.printStackTrace();
-            }
+        if(ValidateUtil.validate(mEtValidate.getText().toString())){
+            TimeOutUtil.getInstance().updateLastTime();
+            finish();
+        }else {
+            errorNotify();
         }
     }
 
     private void validateLauncher(){
-        if(PayloadUtil.getInstance(this).ifMnemonicFileExist()){
-            String words = PayloadUtil.getInstance(this).readMnemonicFromSDCard();
-            String psw = mEtValidate.getText().toString();
-            try {
-                String json = AESUtil.decrypt(words,new CharSequenceX(psw),AESUtil.DefaultPBKDF2Iterations);
-                Log.e("yjq","JSON: " + json);
-                List<String> mneonicList = new Gson().fromJson(json, new TypeToken<List<String>>() {}.getType());
-                Log.e("yjq","mneonicList: " + mneonicList.toString());
-                validate(mneonicList,psw);
-            } catch (UnsupportedEncodingException e) {
-                Log.e("yjq","UnsupportedEncodingException");
-                e.printStackTrace();
-            } catch (InvalidCipherTextException e) {
-                Log.e("yjq","InvalidCipherTextException");
-                UIUtils.showToastCenter("Incorrect Password");
-                e.printStackTrace();
-            } catch (DecryptionException e) {
-                Log.e("yjq","DecryptionException");
-                e.printStackTrace();
-            }
+        List<String> mneonicList = ValidateUtil.validate2(mEtValidate.getText().toString());
+        if(mneonicList != null){
+            validate(mneonicList,mEtValidate.getText().toString());
+        }else {
+            errorNotify();
         }
+    }
+
+    private void errorNotify(){
+        mTilPsw.setErrorEnabled(true);
+        mTilPsw.setError("Incorrect Password");
     }
 
     private void validate(final List<String> words, final String psw) {
@@ -199,6 +191,35 @@ public class VcashValidateActivity extends BaseActivity {
 
     @OnClick(R.id.tv_recover)
     public void onRecoverClick(){
-        nv(MnemonicRestoreActivity.class);
+        AndPermission.with(this)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE)
+                .onGranted(new Action() {
+                    @Override
+                    public void onAction(List<String> permissions) {
+                        new AlertDialog.Builder(VcashValidateActivity.this)
+                                .setTitle("Warning")
+                                .setMessage("The recovered wallet will cover the original wallet,please be cautious")
+                                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        WalletApi.clearWallet();
+                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
+                                        Intent intent = new Intent(VcashValidateActivity.this,MnemonicRestoreActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        nv(intent);
+                                    }
+                                })
+                                .setNegativeButton("Cancel",null)
+                                .show();
+                    }
+                })
+                .onDenied(new Action() {
+                    @Override
+                    public void onAction(List<String> permissions) {
+                        UIUtils.showToastCenter("Need Storage Permission");
+                    }
+                })
+                .start();
     }
 }

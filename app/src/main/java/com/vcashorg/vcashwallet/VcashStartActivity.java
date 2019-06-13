@@ -1,9 +1,12 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.text.TextUtils;
 
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
+import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.yanzhenjie.permission.Action;
@@ -52,8 +55,19 @@ public class VcashStartActivity extends BaseActivity {
                 .onGranted(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        WalletApi.clearWallet();
-                        nv(MnemonicRestoreActivity.class);
+                        new AlertDialog.Builder(VcashStartActivity.this)
+                                .setTitle("Warning")
+                                .setMessage("The recovered wallet will cover the original wallet,please be cautious")
+                                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        WalletApi.clearWallet();
+                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
+                                        nv(MnemonicRestoreActivity.class);
+                                    }
+                                })
+                                .setNegativeButton("Cancel",null)
+                                .show();
                     }
                 })
                 .onDenied(new Action() {

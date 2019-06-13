@@ -17,6 +17,7 @@ public class SPUtil {
     public static final String USER_ID = "user_id";
     public static final String TIME_OUT = "time_out";
     public static final String FIRST_CREATE_WALLET = "first_create_wallet";
+    public static final String RECOVER_WALLET_FAILED = "recover_wallet_failed";
 
     private static Context context = null;
     private static SPUtil instance = null;

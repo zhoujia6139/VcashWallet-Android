@@ -69,8 +69,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
     private PopUtil popUtil;
 
-    private int mode = 1;
-
     @Override
     protected int provideContentViewId() {
         return R.layout.activity_wallet_main;
@@ -83,11 +81,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public void initView(View rootView) {
-
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            mode = bundle.getInt("mode",1);
-        }
 
         initHeaderView();
         initFooterView();
@@ -168,28 +161,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
             }
         });
 
-        if (mode == PasswordActivity.MODE_RESTORE) {
-            showProgressDialog("Recovering");
-            WalletApi.checkWalletUtxo(new WalletCallback() {
-                @Override
-                public void onCall(boolean yesOrNo, Object data) {
-                    if (yesOrNo) {
-                        UIUtils.showToastCenter("Recover Success");
-                        refreshData();
-                    } else {
-                        if(data instanceof String){
-                            UIUtils.showToastCenter((String) data);
-                        }else {
-                            UIUtils.showToastCenter("Recover Failed");
-                        }
-                    }
-                    dismissProgressDialog();
-                }
-            });
-        } else {
-            mSrTx.setRefreshing(true);
-            refreshData();
-        }
+        mSrTx.setRefreshing(true);
+        refreshData();
     }
 
     public void showNewTxPop() {

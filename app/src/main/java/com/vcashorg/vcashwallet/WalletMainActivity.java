@@ -25,11 +25,7 @@ public class WalletMainActivity extends BaseActivity {
 
     @Override
     public void initParams() {
-        int mode = getIntent().getIntExtra(PasswordActivity.PARAM_MODE, 1);
         WalletMainFragment fragment = new WalletMainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt("mode",mode );
-        fragment.setArguments(bundle);
         replaceFragment(fragment);
     }
 
