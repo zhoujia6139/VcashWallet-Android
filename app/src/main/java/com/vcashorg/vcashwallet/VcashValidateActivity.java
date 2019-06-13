@@ -69,7 +69,7 @@ public class VcashValidateActivity extends BaseActivity {
 
     @Override
     public void initParams() {
-        mode = getIntent().getIntExtra(PARAM_MODE,MODE_TIMEOUT_VALIDATE);
+        mode = getIntent().getIntExtra(PARAM_MODE, MODE_TIMEOUT_VALIDATE);
     }
 
     @Override
@@ -87,9 +87,9 @@ public class VcashValidateActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.toString().equals("")){
+                if (s.toString().equals("")) {
                     mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
-                }else {
+                } else {
                     mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
                 }
             }
@@ -97,11 +97,11 @@ public class VcashValidateActivity extends BaseActivity {
     }
 
     @OnClick(R.id.open_wallet)
-    public void onOpenWalletClick(){
-        if(!mEtValidate.getText().toString().trim().equals("")){
-            if(mode == MODE_LAUNCHER_VALIDATE){
+    public void onOpenWalletClick() {
+        if (!mEtValidate.getText().toString().trim().equals("")) {
+            if (mode == MODE_LAUNCHER_VALIDATE) {
                 validateLauncher();
-            }else if(mode == MODE_TIMEOUT_VALIDATE){
+            } else if (mode == MODE_TIMEOUT_VALIDATE) {
                 validateTimeOut();
             }
         }
@@ -109,30 +109,30 @@ public class VcashValidateActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if(mode == MODE_LAUNCHER_VALIDATE){
+        if (mode == MODE_LAUNCHER_VALIDATE) {
             super.onBackPressed();
         }
     }
 
-    private void validateTimeOut(){
-        if(ValidateUtil.validate(mEtValidate.getText().toString())){
+    private void validateTimeOut() {
+        if (ValidateUtil.validate(mEtValidate.getText().toString())) {
             TimeOutUtil.getInstance().updateLastTime();
             finish();
-        }else {
+        } else {
             errorNotify();
         }
     }
 
-    private void validateLauncher(){
+    private void validateLauncher() {
         List<String> mneonicList = ValidateUtil.validate2(mEtValidate.getText().toString());
-        if(mneonicList != null){
-            validate(mneonicList,mEtValidate.getText().toString());
-        }else {
+        if (mneonicList != null) {
+            validate(mneonicList, mEtValidate.getText().toString());
+        } else {
             errorNotify();
         }
     }
 
-    private void errorNotify(){
+    private void errorNotify() {
         mTilPsw.setErrorEnabled(true);
         mTilPsw.setError("Incorrect Password");
     }
@@ -150,10 +150,10 @@ public class VcashValidateActivity extends BaseActivity {
             @Override
             public void subscribe(ObservableEmitter emitter) {
 
-                boolean result = WalletApi.createWallet(words,psw);
-                if(result){
+                boolean result = WalletApi.createWallet(words, psw);
+                if (result) {
                     emitter.onComplete();
-                }else {
+                } else {
                     emitter.onError(null);
                 }
 
@@ -190,7 +190,7 @@ public class VcashValidateActivity extends BaseActivity {
     }
 
     @OnClick(R.id.tv_recover)
-    public void onRecoverClick(){
+    public void onRecoverClick() {
         AndPermission.with(this)
                 .permission(Permission.WRITE_EXTERNAL_STORAGE)
                 .onGranted(new Action() {
@@ -203,14 +203,13 @@ public class VcashValidateActivity extends BaseActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         WalletApi.clearWallet();
-                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
-                                        Intent intent = new Intent(VcashValidateActivity.this,MnemonicRestoreActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, false);
+                                        Intent intent = new Intent(VcashValidateActivity.this, MnemonicRestoreActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         nv(intent);
                                     }
                                 })
-                                .setNegativeButton("Cancel",null)
+                                .setNegativeButton("Cancel", null)
                                 .show();
                     }
                 })

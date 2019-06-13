@@ -74,7 +74,7 @@ public class PasswordActivity extends ToolBarActivity {
     public void initParams() {
         words = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
         mode = getIntent().getIntExtra(PARAM_MODE, MODE_CREATE);
-        if(mode == MODE_CHANGE_PSW){
+        if (mode == MODE_CHANGE_PSW) {
             setToolBarTitle("Change wallet password");
             btnStart.setText("Save new password");
         }
@@ -147,9 +147,9 @@ public class PasswordActivity extends ToolBarActivity {
     @OnClick(R.id.btn_start)
     public void onBtnStartClick() {
         if (validatePassword()) {
-            if(mode == MODE_CREATE || mode == MODE_CHANGE_PSW){
+            if (mode == MODE_CREATE || mode == MODE_CHANGE_PSW) {
                 create(et_psw.getText().toString());
-            }else {
+            } else {
                 recover(et_psw.getText().toString());
             }
         }
@@ -157,7 +157,7 @@ public class PasswordActivity extends ToolBarActivity {
 
     @Override
     public void onBackPressed() {
-        if(mode == MODE_CREATE){
+        if (mode == MODE_CREATE) {
             new AlertDialog.Builder(this)
                     .setTitle("Return to seed phrase")
                     .setMessage("If you return to seed phrase,it would be changed and yout local password won't be saved")
@@ -168,9 +168,9 @@ public class PasswordActivity extends ToolBarActivity {
                             finish();
                         }
                     })
-                    .setNegativeButton("Cancel",null)
+                    .setNegativeButton("Cancel", null)
                     .show();
-        }else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -188,24 +188,24 @@ public class PasswordActivity extends ToolBarActivity {
             @Override
             public void subscribe(ObservableEmitter emitter) {
 
-                boolean result = WalletApi.createWallet(words,psw);
-                if(result){
+                boolean result = WalletApi.createWallet(words, psw);
+                if (result) {
                     String json = new Gson().toJson(words);
-                   // Log.i("yjq","JSON: " + json);
+                    // Log.i("yjq","JSON: " + json);
                     try {
                         String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                      //  Log.i("yjq","Encrypt: " + encrypt);
+                        //  Log.i("yjq","Encrypt: " + encrypt);
                         boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
-                        if(save){
-                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
+                        if (save) {
+                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
                             emitter.onComplete();
-                        }else {
+                        } else {
                             emitter.onError(null);
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         emitter.onError(null);
                     }
-                }else {
+                } else {
                     emitter.onError(null);
                 }
 
@@ -236,8 +236,7 @@ public class PasswordActivity extends ToolBarActivity {
                             progress.dismiss();
                         }
                         Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
-                        intent.putExtra(PARAM_MODE,mode);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         nv(intent);
                         finish();
@@ -245,24 +244,24 @@ public class PasswordActivity extends ToolBarActivity {
                 });
     }
 
-    private void recover(final String psw){
+    private void recover(final String psw) {
         final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
         progress.setMessage("Restoring wallet...Please do not close wallet");
         progress.show();
 
-        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
+        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, false);
 
         Observable.create(new ObservableOnSubscribe() {
 
             @Override
             public void subscribe(ObservableEmitter emitter) {
 
-                boolean result = WalletApi.createWallet(words,psw);
-                if(result){
+                boolean result = WalletApi.createWallet(words, psw);
+                if (result) {
                     emitter.onComplete();
-                }else {
+                } else {
                     emitter.onError(null);
                 }
 
@@ -296,18 +295,16 @@ public class PasswordActivity extends ToolBarActivity {
                                         String json = new Gson().toJson(words);
                                         String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
                                         boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
-                                        if(save){
-                                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,true);
+                                        if (save) {
+                                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
                                             if (progress.isShowing()) {
                                                 progress.dismiss();
                                             }
                                             Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
-                                            intent.putExtra(PARAM_MODE,mode);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                             nv(intent);
                                             finish();
-                                        }else {
+                                        } else {
                                             UIUtils.showToastCenter("Restore Wallet Failed");
                                         }
                                     } catch (DecryptionException e) {
@@ -319,9 +316,9 @@ public class PasswordActivity extends ToolBarActivity {
                                     }
 
                                 } else {
-                                    if(data instanceof String){
+                                    if (data instanceof String) {
                                         UIUtils.showToastCenter((String) data);
-                                    }else {
+                                    } else {
                                         UIUtils.showToastCenter("Restore Wallet Failed");
                                     }
                                 }
