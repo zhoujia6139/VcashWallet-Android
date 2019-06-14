@@ -29,7 +29,7 @@ public class MnemonicCreateActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Create new wallet");
+        setToolBarTitle(UIUtils.getString(R.string.create_new_wallet));
     }
 
     @Override
@@ -71,9 +71,9 @@ public class MnemonicCreateActivity extends ToolBarActivity {
     @OnClick(R.id.btn_next)
     public void onNextClick(){
         new AlertDialog.Builder(this)
-                .setTitle("Save seed phrase")
-                .setMessage("Please write the seed phrase down. Do not screenshot it and save it in your photo gallery. It makes the phrase prone to cyber attacks and, less secure.")
-                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.save_seed_phrase)
+                .setMessage(R.string.save_seed_phrase_content)
+                .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(MnemonicCreateActivity.this,MnemonicConfirmActivity.class);
@@ -82,7 +82,7 @@ public class MnemonicCreateActivity extends ToolBarActivity {
                         finish();
                     }
                 })
-                .setNegativeButton("Cancel",null)
+                .setNegativeButton(R.string.cancel,null)
                 .show();
     }
 }

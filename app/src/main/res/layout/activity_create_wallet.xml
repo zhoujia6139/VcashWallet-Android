@@ -21,7 +21,7 @@
             android:paddingTop="20dp"
             android:paddingRight="30dp"
             android:paddingBottom="35dp"
-            android:text="@string/create_new_wallet"
+            android:text="@string/create_new_wallet_notify"
             android:textColor="@color/A10"
             android:textSize="15sp" />
 
@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
-                android:text="Do not let anyone see your seed phrase."
+                android:text="@string/create_new_wallet_notify_1"
                 android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
@@ -71,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
-                android:text="Never type your seed phrase into password managers or elsewhere."
+                android:text="@string/create_new_wallet_notify_2"
                 android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
@@ -94,7 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
-                android:text="Make at least 2 copies of the phrase in caseof  emergency."
+                android:text="@string/create_new_wallet_notify_3"
                 android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
@@ -111,7 +111,7 @@
         android:layout_marginRight="28dp"
         android:layout_marginBottom="40dp"
         android:background="@drawable/selector_orange"
-        android:text="I Agree"
+        android:text="@string/got_it"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="15sp" />

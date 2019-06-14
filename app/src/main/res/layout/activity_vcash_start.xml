@@ -42,7 +42,7 @@
             android:layout_height="50dp">
             <TextView
                 android:layout_gravity="center"
-                android:text="Create new wallet"
+                android:text="@string/create_new_wallet"
                 android:textColor="@color/white"
                 android:drawablePadding="8dp"
                 android:drawableLeft="@drawable/ic_add_white"
@@ -63,7 +63,7 @@
             android:layout_height="50dp">
             <TextView
                 android:layout_gravity="center"
-                android:text="Restore from paper key"
+                android:text="@string/restore_wallet"
                 android:textColor="@color/white"
                 android:drawablePadding="8dp"
                 android:drawableLeft="@drawable/ic_restore_white"

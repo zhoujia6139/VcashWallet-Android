@@ -50,7 +50,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="TxID:"
                 android:textColor="@color/A10" />
@@ -73,7 +73,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="Sender:"
                 android:textColor="@color/A10" />
@@ -96,7 +96,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="Recipient:"
                 android:textColor="@color/A10" />
@@ -119,7 +119,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="TX amount:"
                 android:textColor="@color/A10" />
@@ -142,7 +142,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="TX fee:"
                 android:textColor="@color/A10" />
@@ -165,7 +165,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
+                android:layout_weight="0.7"
                 android:gravity="end"
                 android:text="TX time:"
                 android:textColor="@color/A10" />

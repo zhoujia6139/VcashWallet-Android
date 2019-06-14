@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.vcashorg.vcashwallet" >
+    package="com.vcashorg.vcashwallet">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
 
     <application
+        android:name=".VcashApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:name=".VcashApp"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".MainActivity" >
+        <activity android:name=".MainActivity">
             <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
         </activity>
 
-        <activity android:name=".LauncherActivity"
+        <activity
+            android:name=".LauncherActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,46 +37,54 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".VcashStartActivity"
-            android:screenOrientation="portrait">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
-        <activity android:name=".VcashValidateActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".WalletCreateActivity"
+        <activity
+            android:name=".VcashStartActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MnemonicCreateActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".MnemonicConfirmActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".PasswordActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".WalletMain3Activity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".VcashSendActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".VcashReceiveActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".SettingActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".widget.qrcode.ScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".TxDetailsActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".MnemonicRestoreActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".LockScreenActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".PasswordChangeActivity"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".WalletMainActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".VcashValidateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".WalletCreateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MnemonicCreateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MnemonicConfirmActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PasswordActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".WalletMain3Activity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VcashSendActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VcashReceiveActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".widget.qrcode.ScannerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".TxDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MnemonicRestoreActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".LockScreenActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PasswordChangeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".WalletMainActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

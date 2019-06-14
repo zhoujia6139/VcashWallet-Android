@@ -46,7 +46,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Confirm seed phrase");
+        setToolBarTitle(UIUtils.getString(R.string.confirm_seed_phrase));
     }
 
     @Override
@@ -225,7 +225,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             for (MnemonicData item : confirmDataList) {
                 if (item.num == data.num) {
                     if (!item.data.equals(data.data)) {
-                        UIUtils.showToastCenter("The words are inconsistent with the seed phrase.please try again.");
+                        UIUtils.showToastCenter(R.string.word_inconsistent);
                         for (MnemonicData mnemonicData : confirmDataList){
                             mnemonicData.state = MnemonicData.STATE_UNCHECK;
                         }
@@ -262,7 +262,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @OnClick(R.id.btn_check)
     public void onCheckClick() {
         if (btnState() && validate()) {
-            UIUtils.showToastCenter("Mnemonic Validate Success");
+            UIUtils.showToastCenter(R.string.confirm_seed_phrase_success);
             Intent intent = new Intent(MnemonicConfirmActivity.this, PasswordActivity.class);
             intent.putExtra(PasswordActivity.PARAM_MNEMONIC_LIST, mnemonicList);
             intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_CREATE);
@@ -274,16 +274,16 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setTitle("Return to seed phrase")
-                .setMessage("Your current seed will become obsolete and the new seed will be generated")
-                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.back_seed_phrase)
+                .setMessage(R.string.back_seed_phrase_content)
+                .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         nv(MnemonicCreateActivity.class);
                         finish();
                     }
                 })
-                .setNegativeButton("Cancel",null)
+                .setNegativeButton(R.string.cancel,null)
                 .show();
         //super.onBackPressed();
     }

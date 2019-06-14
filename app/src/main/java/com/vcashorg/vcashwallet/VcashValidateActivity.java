@@ -88,7 +88,7 @@ public class VcashValidateActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().equals("")) {
-                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
+                    mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_orange_light_round_rect));
                 } else {
                     mOpenWallet.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
                 }
@@ -142,7 +142,7 @@ public class VcashValidateActivity extends BaseActivity {
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
-        progress.setMessage("Validate Wallet...");
+        progress.setMessage(UIUtils.getString(R.string.loading_wallet));
         progress.show();
 
         Observable.create(new ObservableOnSubscribe() {
@@ -179,7 +179,6 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToastCenter("Validate Wallet Success");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -202,8 +201,6 @@ public class VcashValidateActivity extends BaseActivity {
                                 .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        WalletApi.clearWallet();
-                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, false);
                                         Intent intent = new Intent(VcashValidateActivity.this, MnemonicRestoreActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         nv(intent);

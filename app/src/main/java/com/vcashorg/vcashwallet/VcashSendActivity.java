@@ -152,16 +152,13 @@ public class VcashSendActivity extends ToolBarActivity {
 
     private boolean validate(){
         if(mEtAddress.getText().toString().trim().equals("")){
-            UIUtils.showToastCenter("Address cant be empty");
+            UIUtils.showToastCenter("Address can't be empty");
             return false;
         }else if (mEtAmount.getText().toString().trim().equals("")){
-            UIUtils.showToastCenter("Amount cant be empty");
+            UIUtils.showToastCenter("Amount can't be empty");
             return false;
         }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
-            UIUtils.showToastCenter("Amount cant be 0");
-            return false;
-        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) < 0.01){
-            UIUtils.showToastCenter("Amount cant less than 0.01");
+            UIUtils.showToastCenter("Amount can't be 0");
             return false;
         }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){
             UIUtils.showToastCenter("Please don't send VCash to your own wallet address");

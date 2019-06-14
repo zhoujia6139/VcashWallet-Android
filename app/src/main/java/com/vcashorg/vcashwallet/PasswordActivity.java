@@ -62,7 +62,7 @@ public class PasswordActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Password");
+        setToolBarTitle(UIUtils.getString(R.string.password));
     }
 
     @Override
@@ -75,8 +75,8 @@ public class PasswordActivity extends ToolBarActivity {
         words = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
         mode = getIntent().getIntExtra(PARAM_MODE, MODE_CREATE);
         if (mode == MODE_CHANGE_PSW) {
-            setToolBarTitle("Change wallet password");
-            btnStart.setText("Save new password");
+            setToolBarTitle(UIUtils.getString(R.string.change_password));
+            btnStart.setText(R.string.save_new_password);
         }
     }
 
@@ -123,7 +123,7 @@ public class PasswordActivity extends ToolBarActivity {
         if (!et_psw.getText().toString().trim().equals("") && !et_psw_confirm.getText().toString().trim().equals("")) {
             btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
         } else {
-            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_grey_round_rect));
+            btnStart.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_orange_light_round_rect));
         }
     }
 
@@ -137,7 +137,7 @@ public class PasswordActivity extends ToolBarActivity {
 
         if (!psw1.equals(psw2)) {
             til_psw_confirm.setErrorEnabled(true);
-            til_psw_confirm.setError("Passwords do not match");
+            til_psw_confirm.setError(UIUtils.getString(R.string.password_dont_match));
             return false;
         }
 
@@ -159,16 +159,16 @@ public class PasswordActivity extends ToolBarActivity {
     public void onBackPressed() {
         if (mode == MODE_CREATE) {
             new AlertDialog.Builder(this)
-                    .setTitle("Return to seed phrase")
-                    .setMessage("If you return to seed phrase,it would be changed and yout local password won't be saved")
-                    .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.back_seed_phrase)
+                    .setMessage(R.string.back_seed_phrase_message)
+                    .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             nv(MnemonicCreateActivity.class);
                             finish();
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show();
         } else {
             super.onBackPressed();
@@ -180,7 +180,7 @@ public class PasswordActivity extends ToolBarActivity {
         final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
-        progress.setMessage("Create wallet...");
+        progress.setMessage(UIUtils.getString(R.string.creating_wallet));
         progress.show();
 
         Observable.create(new ObservableOnSubscribe() {
@@ -223,7 +223,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToastCenter("Create Wallet Failed");
+                        UIUtils.showToastCenter(R.string.create_wallet_failed);
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -231,7 +231,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onComplete() {
-                        UIUtils.showToastCenter("Create Wallet Success");
+                        UIUtils.showToastCenter(R.string.create_wallet_success);
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -248,10 +248,11 @@ public class PasswordActivity extends ToolBarActivity {
         final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
-        progress.setMessage("Restoring wallet...Please do not close wallet");
+        progress.setMessage(UIUtils.getString(R.string.restoring_wallet));
         progress.show();
 
-        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, false);
+        WalletApi.clearWallet();
+        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
 
         Observable.create(new ObservableOnSubscribe() {
 
@@ -279,7 +280,7 @@ public class PasswordActivity extends ToolBarActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToastCenter("Restore Wallet Failed");
+                        UIUtils.showToastCenter(R.string.restore_fail);
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -300,18 +301,19 @@ public class PasswordActivity extends ToolBarActivity {
                                             if (progress.isShowing()) {
                                                 progress.dismiss();
                                             }
+                                            UIUtils.showToastCenter(R.string.restore_success);
                                             Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                             nv(intent);
                                             finish();
                                         } else {
-                                            UIUtils.showToastCenter("Restore Wallet Failed");
+                                            UIUtils.showToastCenter(R.string.restore_fail);
                                         }
                                     } catch (DecryptionException e) {
-                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                        UIUtils.showToastCenter(R.string.restore_fail);
                                         e.printStackTrace();
                                     } catch (UnsupportedEncodingException e) {
-                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                        UIUtils.showToastCenter(R.string.restore_fail);
                                         e.printStackTrace();
                                     }
 
@@ -319,7 +321,7 @@ public class PasswordActivity extends ToolBarActivity {
                                     if (data instanceof String) {
                                         UIUtils.showToastCenter((String) data);
                                     } else {
-                                        UIUtils.showToastCenter("Restore Wallet Failed");
+                                        UIUtils.showToastCenter(R.string.restore_fail);
                                     }
                                 }
                             }

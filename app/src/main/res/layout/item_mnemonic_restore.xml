@@ -32,6 +32,8 @@
         android:layout_marginLeft="9dp"
         android:textColor="@color/A10"
         android:textSize="15sp"
+        android:inputType="text"
+        android:imeOptions="actionNext"
         tools:text="winter" />
 
 </LinearLayout>

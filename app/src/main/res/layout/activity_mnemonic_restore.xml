@@ -50,14 +50,15 @@
                 android:id="@+id/btn_next"
                 android:layout_width="190dp"
                 android:layout_height="46dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="40dp"
-                android:background="@drawable/selector_orange"
-                android:text="Next"
+                android:background="@drawable/bg_orange_light_round_rect"
+                android:text="@string/next"
                 android:layout_gravity="center_horizontal"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>

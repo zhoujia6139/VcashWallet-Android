@@ -2,24 +2,53 @@
     <string name="app_name">Vcash Wallet</string>
 
 
-    <string name="copy_ok">Copy Success</string>
+    <string name="copy_ok">Copied to clipboard</string>
     <string name="exit">Please press again to exit</string>
+    <string name="next">Next</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="check">Check</string>
+    <string name="generate">Generate</string>
+    <string name="warning">Warning</string>
+    <string name="wait">Waiting…</string>
 
-
-
-
-    <string name="create_new_wallet">Create new wallet by generating seed phrase.If you ever lose your device,you will need this phrase to recover your wallet!  Never save it in your loacl or remote folders in any form.</string>
-
-    <string name="wallet_mneonic">Your seed phrase is the access key to all the funds in your wallet. Print or write down the phrase to keep it in a safe or in a locked vault.Without the phrase you will not be able to recover your money.</string>
+    <string name="create_new_wallet">Create new wallet</string>
+    <string name="restore_wallet">Restore from recovery phrase</string>
+    <string name="create_new_wallet_notify">By creating the wallet, you need to write down your seed recovery phrase and store it securely so that your wallet can be recovered in the case your device was lost for stolen</string>
+    <string name="create_new_wallet_notify_1">Do not let anyone see your seed phrase.</string>
+    <string name="create_new_wallet_notify_2">Never type your seed phrase into password managers or elsewhere.</string>
+    <string name="create_new_wallet_notify_3">Make at least 2 copies of the phrase in caseof emergency.</string>
+    <string name="got_it">Got it</string>
+    <string name="backup_prompt">Your seed phrase is the access key to all the funds in your wallet. Print or write down the phrase to keep it in a safe or in a locked vault.Without the phrase you will not be able to recover your money.</string>
+    <string name="save_seed_phrase">Save seed phrase</string>
+    <string name="save_seed_phrase_content">Please write the seed phrase down. Do not screenshot it and save it in your photo gallery. It makes the phrase prone to cyber attacks and, less secure.</string>
+    <string name="confirm_seed_phrase">Confirm seed phrase</string>
+    <string name="confirm_seed_phrase_notify_1">To ensure the seed phrase is written down correctly. please fill in the specific words below.</string>
+    <string name="confirm_seed_phrase_notify_2">Match the words to their due sequences</string>
+    <string name="word_inconsistent">The words are inconsistent with the seed phrase.please try again</string>
+    <string name="back_seed_phrase">Return to seed phrase</string>
+    <string name="back_seed_phrase_content">Your current seed will become obsolete and the new seed will be generated</string>
+    <string name="back_seed_phrase_message">If you return to seed phrase,it would be changed and your local password won\'t be saved</string>
+    <string name="confirm_seed_phrase_success">Seed phrase confirm success</string>
+    <string name="password">Password</string>
+    <string name="password_create_1">Create password to access your wallet</string>
+    <string name="password_create_2">You are highly recommended to set a strong password, preferably with uppercase and lowercase letters and numbers.</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="start_use_wallet">Start to use your wallet</string>
+    <string name="change_password">Change wallet password</string>
+    <string name="save_new_password">Save new password</string>
+    <string name="recover_content">The recovered wallet will cover the original wallet,please be cautious</string>
+    <string name="storage_permission">Need Storage Permission</string>
+    <string name="password_dont_match">Passwords do not match</string>
+    <string name="create_wallet_success">Wallet is ready for use</string>
+    <string name="create_wallet_failed">Failed to create wallet, please check the information you filled out Is the seed phrase correct</string>
+    <string name="creating_wallet">Creating wallet…</string>
+    <string name="restoring_wallet">Restoring wallet…Please do not close wallet</string>
+    <string name="loading_wallet">Loading wallet…</string>
+    <string name="restore_success">Successful restore</string>
+    <string name="restore_fail">Restore failure</string>
 
     <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.</string>
 
-    <string name="wallet_mneonic_confirm">To ensure the seed phrase is written down correctly. please fill in the specific words below.</string>
 
-    <string name="password_create_1">Create password to access your wallet</string>
-
-    <string name="password_create_2">You are highly recommended to set a strong password, preferably with uppercase and lowercase letters and numbers.</string>
-
-
-    <string name="wait">Waiting…</string>
 </resources>

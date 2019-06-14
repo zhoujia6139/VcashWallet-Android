@@ -41,7 +41,7 @@ public class VcashStartActivity extends BaseActivity {
                 .onDenied(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        UIUtils.showToastCenter("Need Storage Permission");
+                        UIUtils.showToastCenter(R.string.storage_permission);
                     }
                 })
                 .start();
@@ -56,24 +56,22 @@ public class VcashStartActivity extends BaseActivity {
                     @Override
                     public void onAction(List<String> permissions) {
                         new AlertDialog.Builder(VcashStartActivity.this)
-                                .setTitle("Warning")
-                                .setMessage("The recovered wallet will cover the original wallet,please be cautious")
-                                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                                .setTitle(R.string.warning)
+                                .setMessage(R.string.recover_content)
+                                .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        WalletApi.clearWallet();
-                                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
                                         nv(MnemonicRestoreActivity.class);
                                     }
                                 })
-                                .setNegativeButton("Cancel",null)
+                                .setNegativeButton(R.string.cancel,null)
                                 .show();
                     }
                 })
                 .onDenied(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        UIUtils.showToastCenter("Need Storage Permission");
+                        UIUtils.showToastCenter(R.string.storage_permission);
                     }
                 })
                 .start();
