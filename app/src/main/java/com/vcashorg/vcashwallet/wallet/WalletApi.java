@@ -140,22 +140,29 @@ public class WalletApi {
             @Override
             public void onCall(boolean yesOrNo, Object data){
                 if (yesOrNo){
-                    VcashWallet.getInstance().setChainOutputs((ArrayList<VcashOutput>)data);
-                    ArrayList<VcashTxLog> txArr = new ArrayList<VcashTxLog>();
-                    for (VcashOutput item :(ArrayList<VcashOutput>)data){
-                        VcashTxLog tx = new VcashTxLog();
-                        tx.tx_id = VcashWallet.getInstance().getNextLogId();
-                        tx.create_time = AppUtil.getCurrentTimeSecs();
-                        tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
-                        tx.amount_credited = item.value;
-                        tx.tx_type = item.is_coinbase? VcashTxLog.TxLogEntryType.ConfirmedCoinbase: VcashTxLog.TxLogEntryType.TxReceived;
-                        tx.server_status = ServerTxStatus.TxClosed;
-                        item.tx_log_id = tx.tx_id;
-                        txArr.add(tx);
+                    if (data instanceof ArrayList){
+                        ArrayList<VcashTxLog> txArr = new ArrayList<VcashTxLog>();
+                        for (VcashOutput item :(ArrayList<VcashOutput>)data){
+                            VcashTxLog tx = new VcashTxLog();
+                            tx.tx_id = VcashWallet.getInstance().getNextLogId();
+                            tx.create_time = AppUtil.getCurrentTimeSecs();
+                            tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
+                            tx.amount_credited = item.value;
+                            tx.tx_type = item.is_coinbase? VcashTxLog.TxLogEntryType.ConfirmedCoinbase: VcashTxLog.TxLogEntryType.TxReceived;
+                            tx.server_status = ServerTxStatus.TxClosed;
+                            item.tx_log_id = tx.tx_id;
+                            txArr.add(tx);
+                        }
+                        VcashWallet.getInstance().setChainOutputs((ArrayList<VcashOutput>)data);
+                        EncryptedDBHelper.getsInstance().saveTxDataArr(txArr);
+                        if (callback != null){
+                            callback.onCall(true, null);
+                        }
                     }
-                    EncryptedDBHelper.getsInstance().saveTxDataArr(txArr);
-                    if (callback != null){
-                        callback.onCall(true, null);
+                    else {
+                        if (callback != null){
+                            callback.onCall(true, data);
+                        }
                     }
                 }
                 else {
@@ -174,7 +181,7 @@ public class WalletApi {
     public static void sendTransaction(VcashSlate slate, String user, final WalletCallback callback){
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
 
-        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
             @Override
             public void onCall() {
                 EncryptedDBHelper.getsInstance().rollbackDataTransaction();
@@ -220,7 +227,7 @@ public class WalletApi {
                 }
                 else{
                     Log.e(Tag, "sendTransaction to server failed! roll back database");
-                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    rollbackBlock.onCall();
                     callback.onCall(false, "Tx send to server failed");
                 }
             }
@@ -236,7 +243,7 @@ public class WalletApi {
 
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
 
-        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
             @Override
             public void onCall() {
                 EncryptedDBHelper.getsInstance().rollbackDataTransaction();
@@ -268,7 +275,7 @@ public class WalletApi {
                 }
                 else{
                     Log.e(Tag, "send receiveTransaction to server failed! roll back database");
-                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    rollbackBlock.onCall();
                     callback.onCall(false, null);
                 }
             }

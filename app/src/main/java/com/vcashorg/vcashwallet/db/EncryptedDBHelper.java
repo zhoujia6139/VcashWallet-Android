@@ -49,6 +49,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         if (dbFile.exists()){
             dbFile.delete();
         }
+        sInstance = null;
     }
 
     public boolean saveOutputData(ArrayList<VcashOutput> arr){
@@ -96,7 +97,9 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 item.is_coinbase = (cursor.getInt(cursor.getColumnIndex("is_coinbase")) == 1);
                 item.status = VcashOutput.OutputStatus.values()[cursor.getInt(cursor.getColumnIndex("status"))];
                 item.tx_log_id = cursor.getShort(cursor.getColumnIndex("tx_log_id"));
-                arr.add(item);
+                if (getTxByTxId(item.tx_log_id) != null){
+                    arr.add(item);
+                }
             } while (cursor.moveToNext());
         }
         return arr;
@@ -190,6 +193,16 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public VcashTxLog getTxBySlateId(String slate_id){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
+        if (cursor != null && cursor.moveToFirst()){
+
+            return parseTxLog(cursor);
+        }
+        return null;
+    }
+
+    public VcashTxLog getTxByTxId(int tx_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_id = ?", new Integer[] {tx_id});
         if (cursor != null && cursor.moveToFirst()){
 
             return parseTxLog(cursor);
