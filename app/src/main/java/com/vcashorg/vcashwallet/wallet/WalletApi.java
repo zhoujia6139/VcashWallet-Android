@@ -140,7 +140,6 @@ public class WalletApi {
             @Override
             public void onCall(boolean yesOrNo, Object data){
                 if (yesOrNo){
-                    VcashWallet.getInstance().setChainOutputs((ArrayList<VcashOutput>)data);
                     ArrayList<VcashTxLog> txArr = new ArrayList<VcashTxLog>();
                     for (VcashOutput item :(ArrayList<VcashOutput>)data){
                         VcashTxLog tx = new VcashTxLog();
@@ -153,6 +152,7 @@ public class WalletApi {
                         item.tx_log_id = tx.tx_id;
                         txArr.add(tx);
                     }
+                    VcashWallet.getInstance().setChainOutputs((ArrayList<VcashOutput>)data);
                     EncryptedDBHelper.getsInstance().saveTxDataArr(txArr);
                     if (callback != null){
                         callback.onCall(true, null);
