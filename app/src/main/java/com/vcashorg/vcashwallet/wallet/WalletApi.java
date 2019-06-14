@@ -174,7 +174,7 @@ public class WalletApi {
     public static void sendTransaction(VcashSlate slate, String user, final WalletCallback callback){
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
 
-        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
             @Override
             public void onCall() {
                 EncryptedDBHelper.getsInstance().rollbackDataTransaction();
@@ -220,7 +220,7 @@ public class WalletApi {
                 }
                 else{
                     Log.e(Tag, "sendTransaction to server failed! roll back database");
-                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    rollbackBlock.onCall();
                     callback.onCall(false, "Tx send to server failed");
                 }
             }
@@ -236,7 +236,7 @@ public class WalletApi {
 
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
 
-        WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
             @Override
             public void onCall() {
                 EncryptedDBHelper.getsInstance().rollbackDataTransaction();
@@ -268,7 +268,7 @@ public class WalletApi {
                 }
                 else{
                     Log.e(Tag, "send receiveTransaction to server failed! roll back database");
-                    EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                    rollbackBlock.onCall();
                     callback.onCall(false, null);
                 }
             }

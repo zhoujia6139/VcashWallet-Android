@@ -212,13 +212,13 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     }
 
     private boolean validate(){
-        for (MnemonicData data : restoreMnemonicData){
-            if(data.state == MnemonicData.STATE_UNCHECK){
-                return false;
-            }else if(data.state == MnemonicData.STATE_CHECK_FALSE){
-                return false;
-            }
-        }
+//        for (MnemonicData data : restoreMnemonicData){
+//            if(data.state == MnemonicData.STATE_UNCHECK){
+//                return false;
+//            }else if(data.state == MnemonicData.STATE_CHECK_FALSE){
+//                return false;
+//            }
+//        }
         return true;
     }
 
