@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -113,7 +114,7 @@ public class VcashSendActivity extends ToolBarActivity {
     public void onSendClick(){
         if(btnState() && validate()){
             showProgressDialog(R.string.wait);
-            WalletApi.createSendTransaction(mEtAddress.getText().toString(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
+            WalletApi.createSendTransaction(mEtAddress.getText().toString().trim(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
@@ -154,7 +155,10 @@ public class VcashSendActivity extends ToolBarActivity {
     }
 
     private boolean validate(){
-        if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
+        if(mEtAddress.getText().toString().trim().length() != 66){
+            UIUtils.showToastCenter(R.string.send_address_length);
+            return false;
+        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
             UIUtils.showToastCenter(R.string.send_cant_0);
             return false;
         }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){

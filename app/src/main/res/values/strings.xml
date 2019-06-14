@@ -101,6 +101,7 @@
     <string name="restore_wallet_hint">Restore from recovery phrase</string>
     <string name="send_cant_0">Please send funds more than 0</string>
     <string name="send_cant_me">Please don\'t send VCash to your own wallet address</string>
+    <string name="send_address_length">The address format is incorrect</string>
     <string name="psw_incorrect">Incorrect Password</string>
     <string name="old_psw_incorrect">The old password you have entered is incorrect</string>
     <string name="enter_current_psw">Enter your current password</string>
