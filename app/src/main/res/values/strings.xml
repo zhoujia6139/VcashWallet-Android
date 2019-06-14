@@ -11,6 +11,38 @@
     <string name="generate">Generate</string>
     <string name="warning">Warning</string>
     <string name="wait">Waiting…</string>
+    <string name="setting">Setting</string>
+    <string name="height">Height:</string>
+
+    <string name="coinbase">CoinBase</string>
+    <string name="now">Now</string>
+    <string name="unReachable">UnReachable</string>
+    <string name="ongoing">Ongoing</string>
+    <string name="canceled">Canceled</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="wait_for_process">waiting for processing</string>
+    <string name="unconfirmed">Unconfirmed</string>
+    <string name="available">Available</string>
+    <string name="balance">Balance</string>
+    <string name="recent_transaction">Recent transaction</string>
+    <string name="receive">Receive</string>
+    <string name="send">Send</string>
+
+    <string name="transaction_details">Transaction Details</string>
+    <string name="verify_signature">Verify and signature</string>
+    <string name="receive_signature">Receive and signature</string>
+    <string name="tx_status_wait_sender_sign">Tx Status: waiting for the sender to sign</string>
+    <string name="tx_status_wait_receiver_sign">Tx Status: waiting for the recipient to sign</string>
+    <string name="tx_status_wait_confirm">Tx Status: waiting for confirming</string>
+    <string name="tx_status_cancel">Tx Status: transaction canceled</string>
+    <string name="tx_status_completed">Tx Status: transaction completed</string>
+    <string name="delete_transaction">Delete the transaction</string>
+    <string name="tx_id">TxID:</string>
+    <string name="sender">Sender:</string>
+    <string name="recipient">Recipient:</string>
+    <string name="tx_amount">TX amount:</string>
+    <string name="tx_fee">TX fee:</string>
+    <string name="tx_time">TX time:</string>
 
     <string name="create_new_wallet">Create new wallet</string>
     <string name="restore_wallet">Restore from recovery phrase</string>
@@ -37,7 +69,7 @@
     <string name="start_use_wallet">Start to use your wallet</string>
     <string name="change_password">Change wallet password</string>
     <string name="save_new_password">Save new password</string>
-    <string name="recover_content">The recovered wallet will cover the original wallet,please be cautious</string>
+    <string name="recover_content">Your current wallet will be logged out if you restore other wallets. Please ensure seed phrase has been correctly saved before taking actions</string>
     <string name="storage_permission">Need Storage Permission</string>
     <string name="password_dont_match">Passwords do not match</string>
     <string name="create_wallet_success">Wallet is ready for use</string>
@@ -47,8 +79,41 @@
     <string name="loading_wallet">Loading wallet…</string>
     <string name="restore_success">Successful restore</string>
     <string name="restore_fail">Restore failure</string>
-
     <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.</string>
+    <string name="send_vcash">Send VCash</string>
+    <string name="send_to">Send to</string>
+    <string name="enter_recipient_id">Enter or scan the recipient’s ID</string>
+    <string name="amount">Amount</string>
+    <string name="enter_amount">Enter Amount</string>
+    <string name="receive_vcash">Receive VCash</string>
+    <string name="wallet_id">Your wallet ID</string>
+    <string name="scan_qr_code">Or scan the QR code</string>
+    <string name="general_settings">General settings</string>
+    <string name="lock_screen">Lock screen</string>
+    <string name="app_version">App Version</string>
+    <string name="never">Never</string>
+    <string name="after_30_seconds">After 30 seconds</string>
+    <string name="after_1_minute">After 1 minute</string>
+    <string name="after_3_minute">After 3 minute</string>
+    <string name="restore_seed_phrase">Restore from seed phrase</string>
+    <string name="access_wallet">Enter your password to access the wallet</string>
+    <string name="open_wallet">Open my wallet</string>
+    <string name="restore_wallet_hint">Restore from recovery phrase</string>
+    <string name="send_cant_0">Please send funds more than 0</string>
+    <string name="send_cant_me">Please don\'t send VCash to your own wallet address</string>
+    <string name="psw_incorrect">Incorrect Password</string>
+    <string name="old_psw_incorrect">The old password you have entered is incorrect</string>
+    <string name="enter_current_psw">Enter your current password</string>
 
+    <string name="send_success">Sent successfully</string>
+    <string name="send_failed">Failed to send your transaction</string>
+    <string name="receive_success">Received successfully</string>
+    <string name="receive_failed">Failed to receive the transaction</string>
+    <string name="broadcast_success">Broadcasted successfully</string>
+    <string name="broadcast_failed">Failed to broadcast the transaction</string>
+    <string name="cancel_success">Cancelled successfully</string>
+    <string name="cancel_failed">Failed to cancel the transaction</string>
+    <string name="delete_success">Deleted successfully</string>
+    <string name="delete_failed">Failed to delete the transaction</string>
 
 </resources>

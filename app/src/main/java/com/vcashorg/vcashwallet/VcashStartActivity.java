@@ -55,17 +55,21 @@ public class VcashStartActivity extends BaseActivity {
                 .onGranted(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        new AlertDialog.Builder(VcashStartActivity.this)
-                                .setTitle(R.string.warning)
-                                .setMessage(R.string.recover_content)
-                                .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        nv(MnemonicRestoreActivity.class);
-                                    }
-                                })
-                                .setNegativeButton(R.string.cancel,null)
-                                .show();
+                        if(SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)){
+                            new AlertDialog.Builder(VcashStartActivity.this)
+                                    .setTitle(R.string.warning)
+                                    .setMessage(R.string.recover_content)
+                                    .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            nv(MnemonicRestoreActivity.class);
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.cancel,null)
+                                    .show();
+                        }else {
+                            nv(MnemonicRestoreActivity.class);
+                        }
                     }
                 })
                 .onDenied(new Action() {

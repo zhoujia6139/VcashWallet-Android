@@ -47,7 +47,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Restore from seed phrase");
+        setToolBarTitle(UIUtils.getString(R.string.restore_seed_phrase));
     }
 
     @Override

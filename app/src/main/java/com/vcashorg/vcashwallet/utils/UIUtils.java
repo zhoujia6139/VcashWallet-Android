@@ -3,7 +3,10 @@ package com.vcashorg.vcashwallet.utils;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -221,6 +224,30 @@ public class UIUtils {
     public static int sp2px(int sp) {
         return (int) (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResource().getDisplayMetrics()) + 0.5f);
     }
+
+    public static boolean isEmpty(String value){
+        if(TextUtils.isEmpty(value) || value.equals("null")){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * getVersionName
+     */
+    public static String getVersionName(Context ctx) {
+        String localVersion = "";
+        try {
+            PackageInfo packageInfo = ctx.getApplicationContext()
+                    .getPackageManager()
+                    .getPackageInfo(ctx.getPackageName(), 0);
+            localVersion = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return localVersion;
+    }
+
 
 
     public static void copyText(Context context, String text){

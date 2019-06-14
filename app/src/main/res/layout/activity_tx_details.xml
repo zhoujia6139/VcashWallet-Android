@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            android:text="Tx Status: waiting for the recipient to sign"
+            tools:text="Tx Status: waiting for the recipient to sign"
             android:textColor="@color/black"
             android:textSize="26sp" />
     </LinearLayout>
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="TxID:"
+                android:text="@string/tx_id"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="Sender:"
+                android:text="@string/sender"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -98,7 +98,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="Recipient:"
+                android:text="@string/recipient"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -121,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="TX amount:"
+                android:text="@string/tx_amount"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -144,7 +144,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="TX fee:"
+                android:text="@string/tx_fee"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -164,10 +164,10 @@
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.7"
                 android:gravity="end"
-                android:text="TX time:"
+                android:text="@string/tx_time"
                 android:textColor="@color/A10" />
 
             <TextView
@@ -204,7 +204,7 @@
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_round_correct"
                 android:drawablePadding="6dp"
-                android:text="Receive and signature"
+                tools:text="Receive and signature"
                 android:textColor="@color/white"
                 android:textSize="15sp" />
 
@@ -227,7 +227,7 @@
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_round_error"
                 android:drawablePadding="6dp"
-                android:text="Cancel the transaction"
+                tools:text="Cancel the transaction"
                 android:textColor="@color/red"
                 android:textSize="15sp" />
 

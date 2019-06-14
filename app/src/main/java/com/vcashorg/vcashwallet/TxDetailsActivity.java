@@ -65,7 +65,7 @@ public class TxDetailsActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Transaction Details");
+        setToolBarTitle(UIUtils.getString(R.string.transaction_details));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         sender = intent.getBooleanExtra(PARAM_TX_SENDER,false);
         if(sender){
             TextView tvRight = getSubTitle();
-            tvRight.setText("Done");
+            tvRight.setText(R.string.done);
             tvRight.setTextColor(UIUtils.getColor(R.color.orange));
             tvRight.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -106,29 +106,27 @@ public class TxDetailsActivity extends ToolBarActivity {
     public void configDataFromServerTransaction(){
         if(serverTx == null)return;
         mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-        mTvSign.setText(serverTx.isSend ? "Verify and signature": "Receive and signature");
+        mTvSign.setText(serverTx.isSend ? R.string.verify_signature: R.string.receive_signature);
         mFlCancel.setVisibility(serverTx.isSend ? View.VISIBLE : View.GONE);
         switch (serverTx.status){
             case TxDefaultStatus:
-                mTvStatus.setText(serverTx.isSend ?
-                        "Tx Status: waiting for the sender to sign":"Tx Status: waiting for the recipient to sign");
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign:R.string.tx_status_wait_receiver_sign);
                 mFlSign.setVisibility(View.VISIBLE);
                 break;
             case TxFinalized:
-                mTvStatus.setText("Tx Status: waiting for confirming");
+                mTvStatus.setText(R.string.tx_status_wait_confirm);
                 mFlSign.setVisibility(View.GONE);
                 mFlCancel.setVisibility(View.GONE);
                 break;
             case TxReceiverd:
                 //The recipient has already signed, waiting for the sender to broadcast
-                mTvStatus.setText(serverTx.isSend ?
-                        "Tx Status: waiting for the sender to sign":"Tx Status: waiting for the recipient to sign");
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign:R.string.tx_status_wait_receiver_sign);
                 break;
             case TxCanceled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
-                mTvStatus.setText("Tx Status: transaction canceled");
+                mTvStatus.setText(R.string.tx_status_cancel);
                 mFlSign.setVisibility(View.GONE);
-                mTvCancel.setText("Delete the transaction");
+                mTvCancel.setText(R.string.delete_transaction);
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
         }
         mTvTxId.setText(serverTx.tx_id);
@@ -146,8 +144,8 @@ public class TxDetailsActivity extends ToolBarActivity {
             case DefaultState:
                 if(vcashTxLog.tx_type == TxSent){
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-                    mTvStatus.setText("Tx Status: waiting for the recipient to sign");
-                    mTvSign.setText("Verify and signature");
+                    mTvStatus.setText(R.string.tx_status_wait_receiver_sign);
+                    mTvSign.setText(R.string.verify_signature);
                     mFlCancel.setVisibility(View.VISIBLE);
                     if(vcashTxLog.server_status == ServerTxStatus.TxDefaultStatus){
                         mFlSign.setVisibility(View.GONE);
@@ -157,26 +155,26 @@ public class TxDetailsActivity extends ToolBarActivity {
                     }
                 }else if(vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived){
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-                    mTvStatus.setText("Tx Status: waiting for the sender to sign");
+                    mTvStatus.setText(R.string.tx_status_wait_sender_sign);
                     mFlSign.setVisibility(View.GONE);
                     mFlCancel.setVisibility(View.GONE);
                 }
                 break;
             case LoalConfirmed:
-                mTvStatus.setText("Tx Status: waiting for confirming");
+                mTvStatus.setText(R.string.tx_status_wait_confirm);
                 mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
                 mFlSign.setVisibility(View.GONE);
                 mFlCancel.setVisibility(View.GONE);
                 break;
             case NetConfirmed:
-                mTvStatus.setText("Tx Status: transaction completed");
+                mTvStatus.setText(R.string.tx_status_completed);
                 mIvStatus.setImageResource(R.drawable.ic_tx_confirmed_big);
                 mFlSign.setVisibility(View.GONE);
                 mFlCancel.setVisibility(View.GONE);
                 break;
         }
 
-        mTvTxId.setText(vcashTxLog.tx_slate_id == null ? "unreachable" : vcashTxLog.tx_slate_id);
+        mTvTxId.setText(vcashTxLog.tx_slate_id == null ? UIUtils.getString(R.string.unReachable) : vcashTxLog.tx_slate_id);
         mTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
         configInfoFromTxType(vcashTxLog.tx_type);
@@ -186,38 +184,38 @@ public class TxDetailsActivity extends ToolBarActivity {
     public void configInfoFromTxType(VcashTxLog.TxLogEntryType txType){
         switch (txType){
             case ConfirmedCoinbase:
-                mTvTxId.setText("coinbase");
+                mTvTxId.setText(R.string.coinbase);
                 break;
             case TxSent:
                 mTvSender.setText(WalletApi.getWalletUserId());
-                mTvRecipient.setText(TextUtils.isEmpty(vcashTxLog.parter_id) ? "unreachable":vcashTxLog.parter_id);
+                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited - vcashTxLog.fee));
                 break;
             case TxReceived:
-                mTvSender.setText(TextUtils.isEmpty(vcashTxLog.parter_id) ? "unreachable":vcashTxLog.parter_id);
+                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) :vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited));
                 break;
             case TxReceivedCancelled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
-                mTvStatus.setText("Tx Status: transaction cancelled");
+                mTvStatus.setText(R.string.tx_status_cancel);
                 mFlSign.setVisibility(View.GONE);
                 mFlCancel.setVisibility(View.VISIBLE);
-                mTvCancel.setText("Delete the transaction");
+                mTvCancel.setText(R.string.delete_transaction);
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
-                mTvSender.setText(TextUtils.isEmpty(vcashTxLog.parter_id) ? "unreachable":vcashTxLog.parter_id);
+                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited));
                 break;
             case TxSentCancelled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
-                mTvStatus.setText("Tx Status: transaction cancelled");
+                mTvStatus.setText(R.string.tx_status_cancel);
                 mFlSign.setVisibility(View.GONE);
                 mFlCancel.setVisibility(View.VISIBLE);
-                mTvCancel.setText("Delete the transaction");
+                mTvCancel.setText(R.string.delete_transaction);
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
                 mTvSender.setText(WalletApi.getWalletUserId());
-                mTvRecipient.setText(TextUtils.isEmpty(vcashTxLog.parter_id) ? "unreachable":vcashTxLog.parter_id);
+                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited - vcashTxLog.fee));
                 break;
         }
@@ -241,7 +239,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                     public void onCall(boolean yesOrNo, Object data) {
                         dismissProgressDialog();
                         if(yesOrNo){
-                            UIUtils.showToastCenter("Finalize Success");
+                            UIUtils.showToastCenter(R.string.broadcast_success);
                             if(serverTx != null){
                                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
                             }
@@ -250,7 +248,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                             if(data instanceof String){
                                 UIUtils.showToastCenter((String) data);
                             }else {
-                                UIUtils.showToastCenter("Finalize Failed");
+                                UIUtils.showToastCenter(R.string.broadcast_failed);
                             }
                         }
                     }
@@ -261,7 +259,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                     public void onCall(boolean yesOrNo, Object data) {
                         dismissProgressDialog();
                         if(yesOrNo){
-                            UIUtils.showToastCenter("Receive Success");
+                            UIUtils.showToastCenter(R.string.receive_success);
                             if(serverTx != null){
                                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
                             }
@@ -270,7 +268,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                             if(data instanceof String){
                                 UIUtils.showToastCenter((String) data);
                             }else {
-                                UIUtils.showToastCenter("Receive Failed");
+                                UIUtils.showToastCenter(R.string.receive_failed);
                             }
                         }
                     }
@@ -307,22 +305,22 @@ public class TxDetailsActivity extends ToolBarActivity {
     public void deleteTransaction(){
         boolean result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);
         if(result){
-            UIUtils.showToastCenter("Delete Success");
+            UIUtils.showToastCenter(R.string.delete_success);
             finish();
         }else {
-            UIUtils.showToastCenter("Delete Failed");
+            UIUtils.showToastCenter(R.string.delete_failed);
         }
     }
 
     public void cancelTransaction(VcashTxLog vcashTxLog){
         if(WalletApi.cancelTransaction(vcashTxLog)){
-            UIUtils.showToastCenter("Tx Cancel Success");
+            UIUtils.showToastCenter(R.string.cancel_success);
             if(serverTx != null){
                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
             }
             finish();
         }else {
-            UIUtils.showToastCenter("Tx Cancel Failed");
+            UIUtils.showToastCenter(R.string.cancel_failed);
         }
     }
 }

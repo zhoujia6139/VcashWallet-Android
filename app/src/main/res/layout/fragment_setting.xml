@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/grey_8"
     android:orientation="vertical">
 
@@ -24,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1"
-            android:text="Setting"
+            android:text="@string/setting"
             android:textColor="@color/black"
             android:textSize="20sp" />
     </LinearLayout>
@@ -35,8 +36,7 @@
         android:paddingLeft="15dp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:text="General settings"
-        android:textColor="@color/A2" />
+        android:text="@string/general_settings" />
 
     <View
         android:layout_width="match_parent"
@@ -55,7 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="Lock screen"
+            android:text="@string/lock_screen"
             android:textColor="@color/A10"
             android:textSize="15sp" />
 
@@ -85,7 +85,7 @@
         android:gravity="center_vertical"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:text="Change wallet password"
+        android:text="@string/change_password"
         android:textColor="@color/A10"
         android:textSize="15sp" />
 
@@ -107,11 +107,11 @@
         android:textSize="15sp" />
 
     <TextView
+        android:id="@+id/tv_version_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|bottom"
         android:paddingBottom="18dp"
-        android:text="App Version 1.0.0"
-        android:textColor="@color/A2"
+        tools:text="App Version 1.0.0"
         android:textSize="12sp" />
 </LinearLayout>

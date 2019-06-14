@@ -144,13 +144,13 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void initData() {
 
-        mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
+        mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());
 
         //HEIGHT
         WalletApi.addChainHeightListener(new WalletNoParamCallBack() {
             @Override
             public void onCall() {
-                mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
+                mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());
             }
         });
 
@@ -232,7 +232,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 mTvUnconfirmed.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
 
                 //refreshheight
-                mTvHeight.setText("Height:" + WalletApi.getCurChainHeight());
+                mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());
             }
         });
 
@@ -290,19 +290,19 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
                     helper.setText(R.id.tv_tx_id, TextUtils.isEmpty(serverTx.tx_id) ? "" : serverTx.tx_id);
                     helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(serverTx.slateObj.amount));
-                    helper.setText(R.id.tv_tx_state, "waiting for processing");
+                    helper.setText(R.id.tv_tx_state, R.string.wait_for_process);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
                     TextView txState1 = helper.getView(R.id.tv_tx_state);
                     txState1.setCompoundDrawablesWithIntrinsicBounds(
                             UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
-                    helper.setText(R.id.tv_tx_time, "Now");
+                    helper.setText(R.id.tv_tx_time, R.string.now);
                     break;
                 case WalletTxEntity.TYPE_TX_LOG:
                     VcashTxLog txLog = item.getTxLogEntity();
 
                     String txId = txLog.tx_slate_id;
                     if (TextUtils.isEmpty(txId) || txId.equals("null")) {
-                        helper.setText(R.id.tv_tx_id, "UnReachable");
+                        helper.setText(R.id.tv_tx_id, R.string.unReachable);
                     } else {
                         helper.setText(R.id.tv_tx_id, txId);
                     }
@@ -312,7 +312,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
                     switch (txType) {
                         case ConfirmedCoinbase:
-                            helper.setText(R.id.tv_tx_id, "CoinBase");
+                            helper.setText(R.id.tv_tx_id, R.string.coinbase);
                         case TxReceived:
                         case TxReceivedCancelled:
                             helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
@@ -335,17 +335,17 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                         case DefaultState:
                         case LoalConfirmed://waiting confirm
                             if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
-                                helper.setText(R.id.tv_tx_state, "Canceled");
+                                helper.setText(R.id.tv_tx_state,R.string.canceled);
                                 txState.setCompoundDrawablesWithIntrinsicBounds(
                                         UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
                             } else {
-                                helper.setText(R.id.tv_tx_state, "Ongoing");
+                                helper.setText(R.id.tv_tx_state, R.string.ongoing);
                                 txState.setCompoundDrawablesWithIntrinsicBounds(
                                         UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             }
                             break;
                         case NetConfirmed:
-                            helper.setText(R.id.tv_tx_state, "Confirmed");
+                            helper.setText(R.id.tv_tx_state,R.string.confirmed);
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
                             break;
@@ -365,7 +365,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
     @OnClick(R.id.iv_open_menu)
     public void onOpenMenuClick() {
         ((WalletMainActivity)mActivity).openDrawer();
-//        walletDrawer.openDrawer();
     }
 
     @OnClick(R.id.send)

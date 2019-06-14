@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_weight="1"
-        android:text="VCash Wallet"
+        android:text="@string/app_name"
         android:textColor="@color/white"
         android:textSize="20sp" />
 
