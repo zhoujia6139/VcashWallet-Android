@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         app:navigationIcon="@drawable/ic_back_arrow_black">
-        <!--自定义toolbar的title 和subtitle -->
+
         <TextView
             android:id="@+id/tv_right"
             style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"

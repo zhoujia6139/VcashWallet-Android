@@ -39,7 +39,7 @@ public class RecyclerViewDivider extends RecyclerView.ItemDecoration{
      */
     public RecyclerViewDivider(Context context, int orientation, int drawableId) {
         if (orientation != LinearLayoutManager.VERTICAL && orientation != LinearLayoutManager.HORIZONTAL) {
-            throw new IllegalArgumentException("请输入正确的参数！");
+            throw new IllegalArgumentException("Illegal Argument");
         }
         mOrientation = orientation;
 
@@ -56,7 +56,7 @@ public class RecyclerViewDivider extends RecyclerView.ItemDecoration{
      */
     public RecyclerViewDivider(Context context, int orientation, int drawableId, int margin) {
         if (orientation != LinearLayoutManager.VERTICAL && orientation != LinearLayoutManager.HORIZONTAL) {
-            throw new IllegalArgumentException("请输入正确的参数！");
+            throw new IllegalArgumentException("Illegal Argument");
         }
         mOrientation = orientation;
         mMarginLeft = margin;
@@ -73,7 +73,7 @@ public class RecyclerViewDivider extends RecyclerView.ItemDecoration{
      */
     public RecyclerViewDivider(Context context, int orientation, int drawableId, boolean hideFirst) {
         if (orientation != LinearLayoutManager.VERTICAL && orientation != LinearLayoutManager.HORIZONTAL) {
-            throw new IllegalArgumentException("请输入正确的参数！");
+            throw new IllegalArgumentException("Illegal Argument");
         }
         mOrientation = orientation;
         this.hideFirst = hideFirst;
@@ -97,28 +97,6 @@ public class RecyclerViewDivider extends RecyclerView.ItemDecoration{
         mMarginRight = marginRight;
     }
 
-//    /**
-//     * 自定义分割线
-//     *
-//     * @param context
-//     * @param orientation   列表方向
-//     * @param dividerHeight 分割线高度
-//     * @param dividerColor  分割线颜色
-//     */
-//    public RecyclerViewDivider(Context context, int orientation, int dividerHeight, int dividerColor) {
-//
-//        if (orientation != LinearLayoutManager.VERTICAL && orientation != LinearLayoutManager.HORIZONTAL) {
-//            throw new IllegalArgumentException("请输入正确的参数！");
-//        }
-//        mOrientation = orientation;
-//
-//        mDividerHeight = dividerHeight;
-//
-//        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        mPaint.setColor(dividerColor);
-//        mPaint.setStyle(Paint.Style.FILL);
-//
-//    }
 
 
     //获取分割线尺寸

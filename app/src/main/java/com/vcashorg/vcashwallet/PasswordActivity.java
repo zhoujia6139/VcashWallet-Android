@@ -21,6 +21,7 @@ import com.vcashorg.vcashwallet.utils.CharSequenceX;
 import com.vcashorg.vcashwallet.utils.DecryptionException;
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.MnemonicHelper;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
@@ -249,6 +250,10 @@ public class PasswordActivity extends ToolBarActivity {
         progress.setCancelable(false);
         progress.setTitle(R.string.app_name);
         progress.setMessage(UIUtils.getString(R.string.restoring_wallet));
+        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progress.setProgress(100);
+        progress.setIndeterminate(false);
+        progress.setProgressNumberFormat("");
         progress.show();
 
         WalletApi.clearWallet();
@@ -291,33 +296,44 @@ public class PasswordActivity extends ToolBarActivity {
                         WalletApi.checkWalletUtxo(new WalletCallback() {
                             @Override
                             public void onCall(boolean yesOrNo, Object data) {
-                                if (progress.isShowing()) {
-                                    progress.dismiss();
-                                }
                                 if (yesOrNo) {
-                                    try {
-                                        String json = new Gson().toJson(words);
-                                        String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                                        boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
-                                        if (save) {
-                                            SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
-                                            UIUtils.showToastCenter(R.string.restore_success);
-                                            Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            nv(intent);
-                                            finish();
-                                        } else {
+                                    if(data instanceof Double){
+                                        double percent = (double) data;
+                                        progress.setProgress((int)(percent * 100));
+                                    }else {
+                                        try {
+                                            String json = new Gson().toJson(words);
+                                            String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+                                            boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
+                                            if (save) {
+                                                progress.setProgress(100);
+                                                if (progress.isShowing()) {
+                                                    progress.dismiss();
+                                                }
+                                                SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
+                                                UIUtils.showToastCenter(R.string.restore_success);
+                                                Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                nv(intent);
+                                                finish();
+                                            } else {
+                                                if (progress.isShowing()) {
+                                                    progress.dismiss();
+                                                }
+                                                UIUtils.showToastCenter(R.string.restore_fail);
+                                            }
+                                        } catch (DecryptionException e) {
                                             UIUtils.showToastCenter(R.string.restore_fail);
+                                            e.printStackTrace();
+                                        } catch (UnsupportedEncodingException e) {
+                                            UIUtils.showToastCenter(R.string.restore_fail);
+                                            e.printStackTrace();
                                         }
-                                    } catch (DecryptionException e) {
-                                        UIUtils.showToastCenter(R.string.restore_fail);
-                                        e.printStackTrace();
-                                    } catch (UnsupportedEncodingException e) {
-                                        UIUtils.showToastCenter(R.string.restore_fail);
-                                        e.printStackTrace();
                                     }
-
                                 } else {
+                                    if (progress.isShowing()) {
+                                        progress.dismiss();
+                                    }
                                     if (data instanceof String) {
                                         UIUtils.showToastCenter((String) data);
                                     } else {
