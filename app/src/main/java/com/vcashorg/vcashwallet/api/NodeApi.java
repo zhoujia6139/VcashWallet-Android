@@ -39,6 +39,10 @@ public class NodeApi {
                 }
                 if (result.highest_index > result.last_retrieved_index){
                     NodeApi.getOutputsByPmmrIndex(result.last_retrieved_index, retArr, callback);
+                    double percent = (double)result.last_retrieved_index / (double)result.highest_index;
+                    if (callback != null){
+                        callback.onCall(true, percent);
+                    }
                 }
                 else if(result.highest_index == result.last_retrieved_index){
                     if (callback != null){
