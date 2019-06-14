@@ -104,6 +104,10 @@
     <string name="psw_incorrect">Incorrect Password</string>
     <string name="old_psw_incorrect">The old password you have entered is incorrect</string>
     <string name="enter_current_psw">Enter your current password</string>
+    <string name="new_transaction_come">You have received a new transaction, Waiting for you to sign</string>
+    <string name="not_process_yet">Not processed yet</string>
+    <string name="go_and_see">Go and See</string>
+    <string name="cancel_transaction">Cancel the transaction</string>
 
     <string name="send_success">Sent successfully</string>
     <string name="send_failed">Failed to send your transaction</string>

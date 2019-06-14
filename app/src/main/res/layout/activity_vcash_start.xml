@@ -37,8 +37,8 @@
             android:id="@+id/create_wallet"
             android:background="@drawable/selector_orange"
             android:layout_width="match_parent"
-            android:layout_marginLeft="34dp"
-            android:layout_marginRight="34dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
             android:layout_height="50dp">
             <TextView
                 android:layout_gravity="center"
@@ -57,8 +57,8 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/selector_black_grey"
             android:layout_width="match_parent"
-            android:layout_marginLeft="34dp"
-            android:layout_marginRight="34dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
             android:layout_marginBottom="65dp"
             android:layout_height="50dp">
             <TextView

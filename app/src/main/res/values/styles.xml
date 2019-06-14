@@ -18,6 +18,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="textinputlayout_style_2" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorControlNormal">@color/grey_4</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
     <style name="textinputlayout_error_style" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColor">@color/red</item>
     </style>

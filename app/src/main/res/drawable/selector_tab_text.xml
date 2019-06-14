@@ -1,12 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ Created by wulin on 18-4-15 下午2:57.
-  ~ Copyright (c) 2018 Blockin. All Rights Reserved.
-  ~ Last modified 18-4-15 下午2:54.
-  -->
-
+<?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:color="@color/A10" android:state_checked="false" />
-    <item android:color="@color/A6" android:state_checked="true" />
+    <item android:color="@color/orange" android:state_checked="true" />
 
 </selector>
