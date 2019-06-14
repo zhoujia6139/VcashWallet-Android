@@ -291,6 +291,9 @@ public class PasswordActivity extends ToolBarActivity {
                         WalletApi.checkWalletUtxo(new WalletCallback() {
                             @Override
                             public void onCall(boolean yesOrNo, Object data) {
+                                if (progress.isShowing()) {
+                                    progress.dismiss();
+                                }
                                 if (yesOrNo) {
                                     try {
                                         String json = new Gson().toJson(words);
@@ -298,9 +301,6 @@ public class PasswordActivity extends ToolBarActivity {
                                         boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
                                         if (save) {
                                             SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
-                                            if (progress.isShowing()) {
-                                                progress.dismiss();
-                                            }
                                             UIUtils.showToastCenter(R.string.restore_success);
                                             Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

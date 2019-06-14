@@ -27,7 +27,7 @@ public class LockScreenActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Lock Screen");
+        setToolBarTitle(UIUtils.getString(R.string.lock_screen));
         setToolBarBgColor(R.color.white);
     }
 
@@ -42,10 +42,10 @@ public class LockScreenActivity extends ToolBarActivity {
         final List<LockScreenItem> data = new ArrayList<>();
         int type = TimeOutUtil.getInstance().getTimeOutType();
 
-        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_NEVER,TimeOutUtil.TIME_OUT_NEVER,"Never"));
-        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_30SEC,TimeOutUtil.TIME_OUT_30SEC,"After 30 seconds"));
-        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_1MIN,TimeOutUtil.TIME_OUT_1MIN,"After 1 minute"));
-        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_3MIN,TimeOutUtil.TIME_OUT_3MIN,"After 3 minute"));
+        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_NEVER,TimeOutUtil.TIME_OUT_NEVER,UIUtils.getString(R.string.never)));
+        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_30SEC,TimeOutUtil.TIME_OUT_30SEC,UIUtils.getString(R.string.after_30_seconds)));
+        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_1MIN,TimeOutUtil.TIME_OUT_1MIN,UIUtils.getString(R.string.after_1_minute)));
+        data.add(new LockScreenItem(type == TimeOutUtil.TIME_OUT_3MIN,TimeOutUtil.TIME_OUT_3MIN,UIUtils.getString(R.string.after_3_minute)));
 
         mRv.setLayoutManager(new LinearLayoutManager(this));
         mRv.addItemDecoration(new LinerLineItemDecoration(1, 1, UIUtils.getColor(R.color.grey_4)));

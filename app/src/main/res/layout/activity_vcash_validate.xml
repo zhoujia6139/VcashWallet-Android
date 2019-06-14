@@ -39,7 +39,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter your password to access the wallet"
+            android:text="@string/access_wallet"
             android:textColor="@color/white"
             android:textSize="13sp" />
 
@@ -55,7 +55,7 @@
                 android:id="@+id/et_validate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:textColor="@color/white"
                 android:inputType="textPassword" />
 
@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:drawablePadding="8dp"
-                android:text="Open my wallet"
+                android:text="@string/open_wallet"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="22dp"
-            android:text="Restore from recovery phrase"
+            android:text="@string/restore_wallet_hint"
             android:textColor="@color/A4"
             android:padding="8dp"
             android:textSize="12sp" />

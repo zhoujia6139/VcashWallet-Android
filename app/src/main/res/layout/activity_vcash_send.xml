@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send to"
+            android:text="@string/send_to"
             android:textColor="@color/A10"
             android:textSize="18sp" />
 
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@null"
-                android:hint="Enter or scan the recipient’s ID"
+                android:hint="@string/enter_recipient_id"
                 android:minHeight="40dp"
                 android:textSize="15sp" />
 
@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="35dp"
-            android:text="Amount"
+            android:text="@string/amount"
             android:textColor="@color/A10"
             android:textSize="18sp" />
 
@@ -75,7 +75,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@null"
-                android:hint="Enter amount"
+                android:hint="@string/enter_amount"
                 android:inputType="numberDecimal"
                 android:textSize="15sp" />
 
@@ -83,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
-                android:text="Vcash"
+                android:text="VCash"
                 android:textColor="@color/A10"
                 android:textSize="15sp" />
         </LinearLayout>
@@ -110,7 +110,7 @@
             android:layout_gravity="center"
             android:drawableLeft="@drawable/ic_arrow_white_up"
             android:drawablePadding="6dp"
-            android:text="Send"
+            android:text="@string/send"
             android:textColor="@color/white"
             android:textSize="15sp" />
 

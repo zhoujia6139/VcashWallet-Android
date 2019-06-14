@@ -134,7 +134,7 @@ public class VcashValidateActivity extends BaseActivity {
 
     private void errorNotify() {
         mTilPsw.setErrorEnabled(true);
-        mTilPsw.setError("Incorrect Password");
+        mTilPsw.setError(UIUtils.getString(R.string.psw_incorrect));
     }
 
     private void validate(final List<String> words, final String psw) {
@@ -171,7 +171,7 @@ public class VcashValidateActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        UIUtils.showToastCenter("Validate Wallet Error");
+                        UIUtils.showToastCenter("Create Wallet Error");
                         if (progress.isShowing()) {
                             progress.dismiss();
                         }
@@ -196,9 +196,9 @@ public class VcashValidateActivity extends BaseActivity {
                     @Override
                     public void onAction(List<String> permissions) {
                         new AlertDialog.Builder(VcashValidateActivity.this)
-                                .setTitle("Warning")
-                                .setMessage("The recovered wallet will cover the original wallet,please be cautious")
-                                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                                .setTitle(R.string.warning)
+                                .setMessage(R.string.recover_content)
+                                .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         Intent intent = new Intent(VcashValidateActivity.this, MnemonicRestoreActivity.class);
@@ -206,14 +206,14 @@ public class VcashValidateActivity extends BaseActivity {
                                         nv(intent);
                                     }
                                 })
-                                .setNegativeButton("Cancel", null)
+                                .setNegativeButton(R.string.cancel, null)
                                 .show();
                     }
                 })
                 .onDenied(new Action() {
                     @Override
                     public void onAction(List<String> permissions) {
-                        UIUtils.showToastCenter("Need Storage Permission");
+                        UIUtils.showToastCenter(R.string.storage_permission);
                     }
                 })
                 .start();

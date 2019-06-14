@@ -28,7 +28,7 @@ public class PasswordChangeActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Change Wallet Password");
+        setToolBarTitle(UIUtils.getString(R.string.change_password));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class PasswordChangeActivity extends ToolBarActivity {
                 intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,words);
                 startActivity(intent);
             }else {
-                textInputLayout.setError("The old password you have entered is incorrect");
+                textInputLayout.setError(UIUtils.getString(R.string.old_psw_incorrect));
                 textInputLayout.setErrorEnabled(true);
             }
         }

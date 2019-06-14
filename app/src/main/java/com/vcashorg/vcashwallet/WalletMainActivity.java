@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.fragment.SettingFragment;
 import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
 
@@ -36,7 +37,7 @@ public class WalletMainActivity extends BaseActivity {
         walletDrawer.addOnDrawerItemSelectListener(new WalletDrawer.OnDrawerItemSelectListener() {
             @Override
             public void onDrawerItemSelected(String name) {
-                if(name.equals("Setting")){
+                if(name.equals(UIUtils.getString(R.string.setting))){
                     SettingFragment settingFragment = new SettingFragment();
                     replaceFragment(settingFragment);
                 }else {

@@ -38,7 +38,7 @@ public class VcashSendActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle("Send VCash");
+        setToolBarTitle(UIUtils.getString(R.string.send_vcash));
     }
 
     @Override
@@ -82,12 +82,14 @@ public class VcashSendActivity extends ToolBarActivity {
         });
     }
 
-    private void btnState() {
+    private boolean btnState() {
         if (!mEtAmount.getText().toString().trim().equals("")
                 && !mEtAddress.getText().toString().trim().equals("")) {
             mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.selector_orange));
+            return true;
         } else {
             mBtnSend.setBackground(UIUtils.getResource().getDrawable(R.drawable.bg_orange_light_round_rect));
+            return false;
         }
     }
 
@@ -109,7 +111,7 @@ public class VcashSendActivity extends ToolBarActivity {
 
     @OnClick(R.id.btn_send)
     public void onSendClick(){
-        if(validate()){
+        if(btnState() && validate()){
             showProgressDialog(R.string.wait);
             WalletApi.createSendTransaction(mEtAddress.getText().toString(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
                 @Override
@@ -121,6 +123,7 @@ public class VcashSendActivity extends ToolBarActivity {
                             public void onCall(boolean yesOrNo, Object data) {
                                 dismissProgressDialog();
                                 if(yesOrNo){
+                                    UIUtils.showToastCenter(R.string.send_success);
                                     VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
                                     Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
@@ -132,7 +135,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                     if(data instanceof String){
                                         UIUtils.showToastCenter((String) data);
                                     }else {
-                                        UIUtils.showToastCenter("Send Failed");
+                                        UIUtils.showToastCenter(R.string.send_failed);
                                     }
                                 }
                             }
@@ -142,7 +145,7 @@ public class VcashSendActivity extends ToolBarActivity {
                         if(data instanceof String){
                             UIUtils.showToastCenter((String) data);
                         }else {
-                            UIUtils.showToastCenter("Send Failed");
+                            UIUtils.showToastCenter(R.string.send_failed);
                         }
                     }
                 }
@@ -151,17 +154,11 @@ public class VcashSendActivity extends ToolBarActivity {
     }
 
     private boolean validate(){
-        if(mEtAddress.getText().toString().trim().equals("")){
-            UIUtils.showToastCenter("Address can't be empty");
-            return false;
-        }else if (mEtAmount.getText().toString().trim().equals("")){
-            UIUtils.showToastCenter("Amount can't be empty");
-            return false;
-        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
-            UIUtils.showToastCenter("Amount can't be 0");
+        if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
+            UIUtils.showToastCenter(R.string.send_cant_0);
             return false;
         }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            UIUtils.showToastCenter("Please don't send VCash to your own wallet address");
+            UIUtils.showToastCenter(R.string.send_cant_me);
             return false;
         }
 

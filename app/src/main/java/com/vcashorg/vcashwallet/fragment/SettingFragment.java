@@ -10,6 +10,7 @@ import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.base.BaseFragment;
 import com.vcashorg.vcashwallet.utils.TimeOutUtil;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -21,6 +22,8 @@ public class SettingFragment extends BaseFragment {
     @BindView(R.id.tv_timeout)
     TextView tvTimeOut;
 
+    @BindView(R.id.tv_version_name)
+    TextView tvVersionName;
 
     @Override
     protected int provideContentViewId() {
@@ -30,6 +33,7 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void initView(View rootView) {
         tvTimeOut.setText(TimeOutUtil.getInstance().getTimeOutString());
+        tvVersionName.setText(UIUtils.getString(R.string.app_version) + " " + UIUtils.getVersionName(mActivity));
     }
 
     @Override

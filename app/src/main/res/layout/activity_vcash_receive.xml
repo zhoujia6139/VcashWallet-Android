@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="58dp"
-        android:text="Your wallet ID"
+        android:text="@string/wallet_id"
         android:textColor="@color/A10"
         android:textSize="22sp" />
 
@@ -59,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Or scan the QR code"
+        android:text="@string/scan_qr_code"
         android:textColor="@color/orange"
         android:textSize="15sp" />
 

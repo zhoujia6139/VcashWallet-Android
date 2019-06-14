@@ -33,7 +33,7 @@
             android:drawableLeft="@drawable/ic_vcash_small"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"
-            android:text="Balance"
+            android:text="@string/balance"
             android:textColor="#777777"
             android:textSize="14sp" />
     </LinearLayout>
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Available"
+                android:text="@string/available"
                 android:textColor="#777777"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -87,7 +87,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unconfirmed"
+                android:text="@string/unconfirmed"
                 android:textColor="#777777"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -104,6 +104,6 @@
         android:gravity="center"
         android:paddingTop="6dp"
         android:paddingBottom="6dp"
-        android:text="Recent transaction"
+        android:text="@string/recent_transaction"
         android:textSize="12sp" />
 </RelativeLayout>

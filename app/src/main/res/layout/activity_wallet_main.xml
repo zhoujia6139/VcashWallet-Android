@@ -44,7 +44,7 @@
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_arrow_white_down"
                 android:drawablePadding="6dp"
-                android:text="Receive"
+                android:text="@string/receive"
                 android:textColor="@color/white"
                 android:textSize="15sp" />
 
@@ -67,7 +67,7 @@
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_arrow_white_up"
                 android:drawablePadding="6dp"
-                android:text="Send"
+                android:text="@string/send"
                 android:textColor="@color/white"
                 android:textSize="15sp" />
 
