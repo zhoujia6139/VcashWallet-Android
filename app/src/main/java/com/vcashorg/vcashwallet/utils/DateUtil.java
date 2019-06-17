@@ -19,6 +19,17 @@ public class DateUtil {
 
     /**
      * 时间戳转年月日
+     * @param sec 秒时间戳
+     * @return
+     */
+    public static String formatDateTimeSimple(long sec) {
+        Date date = new Date(sec * 1000);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return format.format(date);
+    }
+
+    /**
+     * 时间戳转年月日
      * @param mills 毫秒时间戳
      * @return
      */

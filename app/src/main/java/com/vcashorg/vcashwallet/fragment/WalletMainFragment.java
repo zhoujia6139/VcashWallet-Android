@@ -23,6 +23,7 @@ import com.vcashorg.vcashwallet.VcashSendActivity;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
+import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.base.BaseFragment;
 import com.vcashorg.vcashwallet.bean.WalletTxEntity;
 import com.vcashorg.vcashwallet.utils.DateUtil;
@@ -160,7 +161,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 refreshData();
             }
         });
-        
+
         setNewData();
         mSrTx.setRefreshing(true);
         refreshData();
@@ -332,21 +333,24 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
 
                     VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
+
                     TextView txState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
-                    helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
+                    helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeSimple(txLog.create_time));
                     switch (confirmState) {
                         case DefaultState:
-                        case LoalConfirmed://waiting confirm
-                            if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
-                                helper.setText(R.id.tv_tx_state,R.string.canceled);
-                                txState.setCompoundDrawablesWithIntrinsicBounds(
-                                        UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
-                            } else {
-                                helper.setText(R.id.tv_tx_state, R.string.ongoing);
-                                txState.setCompoundDrawablesWithIntrinsicBounds(
-                                        UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                            if(txType == VcashTxLog.TxLogEntryType.TxSent){
+                                helper.setText(R.id.tv_tx_state, "recipient processing now");
+                            }else if(txType == VcashTxLog.TxLogEntryType.TxReceived){
+                                helper.setText(R.id.tv_tx_state, "sender processing now");
                             }
+                            txState.setCompoundDrawablesWithIntrinsicBounds(
+                                    UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                            break;
+                        case LoalConfirmed://waiting confirm
+                            helper.setText(R.id.tv_tx_state, "waiting for confirming");
+                            txState.setCompoundDrawablesWithIntrinsicBounds(
+                                    UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;
                         case NetConfirmed:
                             helper.setText(R.id.tv_tx_state,R.string.confirmed);
@@ -355,6 +359,13 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                             break;
 
                     }
+
+                    if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
+                        helper.setText(R.id.tv_tx_state, R.string.canceled);
+                        txState.setCompoundDrawablesWithIntrinsicBounds(
+                                UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
+                    }
+
                     break;
             }
 

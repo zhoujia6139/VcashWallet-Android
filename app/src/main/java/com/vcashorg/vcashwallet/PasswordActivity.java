@@ -313,7 +313,7 @@ public class PasswordActivity extends ToolBarActivity {
                                                     progress.dismiss();
                                                 }
                                                 SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
-                                                UIUtils.showToastCenter(R.string.restore_success);
+                                                UIUtils.showToastCenter(R.string.create_wallet_success);
                                                 Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
                                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 nv(intent);
