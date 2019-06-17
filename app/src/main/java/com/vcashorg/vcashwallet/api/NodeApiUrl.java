@@ -18,7 +18,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface NodeApiUrl {
-    public static final String BaseUrl = "http://47.75.163.56:13513";
 
     @GET("/v1/txhashset/outputs?max=500")
     Observable<NodeOutputs> getOutputs(@Query("start_index") long start_index);
