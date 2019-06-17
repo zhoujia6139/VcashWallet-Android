@@ -331,23 +331,25 @@ public class WalletApi {
         });
     }
 
-    public static boolean cancelTransaction(VcashTxLog txLog){
-        if (txLog.isCanBeCanneled()){
+    public static boolean cancelTransaction(String tx_id){
+        VcashTxLog txLog = WalletApi.getTxByTxid(tx_id);
+        if (txLog != null && !txLog.isCanBeCanneled()){
+            return false;
+        }
+        if (txLog != null){
             txLog.cancelTxlog();
             EncryptedDBHelper.getsInstance().saveTx(txLog);
             VcashWallet.getInstance().syncOutputInfo();
-            ServerApi.cancelTransaction(txLog.tx_slate_id, new WalletCallback() {
-                @Override
-                public void onCall(boolean yesOrNo, Object data) {
-                    if (!yesOrNo){
-                        Log.e(Tag, "cancel tx to Server failed");
-                    }
-                }
-            });
-            return true;
         }
-
-        return false;
+        ServerApi.cancelTransaction(tx_id, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (!yesOrNo){
+                    Log.e(Tag, "cancel tx to Server failed");
+                }
+            }
+        });
+        return true;
     }
 
     public static ArrayList<VcashTxLog> getTransationArr(){
