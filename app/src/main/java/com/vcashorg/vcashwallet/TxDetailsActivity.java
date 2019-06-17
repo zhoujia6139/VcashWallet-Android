@@ -284,7 +284,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             switch (vcashTxLog.tx_type) {
                 case TxSent:
                     if(vcashTxLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
-                        cancelTransaction(serverTx.tx_id);
+                        cancelTransaction(vcashTxLog.tx_slate_id);
                     }
                     break;
                 case TxSentCancelled:
