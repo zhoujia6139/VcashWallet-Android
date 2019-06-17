@@ -160,7 +160,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 refreshData();
             }
         });
-
+        
+        setNewData();
         mSrTx.setRefreshing(true);
         refreshData();
     }
@@ -198,45 +199,47 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
         WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
-
-                //refreshlist
-                List<VcashTxLog> txLogs = deleteDbTxLog(WalletApi.getTransationArr());
-                List<ServerTransaction> serverTxs = ServerTxManager.getInstance().getSeverTxList();
-                Collections.reverse(txLogs);
-
-                mData.clear();
-
-                for (int i = 0; i < serverTxs.size(); i++) {
-                    WalletTxEntity entity = new WalletTxEntity();
-                    entity.setItemType(WalletTxEntity.TYPE_SERVER_TX);
-                    entity.setServerTxEntity(serverTxs.get(i));
-                    mData.add(entity);
-                }
-
-                for (int i = 0; i < txLogs.size(); i++) {
-                    WalletTxEntity entity = new WalletTxEntity();
-                    entity.setItemType(WalletTxEntity.TYPE_TX_LOG);
-                    entity.setTxLogEntity(txLogs.get(i));
-                    mData.add(entity);
-                }
-
-                if (mData != null && mData.size() != 0) {
-                    adapter.removeFooterView(footerView);
-                }
-                adapter.setNewData(mData);
-                mSrTx.setRefreshing(false);
-
-                //refreshbalance
-                WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-                mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
-                mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
-                mTvUnconfirmed.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
-
-                //refreshheight
-                mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());
+                setNewData();
             }
         });
+    }
 
+    private void setNewData(){
+        //refreshlist
+        List<VcashTxLog> txLogs = deleteDbTxLog(WalletApi.getTransationArr());
+        List<ServerTransaction> serverTxs = ServerTxManager.getInstance().getSeverTxList();
+        Collections.reverse(txLogs);
+
+        mData.clear();
+
+        for (int i = 0; i < serverTxs.size(); i++) {
+            WalletTxEntity entity = new WalletTxEntity();
+            entity.setItemType(WalletTxEntity.TYPE_SERVER_TX);
+            entity.setServerTxEntity(serverTxs.get(i));
+            mData.add(entity);
+        }
+
+        for (int i = 0; i < txLogs.size(); i++) {
+            WalletTxEntity entity = new WalletTxEntity();
+            entity.setItemType(WalletTxEntity.TYPE_TX_LOG);
+            entity.setTxLogEntity(txLogs.get(i));
+            mData.add(entity);
+        }
+
+        if (mData != null && mData.size() != 0) {
+            adapter.removeFooterView(footerView);
+        }
+        adapter.setNewData(mData);
+        mSrTx.setRefreshing(false);
+
+        //refreshbalance
+        WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
+        mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
+        mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
+        mTvUnconfirmed.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
+
+        //refreshheight
+        mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());
     }
 
     private List<VcashTxLog> deleteDbTxLog(ArrayList<VcashTxLog> txLogs) {
