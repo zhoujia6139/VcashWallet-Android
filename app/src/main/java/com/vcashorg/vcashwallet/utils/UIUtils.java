@@ -226,10 +226,7 @@ public class UIUtils {
     }
 
     public static boolean isEmpty(String value){
-        if(TextUtils.isEmpty(value) || value.equals("null")){
-            return true;
-        }
-        return false;
+        return TextUtils.isEmpty(value) || value.equals("null");
     }
 
     /**

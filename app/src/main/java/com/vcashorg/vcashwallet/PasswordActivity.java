@@ -296,6 +296,8 @@ public class PasswordActivity extends ToolBarActivity {
                         WalletApi.checkWalletUtxo(new WalletCallback() {
                             @Override
                             public void onCall(boolean yesOrNo, Object data) {
+                               // Log.i("yjq","回调返回时间 : " + System.currentTimeMillis());
+
                                 if (yesOrNo) {
                                     if(data instanceof Double){
                                         double percent = (double) data;
