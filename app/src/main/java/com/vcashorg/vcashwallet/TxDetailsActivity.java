@@ -284,7 +284,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             switch (vcashTxLog.tx_type){
                 case TxSent:
                     if(vcashTxLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
-                        cancelTransaction(vcashTxLog);
+                        cancelTransaction(serverTx.tx_id);
                     }
                     break;
                 case TxSentCancelled:
@@ -295,8 +295,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
         if(serverTx != null){
             if(serverTx.status == ServerTxStatus.TxReceiverd){
-                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(serverTx.tx_id);
-                cancelTransaction(vcashTxLog);
+                cancelTransaction(serverTx.tx_id);
             }
         }
     }
@@ -312,8 +311,8 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
     }
 
-    public void cancelTransaction(VcashTxLog vcashTxLog){
-        if(WalletApi.cancelTransaction(vcashTxLog)){
+    public void cancelTransaction(String tx_id){
+        if(WalletApi.cancelTransaction(tx_id)){
             UIUtils.showToastCenter(R.string.cancel_success);
             if(serverTx != null){
                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
