@@ -339,7 +339,6 @@ public class WalletApi {
         if (txLog != null){
             txLog.cancelTxlog();
             EncryptedDBHelper.getsInstance().saveTx(txLog);
-            VcashWallet.getInstance().syncOutputInfo();
         }
         ServerApi.cancelTransaction(tx_id, new WalletCallback() {
             @Override

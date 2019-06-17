@@ -62,6 +62,7 @@ public class VcashTxLog implements Serializable {
                 }
             }
         }
+        VcashWallet.getInstance().syncOutputInfo();
 
         tx_type = ((tx_type == VcashTxLog.TxLogEntryType.TxSent)?VcashTxLog.TxLogEntryType.TxSentCancelled:VcashTxLog.TxLogEntryType.TxReceivedCancelled);
         server_status = ServerTxStatus.TxCanceled;

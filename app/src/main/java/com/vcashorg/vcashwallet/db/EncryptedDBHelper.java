@@ -56,6 +56,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
         try {
+            db.delete("VcashOutput", null, null);
             for (VcashOutput item : arr) {
                 db.execSQL("REPLACE INTO VcashOutput (" +
                         "commitment, keypath, mmr_index, value, height, lock_height, is_coinbase, status, tx_log_id)" +
@@ -97,7 +98,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 item.is_coinbase = (cursor.getInt(cursor.getColumnIndex("is_coinbase")) == 1);
                 item.status = VcashOutput.OutputStatus.values()[cursor.getInt(cursor.getColumnIndex("status"))];
                 item.tx_log_id = cursor.getShort(cursor.getColumnIndex("tx_log_id"));
-                if (getTxByTxId(item.tx_log_id) != null){
+                if (getActiveTxByTxId(item.tx_log_id) != null){
                     arr.add(item);
                 }
             } while (cursor.moveToNext());
@@ -200,9 +201,10 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    public VcashTxLog getTxByTxId(int tx_id){
+    public VcashTxLog getActiveTxByTxId(int tx_id){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_id = ?", new Integer[] {tx_id});
+        String query = String.format("SELECT * FROM VcashTxLog WHERE tx_id = %s AND server_status <> 3", tx_id);
+        Cursor cursor = db.rawQuery(query, null);
         if (cursor != null && cursor.moveToFirst()){
 
             return parseTxLog(cursor);
