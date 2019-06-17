@@ -76,16 +76,16 @@ public class TxDetailsActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         Intent intent = getIntent();
-        int type = intent.getIntExtra(PARAM_TX_TYPE,TYPE_TX_LOG);
-        if(type == TYPE_TX_SERVER){
+        int type = intent.getIntExtra(PARAM_TX_TYPE, TYPE_TX_LOG);
+        if (type == TYPE_TX_SERVER) {
             serverTx = (ServerTransaction) intent.getSerializableExtra(PARAM_TX_DATA);
             configDataFromServerTransaction();
-        }else {
+        } else {
             vcashTxLog = (VcashTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
             configDataFromVcashTxLog();
         }
-        sender = intent.getBooleanExtra(PARAM_TX_SENDER,false);
-        if(sender){
+        sender = intent.getBooleanExtra(PARAM_TX_SENDER, false);
+        if (sender) {
             TextView tvRight = getSubTitle();
             tvRight.setText(R.string.done);
             tvRight.setTextColor(UIUtils.getColor(R.color.orange));
@@ -103,14 +103,14 @@ public class TxDetailsActivity extends ToolBarActivity {
         return R.layout.activity_tx_details;
     }
 
-    public void configDataFromServerTransaction(){
-        if(serverTx == null)return;
+    public void configDataFromServerTransaction() {
+        if (serverTx == null) return;
         mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-        mTvSign.setText(serverTx.isSend ? R.string.verify_signature: R.string.receive_signature);
+        mTvSign.setText(serverTx.isSend ? R.string.verify_signature : R.string.receive_signature);
         mFlCancel.setVisibility(serverTx.isSend ? View.VISIBLE : View.GONE);
-        switch (serverTx.status){
+        switch (serverTx.status) {
             case TxDefaultStatus:
-                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign:R.string.tx_status_wait_receiver_sign);
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign : R.string.tx_status_wait_receiver_sign);
                 mFlSign.setVisibility(View.VISIBLE);
                 break;
             case TxFinalized:
@@ -120,7 +120,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 break;
             case TxReceiverd:
                 //The recipient has already signed, waiting for the sender to broadcast
-                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign:R.string.tx_status_wait_receiver_sign);
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign : R.string.tx_status_wait_receiver_sign);
                 break;
             case TxCanceled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
@@ -138,22 +138,22 @@ public class TxDetailsActivity extends ToolBarActivity {
     }
 
 
-    public void configDataFromVcashTxLog(){
-        if(vcashTxLog == null) return;
-        switch (vcashTxLog.confirm_state){
+    public void configDataFromVcashTxLog() {
+        if (vcashTxLog == null) return;
+        switch (vcashTxLog.confirm_state) {
             case DefaultState:
-                if(vcashTxLog.tx_type == TxSent){
+                if (vcashTxLog.tx_type == TxSent) {
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
                     mTvStatus.setText(R.string.tx_status_wait_receiver_sign);
                     mTvSign.setText(R.string.verify_signature);
                     mFlCancel.setVisibility(View.VISIBLE);
-                    if(vcashTxLog.server_status == ServerTxStatus.TxDefaultStatus){
+                    if (vcashTxLog.server_status == ServerTxStatus.TxDefaultStatus) {
                         mFlSign.setVisibility(View.GONE);
-                    }else if(vcashTxLog.server_status == ServerTxStatus.TxReceiverd){
+                    } else if (vcashTxLog.server_status == ServerTxStatus.TxReceiverd) {
                         serverTx = ServerTxManager.getInstance().getServerTxByTxId(vcashTxLog.tx_slate_id);
                         mFlSign.setVisibility(serverTx != null ? View.VISIBLE : View.GONE);
                     }
-                }else if(vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived){
+                } else if (vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived) {
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
                     mTvStatus.setText(R.string.tx_status_wait_sender_sign);
                     mFlSign.setVisibility(View.GONE);
@@ -174,25 +174,25 @@ public class TxDetailsActivity extends ToolBarActivity {
                 break;
         }
 
-        mTvTxId.setText(vcashTxLog.tx_slate_id == null ? UIUtils.getString(R.string.unReachable) : vcashTxLog.tx_slate_id);
+        mTvTxId.setText(UIUtils.isEmpty(vcashTxLog.tx_slate_id)? UIUtils.getString(R.string.unReachable) : vcashTxLog.tx_slate_id);
         mTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
         configInfoFromTxType(vcashTxLog.tx_type);
     }
 
 
-    public void configInfoFromTxType(VcashTxLog.TxLogEntryType txType){
-        switch (txType){
+    public void configInfoFromTxType(VcashTxLog.TxLogEntryType txType) {
+        switch (txType) {
             case ConfirmedCoinbase:
                 mTvTxId.setText(R.string.coinbase);
                 break;
             case TxSent:
                 mTvSender.setText(WalletApi.getWalletUserId());
-                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
+                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited - vcashTxLog.fee));
                 break;
             case TxReceived:
-                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) :vcashTxLog.parter_id);
+                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited));
                 break;
@@ -203,7 +203,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 mFlCancel.setVisibility(View.VISIBLE);
                 mTvCancel.setText(R.string.delete_transaction);
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
-                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
+                mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited));
                 break;
@@ -215,7 +215,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 mTvCancel.setText(R.string.delete_transaction);
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
                 mTvSender.setText(WalletApi.getWalletUserId());
-                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable):vcashTxLog.parter_id);
+                mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.amount_credited - vcashTxLog.amount_debited - vcashTxLog.fee));
                 break;
         }
@@ -223,51 +223,51 @@ public class TxDetailsActivity extends ToolBarActivity {
 
 
     @OnClick(R.id.fl_btn_sign)
-    public void onSignClick(){
+    public void onSignClick() {
         boolean isSend = false;
-        if(serverTx != null){
+        if (serverTx != null) {
             isSend = serverTx.isSend;
         }
-        if(vcashTxLog != null){
+        if (vcashTxLog != null) {
             isSend = (vcashTxLog.tx_type == TxSent);
         }
-        if(serverTx != null){
+        if (serverTx != null) {
             showProgressDialog(R.string.wait);
-            if(isSend){
+            if (isSend) {
                 WalletApi.finalizeTransaction(serverTx, new WalletCallback() {
                     @Override
                     public void onCall(boolean yesOrNo, Object data) {
                         dismissProgressDialog();
-                        if(yesOrNo){
+                        if (yesOrNo) {
                             UIUtils.showToastCenter(R.string.broadcast_success);
-                            if(serverTx != null){
+                            if (serverTx != null) {
                                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
                             }
                             finish();
-                        }else {
-                            if(data instanceof String){
+                        } else {
+                            if (data instanceof String) {
                                 UIUtils.showToastCenter((String) data);
-                            }else {
+                            } else {
                                 UIUtils.showToastCenter(R.string.broadcast_failed);
                             }
                         }
                     }
                 });
-            }else {
+            } else {
                 WalletApi.receiveTransaction(serverTx, new WalletCallback() {
                     @Override
                     public void onCall(boolean yesOrNo, Object data) {
                         dismissProgressDialog();
-                        if(yesOrNo){
+                        if (yesOrNo) {
                             UIUtils.showToastCenter(R.string.receive_success);
-                            if(serverTx != null){
+                            if (serverTx != null) {
                                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
                             }
                             finish();
-                        }else {
-                            if(data instanceof String){
+                        } else {
+                            if (data instanceof String) {
                                 UIUtils.showToastCenter((String) data);
-                            }else {
+                            } else {
                                 UIUtils.showToastCenter(R.string.receive_failed);
                             }
                         }
@@ -279,9 +279,9 @@ public class TxDetailsActivity extends ToolBarActivity {
     }
 
     @OnClick(R.id.fl_btn_cancel)
-    public void onCancelClick(){
-        if(vcashTxLog != null){
-            switch (vcashTxLog.tx_type){
+    public void onCancelClick() {
+        if (vcashTxLog != null) {
+            switch (vcashTxLog.tx_type) {
                 case TxSent:
                     if(vcashTxLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
                         cancelTransaction(serverTx.tx_id);
@@ -301,12 +301,12 @@ public class TxDetailsActivity extends ToolBarActivity {
     }
 
 
-    public void deleteTransaction(){
+    public void deleteTransaction() {
         boolean result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);
-        if(result){
+        if (result) {
             UIUtils.showToastCenter(R.string.delete_success);
             finish();
-        }else {
+        } else {
             UIUtils.showToastCenter(R.string.delete_failed);
         }
     }
@@ -314,11 +314,11 @@ public class TxDetailsActivity extends ToolBarActivity {
     public void cancelTransaction(String tx_id){
         if(WalletApi.cancelTransaction(tx_id)){
             UIUtils.showToastCenter(R.string.cancel_success);
-            if(serverTx != null){
+            if (serverTx != null) {
                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
             }
             finish();
-        }else {
+        } else {
             UIUtils.showToastCenter(R.string.cancel_failed);
         }
     }

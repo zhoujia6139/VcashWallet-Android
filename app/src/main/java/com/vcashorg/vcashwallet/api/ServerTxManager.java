@@ -207,7 +207,6 @@ public class ServerTxManager {
 
     public List<ServerTransaction> getSeverTxList(){
         List<ServerTransaction> list = new ArrayList<>();
-        //List<ServerTransaction> blacklist = new ArrayList<>();
         List<ServerTransaction> normallist = new ArrayList<>();
 
         Set<Map.Entry<String, ServerTransaction>> entrySet = txMap.entrySet();
@@ -218,10 +217,8 @@ public class ServerTxManager {
 
         }
 
-        //Collections.reverse(blacklist);
         Collections.reverse(normallist);
 
-        //list.addAll(blacklist);
         list.addAll(normallist);
 
         return list;

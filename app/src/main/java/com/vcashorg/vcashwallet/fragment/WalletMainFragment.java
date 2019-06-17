@@ -178,6 +178,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     nv2(intent, REQUEST_CODE_SERVER_TX);
                 }
             });
+            ServerTxManager.getInstance().addBlackList(recentTx);
             popUtil.show();
         }
     }

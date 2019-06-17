@@ -43,6 +43,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
                 android:src="@drawable/ic_eyes_black" />
 
             <TextView
@@ -65,6 +66,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
                 android:src="@drawable/ic_lock_black" />
 
             <TextView
@@ -88,6 +90,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
                 android:src="@drawable/ic_copy_black" />
 
             <TextView
