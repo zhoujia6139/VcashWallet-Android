@@ -348,7 +348,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;
                         case LoalConfirmed://waiting confirm
-                            helper.setText(R.id.tv_tx_state, "waiting for confirming");
+                            helper.setText(R.id.tv_tx_state, "waiting for confirmation");
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;

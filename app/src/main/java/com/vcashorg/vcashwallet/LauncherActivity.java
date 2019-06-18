@@ -16,6 +16,12 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //don't reopen app when click icon
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
         if(SPUtil.getInstance(UIUtils.getContext()).getValue(SPUtil.FIRST_CREATE_WALLET,false)
                 && PayloadUtil.getInstance(this).ifMnemonicFileExist()){
             Intent intent = new Intent(this,VcashValidateActivity.class);

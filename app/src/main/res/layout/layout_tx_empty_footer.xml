@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="No transaction"
+            android:text="@string/no_transaction"
             android:textColor="@color/A2"
             android:textSize="15sp" />
 

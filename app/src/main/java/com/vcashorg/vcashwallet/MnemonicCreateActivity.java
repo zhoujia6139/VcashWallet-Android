@@ -79,7 +79,7 @@ public class MnemonicCreateActivity extends ToolBarActivity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.save_seed_phrase)
                 .setMessage(R.string.save_seed_phrase_content)
-                .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(MnemonicCreateActivity.this,MnemonicConfirmActivity.class);
