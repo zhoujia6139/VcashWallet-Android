@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet.utils;
 
+import com.vcashorg.vcashwallet.R;
+
 public class TimeOutUtil {
 
     public static final int TIME_OUT_NEVER = 0;
@@ -61,13 +63,13 @@ public class TimeOutUtil {
     public String getTimeOutString(){
         switch (type){
             case TIME_OUT_NEVER:
-                return "Never";
+                return UIUtils.getString(R.string.never);
             case TIME_OUT_30SEC:
-                return "After 30 seconds";
+                return UIUtils.getString(R.string.after_30_seconds);
             case TIME_OUT_1MIN:
-                return "After 1 minute";
+                return UIUtils.getString(R.string.after_1_minute);
             case TIME_OUT_3MIN:
-                return "After 3 minutes";
+                return UIUtils.getString(R.string.after_3_minute);
         }
         return "";
     }

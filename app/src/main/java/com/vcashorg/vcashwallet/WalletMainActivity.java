@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -8,6 +9,7 @@ import android.widget.FrameLayout;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.fragment.SettingFragment;
 import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
+import com.vcashorg.vcashwallet.update.WalletUpdateManager;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
@@ -48,6 +50,11 @@ public class WalletMainActivity extends BaseActivity {
         });
     }
 
+    @Override
+    public void initData() {
+        WalletUpdateManager.getInstance().fetchUpdateConfig(this);
+    }
+
     private void replaceFragment(Fragment fragment){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container,fragment);
@@ -56,5 +63,15 @@ public class WalletMainActivity extends BaseActivity {
 
     public void openDrawer(){
         walletDrawer.openDrawer();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == WalletUpdateManager.UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
+            exitApp();
+        }
     }
 }

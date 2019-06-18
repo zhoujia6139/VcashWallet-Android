@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.vcashorg.vcashwallet.api.NodeApiUrl;
 import com.vcashorg.vcashwallet.api.ServerApiUrl;
+import com.vcashorg.vcashwallet.update.UpdateApi;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 
 import okhttp3.OkHttpClient;
@@ -49,6 +50,10 @@ public class RetrofitUtils {
 
     public static ServerApiUrl getServerRetrofit(){
         return initRetrofit(initOkHttp(), getServerBaseUrl()).create(ServerApiUrl.class);
+    }
+
+    public static UpdateApi getUpdateRetrofit(){
+        return initRetrofit(initOkHttp(),getServerBaseUrl()).create(UpdateApi.class);
     }
 
     private static String getNodeBaseUrl(){

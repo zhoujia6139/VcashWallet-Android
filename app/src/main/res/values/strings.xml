@@ -1,12 +1,13 @@
-<resources>
-    <string name="app_name">Vcash Wallet</string>
+<resources tools:ignore="MissingTranslation" xmlns:tools="http://schemas.android.com/tools">
 
+    <string name="app_name">Vcash Wallet</string>
 
     <string name="copy_ok">Copied to clipboard</string>
     <string name="exit">Please press again to exit</string>
     <string name="next">Next</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
+    <string name="ok">OK</string>
     <string name="check">Check</string>
     <string name="generate">Generate</string>
     <string name="warning">Warning</string>
@@ -24,20 +25,21 @@
     <string name="unconfirmed">Unconfirmed</string>
     <string name="available">Available</string>
     <string name="balance">Balance</string>
-    <string name="recent_transaction">Recent transaction</string>
+    <string name="recent_transaction">Recent transactions</string>
     <string name="receive">Receive</string>
     <string name="send">Send</string>
 
     <string name="transaction_details">Transaction Details</string>
-    <string name="verify_signature">Verify and signature</string>
-    <string name="receive_signature">Receive and signature</string>
-    <string name="tx_status_wait_sender_sign">Tx Status: waiting for the sender to sign</string>
-    <string name="tx_status_wait_receiver_sign">Tx Status: waiting for the recipient to sign</string>
-    <string name="tx_status_wait_confirm">Tx Status: waiting for confirming</string>
-    <string name="tx_status_cancel">Tx Status: transaction canceled</string>
-    <string name="tx_status_completed">Tx Status: transaction completed</string>
+    <string name="verify_signature">Sign the transaction</string>
+    <string name="receive_signature">Sign the transaction</string>
+    <string name="tx_status_wait_sender_sign">TX Status: waiting for the sender to sign</string>
+    <string name="tx_status_wait_your_sign">TX Status: waiting for your signature</string>
+    <string name="tx_status_wait_receiver_sign">TX Status: waiting for recipient to sign</string>
+    <string name="tx_status_wait_confirm">TX Status: waiting for confirmation</string>
+    <string name="tx_status_cancel">TX Status: transaction canceled</string>
+    <string name="tx_status_completed">TX Status: transaction completed</string>
     <string name="delete_transaction">Delete the transaction</string>
-    <string name="tx_id">TxID:</string>
+    <string name="tx_id">TXID:</string>
     <string name="sender">Sender:</string>
     <string name="recipient">Recipient:</string>
     <string name="tx_amount">TX amount:</string>
@@ -49,7 +51,7 @@
     <string name="create_new_wallet_notify">By creating the wallet, you need to write down your seed recovery phrase and store it securely so that your wallet can be recovered in the case your device was lost for stolen</string>
     <string name="create_new_wallet_notify_1">Do not let anyone see your seed phrase.</string>
     <string name="create_new_wallet_notify_2">Never type your seed phrase into password managers or elsewhere.</string>
-    <string name="create_new_wallet_notify_3">Make at least 2 copies of the phrase in caseof emergency.</string>
+    <string name="create_new_wallet_notify_3">Make at least 2 copies of the phrase in case of emergency.</string>
     <string name="got_it">Got it</string>
     <string name="backup_prompt">Your seed phrase is the access key to all the funds in your wallet. Print or write down the phrase to keep it in a safe or in a locked vault.Without the phrase you will not be able to recover your money.</string>
     <string name="save_seed_phrase">Save seed phrase</string>
@@ -67,7 +69,7 @@
     <string name="password_create_2">You are highly recommended to set a strong password, preferably with uppercase and lowercase letters and numbers.</string>
     <string name="confirm_password">Confirm password</string>
     <string name="start_use_wallet">Start to use your wallet</string>
-    <string name="change_password">Change wallet password</string>
+    <string name="change_password">Reset wallet password</string>
     <string name="save_new_password">Save new password</string>
     <string name="recover_content">Your current wallet will be logged out if you restore other wallets. Please ensure seed phrase has been correctly saved before taking actions</string>
     <string name="storage_permission">Need Storage Permission</string>
@@ -94,7 +96,7 @@
     <string name="never">Never</string>
     <string name="after_30_seconds">After 30 seconds</string>
     <string name="after_1_minute">After 1 minute</string>
-    <string name="after_3_minute">After 3 minute</string>
+    <string name="after_3_minute">After 3 minutes</string>
     <string name="restore_seed_phrase">Restore from seed phrase</string>
     <string name="access_wallet">Enter your password to access the wallet</string>
     <string name="open_wallet">Open my wallet</string>
@@ -103,18 +105,19 @@
     <string name="send_cant_me">Please don\'t send VCash to your own wallet address</string>
     <string name="send_address_length">The address format is incorrect</string>
     <string name="psw_incorrect">Incorrect Password</string>
-    <string name="old_psw_incorrect">The old password you have entered is incorrect</string>
+    <string name="old_psw_incorrect">The original password you have entered is incorrect</string>
     <string name="enter_current_psw">Enter your current password</string>
-    <string name="new_transaction_come">You have received a new transaction, Waiting for you to sign</string>
-    <string name="not_process_yet">Not processed yet</string>
+    <string name="new_transaction_come">A new transaction is waiting for your signature</string>
+    <string name="not_process_yet">Process later</string>
     <string name="go_and_see">Go and See</string>
     <string name="cancel_transaction">Cancel the transaction</string>
+    <string name="no_transaction">No transactions</string>
 
     <string name="send_success">Sent successfully</string>
     <string name="send_failed">Failed to send your transaction</string>
-    <string name="receive_success">Received successfully</string>
+    <string name="receive_success">Signature completed.Waiting for sender to process</string>
     <string name="receive_failed">Failed to receive the transaction</string>
-    <string name="broadcast_success">Broadcasted successfully</string>
+    <string name="broadcast_success">Waiting for network confirmation</string>
     <string name="broadcast_failed">Failed to broadcast the transaction</string>
     <string name="cancel_success">Cancelled successfully</string>
     <string name="cancel_failed">Failed to cancel the transaction</string>

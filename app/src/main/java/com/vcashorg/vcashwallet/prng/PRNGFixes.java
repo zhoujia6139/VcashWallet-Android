@@ -1,7 +1,4 @@
-/*
- * created by wulin on 18-8-6 下午8:42.
- * Copyright (c) 2018 Blockin. All Rights Reserved.
- */
+
 
 package com.vcashorg.vcashwallet.prng;
 

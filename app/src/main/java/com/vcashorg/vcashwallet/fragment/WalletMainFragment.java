@@ -344,26 +344,29 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                             }else if(txType == VcashTxLog.TxLogEntryType.TxReceived){
                                 helper.setText(R.id.tv_tx_state, "sender processing now");
                             }
+                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;
                         case LoalConfirmed://waiting confirm
-                            helper.setText(R.id.tv_tx_state, "waiting for confirming");
+                            helper.setText(R.id.tv_tx_state, "waiting for confirmation");
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
+                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
                             break;
                         case NetConfirmed:
                             helper.setText(R.id.tv_tx_state,R.string.confirmed);
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
+                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
                             break;
-
                     }
 
                     if (txType == VcashTxLog.TxLogEntryType.TxSentCancelled || txType == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
                         helper.setText(R.id.tv_tx_state, R.string.canceled);
                         txState.setCompoundDrawablesWithIntrinsicBounds(
                                 UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
+                        helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
                     }
 
                     break;

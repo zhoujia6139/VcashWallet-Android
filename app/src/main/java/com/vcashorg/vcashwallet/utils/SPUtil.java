@@ -1,8 +1,3 @@
-/*
- * created by wulin on 18-8-15 下午3:04.
- * Copyright (c) 2018 Blockin. All Rights Reserved.
- */
-
 package com.vcashorg.vcashwallet.utils;
 
 import android.content.Context;
