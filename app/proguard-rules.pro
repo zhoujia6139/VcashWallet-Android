@@ -71,6 +71,11 @@
 
 ###################################################
 
+#WCDB
+-keep class com.tencent.wcdb.** {*;}
+
+###################################################
+
 -dontpreverify
 
 -keepclassmembers class * {
@@ -95,8 +100,8 @@
     public static ** valueOf(java.lang.String);
 }
 
--keepnames class * implements android.os.Parcelable {
-    public static final ** CREATOR;
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator CREATOR;
 }
 
 -keepclassmembers class * implements java.io.Serializable {
