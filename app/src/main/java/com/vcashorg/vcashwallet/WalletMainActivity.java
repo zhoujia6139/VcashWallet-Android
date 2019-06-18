@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -62,5 +63,15 @@ public class WalletMainActivity extends BaseActivity {
 
     public void openDrawer(){
         walletDrawer.openDrawer();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == WalletUpdateManager.UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
+            exitApp();
+        }
     }
 }
