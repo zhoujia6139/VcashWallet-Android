@@ -33,7 +33,7 @@
     <string name="verify_signature">Sign the transaction</string>
     <string name="receive_signature">Sign the transaction</string>
     <string name="tx_status_wait_sender_sign">TX Status: waiting for the sender to sign</string>
-    <string name="tx_status_sender_sign">waiting for your signature</string>
+    <string name="tx_status_wait_your_sign">TX Status: waiting for your signature</string>
     <string name="tx_status_wait_receiver_sign">TX Status: waiting for recipient to sign</string>
     <string name="tx_status_wait_confirm">TX Status: waiting for confirming</string>
     <string name="tx_status_cancel">TX Status: transaction canceled</string>

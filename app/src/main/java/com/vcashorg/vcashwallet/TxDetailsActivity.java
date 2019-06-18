@@ -1,7 +1,6 @@
 package com.vcashorg.vcashwallet;
 
 import android.content.Intent;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -110,7 +109,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         mFlCancel.setVisibility(serverTx.isSend ? View.VISIBLE : View.GONE);
         switch (serverTx.status) {
             case TxDefaultStatus:
-                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign : R.string.tx_status_wait_receiver_sign);
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign : R.string.tx_status_wait_your_sign);
                 mFlSign.setVisibility(View.VISIBLE);
                 break;
             case TxFinalized:
@@ -120,7 +119,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 break;
             case TxReceiverd:
                 //The recipient has already signed, waiting for the sender to broadcast
-                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_sender_sign : R.string.tx_status_wait_receiver_sign);
+                mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_your_sign : R.string.tx_status_wait_receiver_sign);
                 break;
             case TxCanceled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
@@ -152,10 +151,16 @@ public class TxDetailsActivity extends ToolBarActivity {
                     } else if (vcashTxLog.server_status == ServerTxStatus.TxReceiverd) {
                         serverTx = ServerTxManager.getInstance().getServerTxByTxId(vcashTxLog.tx_slate_id);
                         mFlSign.setVisibility(serverTx != null ? View.VISIBLE : View.GONE);
+                        if(serverTx != null){
+                            mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_receiver_sign : R.string.tx_status_wait_your_sign);
+                        }
                     }
                 } else if (vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived) {
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-                    mTvStatus.setText(R.string.tx_status_wait_sender_sign);
+                    serverTx = ServerTxManager.getInstance().getServerTxByTxId(vcashTxLog.tx_slate_id);
+                    if(serverTx != null){
+                        mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_your_sign : R.string.tx_status_wait_sender_sign);
+                    }
                     mFlSign.setVisibility(View.GONE);
                     mFlCancel.setVisibility(View.GONE);
                 }
