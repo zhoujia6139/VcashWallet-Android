@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+
+    <files-path
+        name="getFilesDir"
+        path="."/>
+
+    <cache-path
+        name="getCacheDir"
+        path="."/>
+
+    <external-path
+        name="getExternalStorageDirectory"
+        path="."/>
+
+    <external-files-path
+        name="getExternalFilesDir"
+        path="."/>
+
+    <external-cache-path
+        name="getExternalCacheDir"
+        path="."/>
+</paths>

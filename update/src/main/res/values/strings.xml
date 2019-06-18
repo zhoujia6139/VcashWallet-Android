@@ -1,0 +1,17 @@
+<resources>
+    <string name="versionchecklib_download_apkname">%s.apk</string>
+    <string name="versionchecklib_update">Update</string>
+    <string name="versionchecklib_cancel">Cancel</string>
+    <string name="versionchecklib_retry">Retry</string>
+    <string name="versionchecklib_permission">Authorize</string>
+    <string name="versionchecklib_lowversion_update">The version is too low and needs to be updated</string>
+    <string name="versionchecklib_newversion_update">New Version Available,Would you like to install the latest version?</string>
+    <string name="versionchecklib_download_fail_retry">Download failed , Retry？</string>
+    <string name="versionchecklib_download_net_download">Web Download</string>
+    <string name="versionchecklib_downloading">Downloading</string>
+    <string name="versionchecklib_check_new_version">Find a new version</string>
+    <string name="versionchecklib_download_progress">Download progress :%d%%/100%%</string>
+    <string name="versionchecklib_progress">%d/100</string>
+    <string name="versionchecklib_write_permission_deny">Download and install packages need to read and write file permissions, please authorize.</string>
+
+</resources>

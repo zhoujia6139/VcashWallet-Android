@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.WindowManager;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -37,6 +38,11 @@ public class MnemonicCreateActivity extends ToolBarActivity {
         return R.layout.activity_mneonic_create;
     }
 
+    @Override
+    public void initParams() {
+        //No screenshots
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+    }
 
     @Override
     public void initView() {

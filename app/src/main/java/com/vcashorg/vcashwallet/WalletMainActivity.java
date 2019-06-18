@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.fragment.SettingFragment;
 import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
+import com.vcashorg.vcashwallet.update.WalletUpdateManager;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
@@ -46,6 +47,11 @@ public class WalletMainActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void initData() {
+        WalletUpdateManager.getInstance().fetchUpdateConfig(this);
     }
 
     private void replaceFragment(Fragment fragment){
