@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet.update;
 
 import android.app.Activity;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -36,6 +37,7 @@ public class WalletUpdateManager {
                     @Override
                     public void onSuccess(JsonObject result) {
                         try {
+                           // Log.i("yjq","Update Success");
                             JsonObject versionObject = result.getAsJsonObject("version");
                             JsonObject androidObject = versionObject.getAsJsonObject("android");
                             Version version = new Gson().fromJson(androidObject,Version.class);
@@ -47,12 +49,12 @@ public class WalletUpdateManager {
 
                     @Override
                     public void onFailure(Throwable e, String errorMsg) {
-
+                       // Log.i("yjq","Update onFailure");
                     }
                 });
     }
 
-    public void checkUpdate(Version version,Activity activity){
+    private void checkUpdate(Version version,Activity activity){
         if (version != null) {
             if (!TextUtils.isEmpty(version.download_url)) {
                 int type = UpdateUtils.getUpdateStrategy(UIUtils.getContext(), version.current_version, version.lowest_version);
