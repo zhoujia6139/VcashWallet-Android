@@ -184,17 +184,17 @@ public class VcashTransaction extends VcashTxBaseObject {
         public class TransactionBodyTypeAdapter extends TypeAdapter<TransactionBody> {
             @Override
             public void write(JsonWriter jsonWriter, TransactionBody body) throws IOException {
-                Input input = body.inputs.get(0);
+                Input input = new Input();
                 Gson inputGson = new GsonBuilder().registerTypeAdapter(Input.class, input.new InputTypeAdapter()).create();
                 String inputsStr = inputGson.toJson(body.inputs, new TypeToken<ArrayList<Input>>(){}.getType());
                 inputsStr = StringEscapeUtils.unescapeJson(inputsStr);
 
-                Output output = body.outputs.get(0);
+                Output output = new Output();
                 Gson outputGson = new GsonBuilder().registerTypeAdapter(Output.class, output.new OutputTypeAdapter()).create();
                 String outputsStr = outputGson.toJson(body.outputs, new TypeToken<ArrayList<Output>>(){}.getType());
                 outputsStr = StringEscapeUtils.unescapeJson(outputsStr);
 
-                TxKernel kernel = body.kernels.get(0);
+                TxKernel kernel = new TxKernel();
                 Gson kernelGson = new GsonBuilder().registerTypeAdapter(TxKernel.class, kernel.new TxKernelTypeAdapter()).create();
                 String kernelsStr = kernelGson.toJson(body.kernels, new TypeToken<ArrayList<TxKernel>>(){}.getType());
                 kernelsStr = StringEscapeUtils.unescapeJson(kernelsStr);

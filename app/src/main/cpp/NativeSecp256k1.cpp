@@ -60,6 +60,14 @@ jbyteArray ConvertUnsignedCharsToJByteArray(JNIEnv *env, unsigned char *chars, u
     return jarray;
 }
 
+int getArrayLength(JNIEnv *env, jobjectArray array){
+    int size = 0;
+    if (array != nullptr){
+        size = env->GetArrayLength(array);
+    }
+    return size;
+}
+
 secp256k1_pubkey* getGeneratorJPub(){
     static secp256k1_pubkey GENERATOR_J_PUB = {{
                                                    0x5f, 0x15, 0x21, 0x36, 0x93, 0x93, 0x01, 0x2a,
@@ -163,8 +171,9 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1bind_1sum
         (JNIEnv *env, jobject claseObject, jlong context, jobjectArray positive, jobjectArray negative){
-    int positiveSize = env->GetArrayLength(positive);
-    int negativeSize = env->GetArrayLength(negative);
+
+    int positiveSize = getArrayLength(env, positive);
+    int negativeSize = getArrayLength(env, negative);
     int totalCount = positiveSize + negativeSize;
     const uint8_t * point[totalCount];
     for (int i=0; i<positiveSize; i++){
@@ -199,8 +208,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1commit_1sum
         (JNIEnv *env, jobject claseObject, jlong context, jobjectArray positive, jobjectArray negative){
-    int positiveSize = env->GetArrayLength(positive);
-    int negativeSize = env->GetArrayLength(negative);
+    int positiveSize = getArrayLength(env, positive);
+    int negativeSize = getArrayLength(env, negative);
     secp256k1_pedersen_commitment innerCommit;
     secp256k1_pedersen_commitment* positiveVec[positiveSize];
     secp256k1_pedersen_commitment* negativeVec[negativeSize];
@@ -345,7 +354,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1combination_1pubkey
         (JNIEnv *env, jobject claseObject, jlong context, jobjectArray pubkeyArr){
-    int pubkeySize = env->GetArrayLength(pubkeyArr);
+    int pubkeySize = getArrayLength(env, pubkeyArr);
     secp256k1_pubkey* inkeyArr[pubkeySize];
     for (int i=0; i<pubkeySize; i++){
         jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(pubkeyArr,i);
@@ -370,7 +379,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1combination_1signature_1and_1nonceSum
         (JNIEnv *env, jobject claseObject, jlong context, jobjectArray sigArr, jbyteArray nonceSum){
-    int sigSize = env->GetArrayLength(sigArr);
+    int sigSize = getArrayLength(env, sigArr);
     uint8_t* sigs[sigSize];
     for (int i=0; i<sigSize; i++){
         jbyteArray byteArr = (jbyteArray)env->GetObjectArrayElement(sigArr,i);
