@@ -117,13 +117,13 @@ public class ServerTxManager {
                                 //check as sender
                                 else if (item.sender_id.equals(VcashWallet.getInstance().mUserId)) {
                                     //check is cancelled
-                                    if (txLog.server_status == ServerTxStatus.TxCanceled) {
+                                    if (txLog != null && txLog.server_status == ServerTxStatus.TxCanceled) {
                                         ServerApi.cancelTransaction(txLog.tx_slate_id, null);
                                         continue;
                                     }
 
                                     //check is finalized
-                                    if (txLog.server_status == ServerTxStatus.TxFinalized) {
+                                    if (txLog != null && txLog.server_status == ServerTxStatus.TxFinalized) {
                                         ServerApi.filanizeTransaction(txLog.tx_slate_id, null);
                                         continue;
                                     }

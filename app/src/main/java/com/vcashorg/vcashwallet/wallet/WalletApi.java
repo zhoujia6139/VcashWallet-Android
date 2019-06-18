@@ -204,6 +204,9 @@ public class WalletApi {
             }
         }
 
+        //save output status
+        VcashWallet.getInstance().syncOutputInfo();
+
         //save context
         if (!EncryptedDBHelper.getsInstance().saveContext(slate.context)){
             rollbackBlock.onCall();
@@ -262,6 +265,9 @@ public class WalletApi {
             callback.onCall(false, null);
             return;
         }
+
+        //save output status
+        VcashWallet.getInstance().syncOutputInfo();
 
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         tx.slate = gson.toJson(tx.slateObj);
@@ -402,7 +408,6 @@ public class WalletApi {
                                         tx = txLog;
                                     }
                                 }
-
                                 if (tx != null){
                                     tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                                     tx.confirm_time = AppUtil.getCurrentTimeSecs();
@@ -416,6 +421,26 @@ public class WalletApi {
                         }
                         else{
                             if (item.status == VcashOutput.OutputStatus.Locked || item.status == VcashOutput.OutputStatus.Unspent){
+                                VcashTxLog tx = null;
+                                for (VcashTxLog txLog :txs){
+                                    if (txLog.confirm_state == VcashTxLog.TxLogConfirmType.LoalConfirmed){
+                                        for (String commitStr :txLog.inputs){
+                                            if (commitStr.equals(item.commitment)){
+                                                tx = txLog;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (tx != null){
+                                        break;
+                                    }
+
+                                }
+                                if (tx != null){
+                                    tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
+                                    tx.confirm_time = AppUtil.getCurrentTimeSecs();
+                                    tx.server_status = ServerTxStatus.TxFinalized;
+                                }
                                 item.status = VcashOutput.OutputStatus.Spent;
                                 hasChange = true;
                             }
@@ -424,6 +449,7 @@ public class WalletApi {
 
                     if (hasChange){
                         EncryptedDBHelper.getsInstance().saveTxDataArr(txs);
+                        getTransationArr();
                         VcashWallet.getInstance().syncOutputInfo();
                     }
                 }

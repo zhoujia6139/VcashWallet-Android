@@ -243,7 +243,6 @@ public class VcashSlate implements Serializable {
                 txLog.appendOutput(output.commitment);
 
                 VcashWallet.getInstance().addNewTxChangeOutput(output);
-                VcashWallet.getInstance().syncOutputInfo();
             }
         };
 
