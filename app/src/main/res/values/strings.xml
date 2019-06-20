@@ -112,6 +112,13 @@
     <string name="go_and_see">Go and See</string>
     <string name="cancel_transaction">Cancel the transaction</string>
     <string name="no_transaction">No transactions</string>
+    <string name="support_recipient_ID">support recipient’s ID and "http" methods .</string>
+    <string name="send_transaction_file">Send VCash with transaction file</string>
+    <string name="send_vcash_notify">Sending VCash is an interactive process that the sender and the receiver need to interact back and forth to ensure the transaction is implemented.</string>
+    <string name="receive_transaction_file">Receive from transaction file</string>
+    <string name="receive_transaction_file_notify">You can receive vcash through the transaction file. When you receive a transaction file frome sender, you can copy it into the form below.</string>
+    <string name="enter_tx_file">Enter the received transaction file</string>
+    <string name="read_tx_file">Read transaction details</string>
 
     <string name="send_success">Sent successfully</string>
     <string name="send_failed">Failed to send your transaction</string>
