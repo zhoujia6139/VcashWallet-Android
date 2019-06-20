@@ -18,20 +18,14 @@ public class VcashTxLog implements Serializable {
     public long amount_credited;
     public long amount_debited;
     public long fee;
-    public ArrayList<String> inputs;
-    public ArrayList<String> outputs;
+    public final ArrayList<String> inputs = new ArrayList<String>();
+    public final ArrayList<String> outputs = new ArrayList<String>();
 
     public void appendInput(String commitment){
-        if (inputs == null){
-            inputs = new ArrayList<String>();
-        }
         inputs.add(commitment);
     }
 
     public void appendOutput(String commitment){
-        if (outputs == null){
-            outputs = new ArrayList<String>();
-        }
         outputs.add(commitment);
     }
 
