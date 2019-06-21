@@ -28,8 +28,8 @@ public class VcashReceiveActivity extends ToolBarActivity {
     public void initView() {
 
         Bitmap bitmap = new QREncode.Builder(this)
-                .setColor(UIUtils.getColor(R.color.black))//二维码颜色
-                .setContents(WalletApi.getWalletUserId())//二维码内容
+                .setColor(UIUtils.getColor(R.color.black))
+                .setContents(WalletApi.getWalletUserId())
                 .build().encodeAsBitmap();
         mQrcode.setImageBitmap(bitmap);
 
@@ -44,5 +44,12 @@ public class VcashReceiveActivity extends ToolBarActivity {
     @OnClick(R.id.iv_copy)
     public void onCopyClick() {
         UIUtils.copyText(this, mWalletId.getText().toString());
+    }
+
+
+    @OnClick(R.id.tv_receive_tx_file)
+    public void onReceiveTxFileClick(){
+
+        nv(ReceiveTxFileActivity.class);
     }
 }

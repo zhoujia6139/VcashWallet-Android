@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical">
 
     <include layout="@layout/layout_toolbar" />
@@ -20,44 +21,53 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="30dp"
             android:lineSpacingMultiplier="1.2"
-            android:text="After generating the signed transaction file, copy the contents and send it to the sender."
+            android:text="@string/receive_transaction_file_notify_2"
             android:textColor="@color/A4"
             android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Sign transaction file"
+                android:text="@string/sign_tx_file"
                 android:textColor="@color/A1"
+                android:textFontWeight="1"
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/tv_copy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Copy"
+                android:drawableLeft="@drawable/ic_copy_orange"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:text="@string/copy"
                 android:textColor="@color/orange" />
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tv_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/bg_grey_round_rect"
+            android:background="@drawable/bg_grey9_round_rect"
             android:minHeight="100dp"
-            android:textColor="@color/A1" />
+            android:padding="16dp"
+            android:textColor="@color/A1"
+            tools:text="ndianfioafioa" />
 
         <FrameLayout
-            android:id="@+id/btn_read_tx"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="40dp">
 
             <TextView
+                android:id="@+id/btn_read_tx"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_gravity="bottom"

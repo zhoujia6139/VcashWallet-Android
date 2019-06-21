@@ -105,10 +105,12 @@
             android:src="@drawable/ic_vcash_logo_orange" />
 
         <TextView
+            android:id="@+id/tv_receive_tx_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="70dp"
+            android:padding="10dp"
             android:text="@string/receive_transaction_file"
             android:textColor="@color/blue"
             android:textSize="15sp" />
