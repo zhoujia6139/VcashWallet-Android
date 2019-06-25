@@ -47,7 +47,8 @@ public class FinalizeTxInfo {
 
     public byte[] msgToSign(){
         ByteBuffer buf = ByteBuffer.allocate(100);
-        buf.put(AppUtil.decode(tx_id));
+        String short_tx_id = tx_id.replace("-", "");
+        buf.put(AppUtil.decode(short_tx_id));
         byte bit = (byte)(code.ordinal() & 0xff);
         buf.put(bit);
         buf.flip();

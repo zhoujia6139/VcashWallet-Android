@@ -239,7 +239,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         if (serverTx != null) {
             showProgressDialog(R.string.wait);
             if (isSend) {
-                WalletApi.finalizeTransaction(serverTx, new WalletCallback() {
+                WalletApi.finalizeServerTransaction(serverTx, new WalletCallback() {
                     @Override
                     public void onCall(boolean yesOrNo, Object data) {
                         dismissProgressDialog();

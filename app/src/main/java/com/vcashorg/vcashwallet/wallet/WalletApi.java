@@ -1,6 +1,9 @@
 package com.vcashorg.vcashwallet.wallet;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -31,10 +34,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class WalletApi {
     static private String Tag = "------WalletApi";
     final public static long VCASH_BASE = 1000000000;
     private static  Context context;
+    private static OkHttpClient okClient = new OkHttpClient();
 
     public static void setWalletContext(Context con){
         context = con;
@@ -62,9 +74,9 @@ public class WalletApi {
 
 
     public static boolean createWallet(List<String> wordsArr, String password){
-        if (wordsArr == null){
-            return false;
-        }
+        //if (wordsArr == null){
+            wordsArr = MnemonicHelper.split("purse park trap decide cart fish vendor control unhappy very hope help corn bring dragon surround vendor produce beach van pilot note congress fog");
+        //}
         byte[] entropy = MnemonicHelper.instance(context).toEntropy(wordsArr);
         if (entropy != null){
             DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(entropy);
@@ -173,11 +185,12 @@ public class WalletApi {
         });
     }
 
-    public static void createSendTransaction(String targetUserId, long amount, long fee, final WalletCallback callback){
+    public static void createSendTransaction(long amount, long fee, final WalletCallback callback){
         VcashWallet.getInstance().sendTransaction(amount, fee, callback);
     }
 
-    public static void sendTransaction(VcashSlate slate, String user, final WalletCallback callback){
+    public static void sendTransactionForUser(final VcashSlate slate, final String user, final WalletCallback callback){
+        Log.w(Tag, String.format("sendTransaction for userid:%s", user));
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
 
         final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
@@ -188,18 +201,138 @@ public class WalletApi {
             }
         };
 
+        slate.txLog.parter_id = user;
+
+        sendTransaction(slate, new WalletCallback(){
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    ServerTransaction server_tx = new ServerTransaction(slate);
+                    server_tx.sender_id = VcashWallet.getInstance().mUserId;
+                    server_tx.receiver_id = user;
+                    server_tx.status = ServerTxStatus.TxDefaultStatus;
+
+                    ServerApi.sendTransaction(server_tx, new WalletCallback() {
+                        @Override
+                        public void onCall(boolean yesOrNo, Object data) {
+                            if (yesOrNo){
+                                Log.d(Tag, "sendTransaction to server suc");
+                                EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                                callback.onCall(true, null);
+                            }
+                            else{
+                                Log.e(Tag, "sendTransaction to server failed! roll back database");
+                                rollbackBlock.onCall();
+                                callback.onCall(false, "Tx send to server failed");
+                            }
+                        }
+                    });
+                }
+                else{
+                    Log.e(Tag, "sendTx error!");
+                    rollbackBlock.onCall();
+                    callback.onCall(false, data);
+                }
+            }
+        });
+    }
+
+    public static void sendTransactionForUrl(final VcashSlate slate, final String url, final WalletCallback callback){
+        Log.w(Tag, String.format("sendTransaction for url:%s", url));
+        EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
+
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                VcashWallet.getInstance().reloadOutputInfo();
+            }
+        };
+
+        final Handler handler=new Handler();
+        sendTransaction(slate, new WalletCallback(){
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    final Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, slate.new VcashSlateTypeAdapter()).create();
+                    String slate_str = gson.toJson(slate);
+                    RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), slate_str);
+                    final String full_url = String.format("%s/v1/wallet/foreign/receive_tx", url);
+                    Request req = new Request.Builder().url(full_url).post(body).build();
+                    okClient.newCall(req).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.e(Tag, String.format("sendTransaction post to %s fail!", full_url));
+                                    rollbackBlock.onCall();
+                                    callback.onCall(false, null);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            Log.w(Tag, String.format("sendTransaction post to %s suc!", full_url));
+                            String json = response.body().string();
+                            if (json.startsWith("\"")){
+                                if (json.endsWith("\"")){
+                                    json = json.substring(0, json.length()-1);
+                                }
+                                json = json.replaceFirst("\"", "");
+                                json = json.replaceAll("\\\\", "");
+
+                            }
+                            final VcashSlate resSlate = gson.fromJson(json, VcashSlate.class);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    finalizeTransaction(resSlate, new WalletCallback() {
+                                        @Override
+                                        public void onCall(boolean yesOrNo, Object data) {
+                                            if (yesOrNo){
+                                                Log.w(Tag, "finalizeTransaction sec!");
+                                                EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                                                if (callback != null){
+                                                    callback.onCall(true, null);
+                                                }
+                                            }
+                                            else{
+                                                Log.e(Tag, "finalizeTransaction failed!");
+                                                rollbackBlock.onCall();
+                                                if (callback != null){
+                                                    callback.onCall(false, data);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                else{
+                    Log.e(Tag, "sendTx error!");
+                    rollbackBlock.onCall();
+                    callback.onCall(false, data);
+                }
+            }
+        });
+    }
+
+    private static void sendTransaction(VcashSlate slate, final WalletCallback callback){
         slate.lockOutputsFn.onCall();
         if (slate.createNewOutputsFn != null){
             slate.createNewOutputsFn.onCall();
         }
 
         //save txLog
-        slate.txLog.parter_id = user;
+
         slate.txLog.server_status = ServerTxStatus.TxDefaultStatus;
         if (!EncryptedDBHelper.getsInstance().saveTx(slate.txLog)){
-            rollbackBlock.onCall();
             if (callback != null){
-                callback.onCall(false, "Db error");
+                callback.onCall(false, "Db error:saveTx failed");
                 return;
             }
         }
@@ -209,37 +342,59 @@ public class WalletApi {
 
         //save context
         if (!EncryptedDBHelper.getsInstance().saveContext(slate.context)){
-            rollbackBlock.onCall();
             if (callback != null){
-                callback.onCall(false, "Db error");
+                callback.onCall(false, "Db error:save context failed");
                 return;
             }
         }
 
-        ServerTransaction server_tx = new ServerTransaction(slate);
-        server_tx.sender_id = VcashWallet.getInstance().mUserId;
-        server_tx.receiver_id = user;
-        server_tx.status = ServerTxStatus.TxDefaultStatus;
+        if (callback != null){
+            callback.onCall(true, null);
+        }
+    }
 
-        ServerApi.sendTransaction(server_tx, new WalletCallback() {
+    public static void receiveTransactionByFileContent(String fileContent, final WalletCallback callback){
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        VcashSlate slate = gson.fromJson(fileContent, VcashSlate.class);
+        receiveTx(slate, new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
-                if (yesOrNo){
-                    Log.d(Tag, "sendTransaction to server suc");
-                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
-                    callback.onCall(true, null);
-                }
-                else{
-                    Log.e(Tag, "sendTransaction to server failed! roll back database");
-                    rollbackBlock.onCall();
-                    callback.onCall(false, "Tx send to server failed");
+                if (callback != null){
+                    callback.onCall(yesOrNo, data);
                 }
             }
         });
     }
 
     public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback){
-        if (!VcashWallet.getInstance().receiveTransaction(tx.slateObj)){
+        receiveTx(tx, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (callback != null){
+                    callback.onCall(yesOrNo, data);
+                }
+            }
+        });
+    }
+
+    private static void receiveTx(Object obj, final WalletCallback callback){
+        VcashSlate slate = null;
+        ServerTransaction serverTx = null;
+        if (obj instanceof VcashSlate){
+            slate = (VcashSlate)obj;
+        }
+        else if(obj instanceof  ServerTransaction){
+            serverTx = (ServerTransaction)obj;
+            slate = serverTx.slateObj;
+        }
+        else {
+            if (callback != null){
+                callback.onCall(false, "obj instance error");
+            }
+            return;
+        }
+
+        if (!VcashWallet.getInstance().receiveTransaction(slate)){
             Log.e(Tag, "VcashWallet receiveTransaction failed");
             callback.onCall(false, null);
             return;
@@ -255,11 +410,13 @@ public class WalletApi {
             }
         };
 
-        tx.slateObj.createNewOutputsFn.onCall();
+        slate.createNewOutputsFn.onCall();
         //save txLog
-        tx.slateObj.txLog.parter_id = tx.sender_id;
-        tx.slateObj.txLog.server_status = ServerTxStatus.TxReceiverd;
-        if (!EncryptedDBHelper.getsInstance().saveTx(tx.slateObj.txLog)){
+        slate.txLog.server_status = ServerTxStatus.TxReceiverd;
+        if (serverTx != null){
+            slate.txLog.parter_id = serverTx.sender_id;
+        }
+        if (!EncryptedDBHelper.getsInstance().saveTx(slate.txLog)){
             rollbackBlock.onCall();
             Log.e(Tag, "VcashDataManager saveAppendTx failed");
             callback.onCall(false, null);
@@ -270,57 +427,44 @@ public class WalletApi {
         VcashWallet.getInstance().syncOutputInfo();
 
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
-        tx.slate = gson.toJson(tx.slateObj);
-        tx.status = ServerTxStatus.TxReceiverd;
-        ServerApi.receiveTransaction(tx, new WalletCallback() {
-            @Override
-            public void onCall(boolean yesOrNo, Object data) {
-                if (yesOrNo){
-                    Log.d(Tag, "send receiveTransaction suc");
-                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
-                    callback.onCall(true, null);
+        if (serverTx != null){
+            serverTx.slate = gson.toJson(slate);
+            serverTx.status = ServerTxStatus.TxReceiverd;
+            ServerApi.receiveTransaction(serverTx, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if (yesOrNo){
+                        Log.d(Tag, "send receiveTransaction suc");
+                        EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                        if (callback != null) {
+                            callback.onCall(true, null);
+                        }
+                    }
+                    else{
+                        Log.e(Tag, "send receiveTransaction to server failed! roll back database");
+                        rollbackBlock.onCall();
+                        if (callback != null) {
+                            callback.onCall(false, null);
+                        }
+                    }
                 }
-                else{
-                    Log.e(Tag, "send receiveTransaction to server failed! roll back database");
-                    rollbackBlock.onCall();
-                    callback.onCall(false, null);
-                }
+            });
+        }
+        else {
+            String slate_str = gson.toJson(slate);
+            EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+            if (callback != null){
+                callback.onCall(true, slate_str);
             }
-        });
+        }
 
     }
 
-    public static void finalizeTransaction(final ServerTransaction tx, final WalletCallback callback){
-        VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(tx.slateObj.uuid);
-        if (context == null){
-            Log.e(Tag, "database record is broke, cannot finalize tx");
-            callback.onCall(false, null);
-            return;
-        }
-        tx.slateObj.context = context;
-
-        if (!VcashWallet.getInstance().finalizeTransaction(tx.slateObj)){
-            Log.e(Tag, "finalizeTransaction failed");
-            callback.onCall(false, null);
-            return;
-        }
-
-        tx.slateObj.tx.sortTx();
-        byte[] txPayload = tx.slateObj.tx.computePayload(false);
-        NodeApi.postTx(AppUtil.hex(txPayload), new WalletCallback() {
+    public static void finalizeServerTransaction(final ServerTransaction tx, final WalletCallback callback){
+        finalizeTransaction(tx.slateObj, new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
-                    callback.onCall(true, null);
-                    VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(tx.slateObj.uuid);
-                    if (txLog != null){
-                        txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
-                        txLog.server_status = ServerTxStatus.TxFinalized;
-                        EncryptedDBHelper.getsInstance().saveTx(txLog);
-                    }
-
-                    Gson gson = new Gson();
-                    tx.slate = gson.toJson(tx.slateObj);
                     tx.status = ServerTxStatus.TxFinalized;
                     ServerApi.filanizeTransaction(tx.tx_id, new WalletCallback() {
                         @Override
@@ -330,6 +474,47 @@ public class WalletApi {
                             }
                         }
                     });
+                    if (callback != null){
+                        callback.onCall(true, null);
+                    }
+                }
+                else{
+                    if (callback != null){
+                        callback.onCall(false, data);
+                    }
+                }
+            }
+        });
+    }
+
+    private static void finalizeTransaction(final VcashSlate slate, final WalletCallback callback){
+        VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(slate.uuid);
+        if (context == null){
+            Log.e(Tag, "database record is broke, cannot finalize tx");
+            callback.onCall(false, null);
+            return;
+        }
+        slate.context = context;
+
+        if (!VcashWallet.getInstance().finalizeTransaction(slate)){
+            Log.e(Tag, "finalizeTransaction failed");
+            callback.onCall(false, null);
+            return;
+        }
+
+        slate.tx.sortTx();
+        byte[] txPayload = slate.tx.computePayload(false);
+        NodeApi.postTx(AppUtil.hex(txPayload), new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    callback.onCall(true, null);
+                    VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+                    if (txLog != null){
+                        txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+                        txLog.server_status = ServerTxStatus.TxFinalized;
+                        EncryptedDBHelper.getsInstance().saveTx(txLog);
+                    }
                 }
                 else {
                     callback.onCall(false, "post tx to node failed");

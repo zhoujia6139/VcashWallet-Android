@@ -2,6 +2,7 @@ package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import android.util.Log;
 
+import com.fasterxml.uuid.Generators;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,13 +32,13 @@ import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.Outpu
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeaturePlain;
 
 public class VcashSlate implements Serializable {
-    public String uuid = AppUtil.hex(AppUtil.randomBytes(16));
+    public VersionCompatInfo version_info = new VersionCompatInfo(2, 2, 2);
+    public String uuid = Generators.randomBasedGenerator().generate().toString();
     public short num_participants;
     public long amount;
     public long fee;
     public long height;
     public long lock_height;
-    public long slate_version = 1;
     public VcashTransaction tx = new VcashTransaction();
     public ArrayList<ParticipantData> participant_data = new ArrayList<>();
 
@@ -49,6 +50,18 @@ public class VcashSlate implements Serializable {
     public WalletNoParamCallBack createNewOutputsFn;
     @Expose(serialize = false, deserialize = false)
     public VcashContext context;
+
+    public class VersionCompatInfo implements Serializable {
+        private int version;
+        private int orig_version;
+        private int min_compat_version;
+
+        public VersionCompatInfo(int ver, int orig, int min_compat){
+            version = ver;
+            orig_version = orig;
+            min_compat_version = min_compat;
+        }
+    }
 
     public byte[]addTxElement(ArrayList<VcashOutput> outputs, long change){
         VcashTransaction.TxKernel kernel = tx.new TxKernel();
@@ -259,16 +272,16 @@ public class VcashSlate implements Serializable {
             jsonWriter.name("fee").value(slate.fee);
             jsonWriter.name("height").value(slate.height);
             jsonWriter.name("lock_height").value(slate.lock_height);
-            jsonWriter.name("version").value(slate.slate_version);
+            Gson version_gson = new Gson();
+            String version_str = version_gson.toJson(slate.version_info);
+            jsonWriter.name("version_info").jsonValue(version_str);
             Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
             String jsonStr = gson.toJson(slate.tx);
-            jsonStr = StringEscapeUtils.unescapeJson(jsonStr);
             jsonWriter.name("tx").jsonValue(jsonStr);
 
             ParticipantData data = slate.participant_data.get(0);
-            Gson gson1 = new GsonBuilder().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
+            Gson gson1 = new GsonBuilder().serializeNulls().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
             String jsonStr1 = gson1.toJson(slate.participant_data, new TypeToken<ArrayList<ParticipantData>>(){}.getType());
-            jsonStr1 = StringEscapeUtils.unescapeJson(jsonStr1);
             jsonWriter.name("participant_data").jsonValue(jsonStr1);
             jsonWriter.endObject();
         }
@@ -297,8 +310,9 @@ public class VcashSlate implements Serializable {
                     case "lock_height":
                         slate.lock_height = jsonReader.nextLong();
                         break;
-                    case "version":
-                        slate.slate_version = jsonReader.nextLong();
+                    case "version_info":
+                        Gson version_gson = new Gson();
+                        slate.version_info = version_gson.fromJson(jsonReader, VersionCompatInfo.class);
                         break;
                     case "tx":
                         Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
@@ -334,20 +348,20 @@ public class VcashSlate implements Serializable {
             public void write(JsonWriter jsonWriter, ParticipantData data) throws IOException {
                 jsonWriter.beginObject();
                 jsonWriter.name("id").value(data.pId);
-                jsonWriter.name("message").jsonValue(data.message);
+                jsonWriter.name("message").value(data.message);
                 byte[] compressKey = NativeSecp256k1.instance().getCompressedPubkey(data.public_blind_excess);
-                String public_blind_excessStr = AppUtil.getByteStrFromByteArr(compressKey);
-                jsonWriter.name("public_blind_excess").jsonValue(public_blind_excessStr);
+                String public_blind_excessStr = AppUtil.hex(compressKey);
+                jsonWriter.name("public_blind_excess").value(public_blind_excessStr);
                 compressKey = NativeSecp256k1.instance().getCompressedPubkey(data.public_nonce);
-                String public_nonceStr = AppUtil.getByteStrFromByteArr(compressKey);
-                jsonWriter.name("public_nonce").jsonValue(public_nonceStr);
+                String public_nonceStr = AppUtil.hex(compressKey);
+                jsonWriter.name("public_nonce").value(public_nonceStr);
 
-                byte[] compressSig = NativeSecp256k1.instance().signatureToCompactData(data.part_sig);
-                String part_sigStr = AppUtil.getByteStrFromByteArr(compressSig);
-                jsonWriter.name("part_sig").jsonValue(part_sigStr);
-                compressSig = NativeSecp256k1.instance().signatureToCompactData(data.message_sig);
-                String message_sigStr = AppUtil.getByteStrFromByteArr(compressSig);
-                jsonWriter.name("message_sig").jsonValue(message_sigStr);
+                //byte[] compressSig = NativeSecp256k1.instance().signatureToCompactData(data.part_sig);
+                String part_sigStr = AppUtil.hex(data.part_sig);
+                jsonWriter.name("part_sig").value(part_sigStr);
+                //compressSig = NativeSecp256k1.instance().signatureToCompactData(data.message_sig);
+                String message_sigStr = AppUtil.hex(data.message_sig);
+                jsonWriter.name("message_sig").value(message_sigStr);
                 jsonWriter.endObject();
             }
 
@@ -361,50 +375,28 @@ public class VcashSlate implements Serializable {
                             data.pId = (short) jsonReader.nextInt();
                             break;
                         case "message":
-                            data.message = jsonReader.nextString();
+                            if (jsonReader.peek() != JsonToken.NULL) {
+                                data.message = jsonReader.nextString();
+                            }
+                            else{
+                                jsonReader.nextNull();
+                            }
                             break;
                         case "public_blind_excess":
-                            if (jsonReader.peek() != JsonToken.NULL){
-                                jsonReader.beginArray();
-                                ArrayList<Integer> arrayList = new ArrayList<>();
-                                while(jsonReader.hasNext()){
-                                    arrayList.add(jsonReader.nextInt());
-                                }
-                                jsonReader.endArray();
-                                byte[] compressedKey = AppUtil.intArrToByteArr(arrayList);
-                                data.public_blind_excess = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressedKey);
-                            }
-                            else{
-                                jsonReader.nextNull();
-                            }
-
+                            String bind_excess_str = jsonReader.nextString();
+                            byte[] compressed_bind_excess = AppUtil.decode(bind_excess_str);
+                            data.public_blind_excess = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressed_bind_excess);
                             break;
                         case "public_nonce":
-                            if (jsonReader.peek() != JsonToken.NULL){
-                                jsonReader.beginArray();
-                                ArrayList<Integer> arrayList1 = new ArrayList<>();
-                                while(jsonReader.hasNext()){
-                                    arrayList1.add(jsonReader.nextInt());
-                                }
-                                jsonReader.endArray();
-                                byte[] compressedKey1 = AppUtil.intArrToByteArr(arrayList1);
-                                data.public_nonce = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressedKey1);
-                            }
-                            else{
-                                jsonReader.nextNull();
-                            }
-
+                            String public_nonce_str = jsonReader.nextString();
+                            byte[] compressed_nonce = AppUtil.decode(public_nonce_str);
+                            data.public_nonce = NativeSecp256k1.instance().pubkeyFromCompressedKey(compressed_nonce);
                             break;
+
                         case "part_sig":
-                            if (jsonReader.peek() != JsonToken.NULL){
-                                jsonReader.beginArray();
-                                ArrayList<Integer> arrayList2 = new ArrayList<>();
-                                while(jsonReader.hasNext()){
-                                    arrayList2.add(jsonReader.nextInt());
-                                }
-                                jsonReader.endArray();
-                                byte[] compressedData = AppUtil.intArrToByteArr(arrayList2);
-                                data.part_sig = NativeSecp256k1.instance().compactDataToSignature(compressedData);
+                            if (jsonReader.peek() != JsonToken.NULL) {
+                                String part_sig_str = jsonReader.nextString();
+                                data.part_sig = AppUtil.decode(part_sig_str);
                             }
                             else{
                                 jsonReader.nextNull();
@@ -412,20 +404,13 @@ public class VcashSlate implements Serializable {
 
                             break;
                         case "message_sig":
-                            if (jsonReader.peek() != JsonToken.NULL){
-                                jsonReader.beginArray();
-                                ArrayList<Integer> arrayList3 = new ArrayList<>();
-                                while(jsonReader.hasNext()){
-                                    arrayList3.add(jsonReader.nextInt());
-                                }
-                                jsonReader.endArray();
-                                byte[] compressedData1 = AppUtil.intArrToByteArr(arrayList3);
-                                data.message_sig = NativeSecp256k1.instance().compactDataToSignature(compressedData1);
+                            if (jsonReader.peek() != JsonToken.NULL) {
+                                String message_sig_str = jsonReader.nextString();
+                                data.message_sig = AppUtil.decode(message_sig_str);
                             }
                             else{
                                 jsonReader.nextNull();
                             }
-
                             break;
                     }
                 }

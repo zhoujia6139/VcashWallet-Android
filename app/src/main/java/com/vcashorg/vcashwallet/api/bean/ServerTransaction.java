@@ -53,7 +53,8 @@ public class ServerTransaction implements Serializable {
 
     public byte[] msgToSign(){
         ByteBuffer buf = ByteBuffer.allocate(100);
-        buf.put(AppUtil.decode(tx_id));
+        String short_tx_id = tx_id.replace("-", "");
+        buf.put(AppUtil.decode(short_tx_id));
         buf.put(AppUtil.decode(sender_id));
         buf.put(AppUtil.decode(receiver_id));
         buf.flip();
@@ -62,7 +63,8 @@ public class ServerTransaction implements Serializable {
 
     public byte[] txDataToSign(){
         ByteBuffer buf = ByteBuffer.allocate(20000);
-        buf.put(AppUtil.decode(tx_id));
+        String short_tx_id = tx_id.replace("-", "");
+        buf.put(AppUtil.decode(short_tx_id));
         buf.put(AppUtil.decode(sender_id));
         buf.put(AppUtil.decode(receiver_id));
         buf.put(slateObj.tx.computePayload(true));
