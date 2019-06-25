@@ -231,6 +231,18 @@ public class VcashSlate implements Serializable {
         participant_data.add(partiData);
     }
 
+    public boolean isValidForReceive(){
+        if (participant_data.size() != 1){
+            return false;
+        }
+
+        if (tx.body.inputs.size() == 0 || tx.body.kernels.size() == 0){
+            return false;
+        }
+
+        return true;
+    }
+
     private byte[] createTxOutputWithAmount(final long amount){
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
         final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath);

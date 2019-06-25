@@ -74,9 +74,9 @@ public class WalletApi {
 
 
     public static boolean createWallet(List<String> wordsArr, String password){
-        //if (wordsArr == null){
-            wordsArr = MnemonicHelper.split("purse park trap decide cart fish vendor control unhappy very hope help corn bring dragon surround vendor produce beach van pilot note congress fog");
-        //}
+        if (wordsArr == null){
+            return false;
+        }
         byte[] entropy = MnemonicHelper.instance(context).toEntropy(wordsArr);
         if (entropy != null){
             DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(entropy);
@@ -353,9 +353,28 @@ public class WalletApi {
         }
     }
 
-    public static void receiveTransactionByFileContent(String fileContent, final WalletCallback callback){
+    public static void isValidSlateConent(String fileContent, final WalletCallback callback){
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         VcashSlate slate = gson.fromJson(fileContent, VcashSlate.class);
+        if (slate == null || !slate.isValidForReceive()){
+            if (callback != null){
+                callback.onCall(false, "Wrong Data Format");
+            }
+        }
+
+        VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+        if (txLog != null){
+            if (callback != null){
+                callback.onCall(false, "Duplicate Tx");
+            }
+        }
+
+        if (callback != null){
+            callback.onCall(true, slate);
+        }
+    }
+
+    public static void receiveTransactionBySlate(VcashSlate slate, final WalletCallback callback){
         receiveTx(slate, new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
