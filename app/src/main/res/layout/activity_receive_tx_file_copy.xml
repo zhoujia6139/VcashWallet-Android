@@ -57,28 +57,11 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_grey9_round_rect"
             android:minHeight="100dp"
+            android:maxHeight="300dp"
+            android:scrollbars="vertical"
             android:padding="16dp"
             android:textColor="@color/A1"
             tools:text="ndianfioafioa" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="40dp">
-
-            <TextView
-                android:id="@+id/btn_read_tx"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_gravity="bottom"
-                android:background="@drawable/bg_orange_light_round_rect"
-                android:drawablePadding="6dp"
-                android:gravity="center"
-                android:text="@string/read_tx_file"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
-
-        </FrameLayout>
 
     </LinearLayout>
 

@@ -26,7 +26,6 @@ public class SignTxDialog extends DialogFragment {
     private TextView mTvTxId;
     private TextView mTvTxAmount;
     private TextView mTvTxFee;
-    private TextView mTvTxTime;
 
     private TextView mBtnSign;
 
@@ -76,7 +75,6 @@ public class SignTxDialog extends DialogFragment {
         mTvTxId = view.findViewById(R.id.tv_tx_id);
         mTvTxAmount = view.findViewById(R.id.tv_tx_amount);
         mTvTxFee = view.findViewById(R.id.tv_tx_fee);
-        mTvTxTime = view.findViewById(R.id.tv_tx_time);
         mBtnSign = view.findViewById(R.id.btn_sign);
 
         view.findViewById(R.id.ll_close).setOnClickListener(new View.OnClickListener() {
@@ -91,15 +89,14 @@ public class SignTxDialog extends DialogFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-//        if (getArguments() != null) {
-//            VcashSlate vcashSlate = (VcashSlate) getArguments().getSerializable(KEY);
-//            if (vcashSlate != null) {
-//                mTvTxId.setText(vcashSlate.txLog.tx_id);
-//                mTvTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.amount));
-//                mTvTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.fee));
-//                mTvTxTime.setText(DateUtil.formatDateTimeStamp(vcashSlate.txLog.create_time));
-//            }
-//        }
+        if (getArguments() != null) {
+            VcashSlate vcashSlate = (VcashSlate) getArguments().getSerializable(KEY);
+            if (vcashSlate != null) {
+                mTvTxId.setText(vcashSlate.uuid);
+                mTvTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.amount));
+                mTvTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.fee));
+            }
+        }
 
         mBtnSign.setOnClickListener(new View.OnClickListener() {
             @Override

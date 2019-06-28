@@ -1,5 +1,6 @@
 package com.vcashorg.vcashwallet;
 
+import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
@@ -11,10 +12,11 @@ import butterknife.OnClick;
 
 public class ReceiveTxFileCopyActivity extends ToolBarActivity {
 
+    public static final String PARAM_CONTENT = "content";
+
     @BindView(R.id.tv_content)
     TextView mTvContent;
-    @BindView(R.id.btn_read_tx)
-    TextView mBtnReadTx;
+
 
     @Override
     protected void initToolBar() {
@@ -35,10 +37,15 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
         return R.layout.activity_receive_tx_file_copy;
     }
 
+    @Override
+    public void initParams() {
+        String content = getIntent().getStringExtra(PARAM_CONTENT);
+        mTvContent.setText(content);
+    }
 
     @OnClick(R.id.tv_copy)
     public void onCopyClick(){
-
+        UIUtils.copyText(this,mTvContent.getText().toString());
     }
 
 

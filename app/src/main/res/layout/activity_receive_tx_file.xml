@@ -46,12 +46,15 @@
         android:minHeight="100dp"
         android:padding="20dp"
         android:textSize="14sp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:lines="10"
+        android:scrollbars="vertical"
         tools:text="fnaoinfioanfinaif" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_marginTop="14dp"
         android:background="@color/grey_4" />
 
     <FrameLayout

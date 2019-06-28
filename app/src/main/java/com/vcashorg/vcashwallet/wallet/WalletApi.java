@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.vcashorg.vcashwallet.api.NodeApi;
 import com.vcashorg.vcashwallet.api.ServerApi;
 import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
@@ -355,11 +356,20 @@ public class WalletApi {
 
     public static void isValidSlateConent(String fileContent, final WalletCallback callback){
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
-        VcashSlate slate = gson.fromJson(fileContent, VcashSlate.class);
+        VcashSlate slate;
+        try {
+             slate = gson.fromJson(fileContent, VcashSlate.class);
+        }catch (JsonSyntaxException e){
+            if (callback != null){
+                callback.onCall(false, "Wrong Data Format");
+            }
+            return;
+        }
         if (slate == null || !slate.isValidForReceive()){
             if (callback != null){
                 callback.onCall(false, "Wrong Data Format");
             }
+            return;
         }
 
         VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
@@ -367,6 +377,7 @@ public class WalletApi {
             if (callback != null){
                 callback.onCall(false, "Duplicate Tx");
             }
+            return;
         }
 
         if (callback != null){

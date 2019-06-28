@@ -112,35 +112,60 @@ public class VcashSendActivity extends ToolBarActivity {
 
     @OnClick(R.id.btn_send)
     public void onSendClick(){
-        if(btnState() && validate()){
+        if(btnState() && validate() != -1){
             showProgressDialog(R.string.wait);
-            WalletApi.createSendTransaction(mEtAddress.getText().toString().trim(), WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
+            WalletApi.createSendTransaction(WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
                         final VcashSlate slate = (VcashSlate) data;
-                        WalletApi.sendTransaction(slate, mEtAddress.getText().toString(), new WalletCallback() {
-                            @Override
-                            public void onCall(boolean yesOrNo, Object data) {
-                                dismissProgressDialog();
-                                if(yesOrNo){
-                                    UIUtils.showToastCenter(R.string.send_success);
-                                    VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
-                                    Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
-                                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
-                                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-                                    intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
-                                    nv(intent);
-                                    finish();
-                                }else {
-                                    if(data instanceof String){
-                                        UIUtils.showToastCenter((String) data);
+                        if(validate() == 0){
+                            WalletApi.sendTransactionForUser(slate, mEtAddress.getText().toString(), new WalletCallback() {
+                                @Override
+                                public void onCall(boolean yesOrNo, Object data) {
+                                    dismissProgressDialog();
+                                    if(yesOrNo){
+                                        UIUtils.showToastCenter(R.string.send_success);
+                                        VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                        Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
+                                        nv(intent);
+                                        finish();
                                     }else {
-                                        UIUtils.showToastCenter(R.string.send_failed);
+                                        if(data instanceof String){
+                                            UIUtils.showToastCenter((String) data);
+                                        }else {
+                                            UIUtils.showToastCenter(R.string.send_failed);
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }else if(validate() == 1){
+                            WalletApi.sendTransactionForUrl(slate, mEtAddress.getText().toString(), new WalletCallback() {
+                                @Override
+                                public void onCall(boolean yesOrNo, Object data) {
+                                    dismissProgressDialog();
+                                    if(yesOrNo){
+                                        UIUtils.showToastCenter(R.string.send_success);
+                                        VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                        Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
+                                        nv(intent);
+                                        finish();
+                                    }else {
+                                        if(data instanceof String){
+                                            UIUtils.showToastCenter((String) data);
+                                        }else {
+                                            UIUtils.showToastCenter(R.string.send_failed);
+                                        }
+                                    }
+                                }
+                            });
+                        }
                     }else {
                         dismissProgressDialog();
                         if(data instanceof String){
@@ -154,19 +179,29 @@ public class VcashSendActivity extends ToolBarActivity {
         }
     }
 
-    private boolean validate(){
-        if(mEtAddress.getText().toString().trim().length() != 66){
-            UIUtils.showToastCenter(R.string.send_address_length);
-            return false;
-        }else if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
+    private int validate(){
+        String address = mEtAddress.getText().toString().trim();
+
+        if(Double.parseDouble(mEtAmount.getText().toString().trim()) == 0){
             UIUtils.showToastCenter(R.string.send_cant_0);
-            return false;
-        }else if(mEtAddress.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            UIUtils.showToastCenter(R.string.send_cant_me);
-            return false;
+            return -1;
         }
 
-        return true;
+        //send for url return 1
+        if(address.startsWith("http") || address.startsWith("https")){
+            return 1;
+        }
+
+        //send for user return 0;
+        if(address.length() != 66){
+            UIUtils.showToastCenter(R.string.send_address_length);
+            return -1;
+        }else if(address.equals(WalletApi.getWalletUserId())){
+            UIUtils.showToastCenter(R.string.send_cant_me);
+            return -1;
+        }
+
+        return 0;
     }
 
     @Override
@@ -179,4 +214,6 @@ public class VcashSendActivity extends ToolBarActivity {
             }
         }
     }
+
+
 }
