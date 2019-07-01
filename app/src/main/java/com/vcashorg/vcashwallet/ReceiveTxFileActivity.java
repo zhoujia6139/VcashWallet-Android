@@ -28,6 +28,7 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
     @Override
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.receive_transaction_file));
+        setTitleSize(15);
     }
 
     @Override

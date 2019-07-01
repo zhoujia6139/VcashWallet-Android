@@ -157,10 +157,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                     }
                 } else if (vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived) {
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
-                    serverTx = ServerTxManager.getInstance().getServerTxByTxId(vcashTxLog.tx_slate_id);
-                    if(serverTx != null){
-                        mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_your_sign : R.string.tx_status_wait_sender_sign);
-                    }
+                    mTvStatus.setText(R.string.tx_status_wait_sender_sign);
                     mFlSign.setVisibility(View.GONE);
                     mFlCancel.setVisibility(View.GONE);
                 }
