@@ -150,10 +150,10 @@ public class VcashSendActivity extends ToolBarActivity {
                                     if(yesOrNo){
                                         UIUtils.showToastCenter(R.string.send_success);
                                         VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                        vcashTxLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
                                         Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                         intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                         intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-                                        intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
                                         nv(intent);
                                         finish();
                                     }else {

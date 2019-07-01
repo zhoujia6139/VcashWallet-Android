@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet;
 
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,6 +22,7 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
     @Override
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.receive_transaction_file));
+        setTitleSize(15);
         TextView tvRight = getSubTitle();
         tvRight.setText(R.string.done);
         tvRight.setTextColor(UIUtils.getColor(R.color.orange));
@@ -41,7 +43,9 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
     public void initParams() {
         String content = getIntent().getStringExtra(PARAM_CONTENT);
         mTvContent.setText(content);
+        mTvContent.setMovementMethod(ScrollingMovementMethod.getInstance());
     }
+
 
     @OnClick(R.id.tv_copy)
     public void onCopyClick(){
