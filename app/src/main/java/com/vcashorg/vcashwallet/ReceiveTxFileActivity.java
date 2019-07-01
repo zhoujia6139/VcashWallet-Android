@@ -3,7 +3,9 @@ package com.vcashorg.vcashwallet;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextPaint;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -29,6 +31,18 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.receive_transaction_file));
         setTitleSize(15);
+        setSubTitleSize(15);
+        TextView tvRight = getSubTitle();
+        tvRight.setText("Record");
+        TextPaint paint = tvRight.getPaint();
+        paint.setFakeBoldText(true);
+        tvRight.setTextColor(UIUtils.getColor(R.color.orange));
+        tvRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nv(ReceiveTxFileRecordActivity.class);
+            }
+        });
     }
 
     @Override
@@ -79,6 +93,10 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
                                     if(yesOrNo){
                                         Intent intent = new Intent(ReceiveTxFileActivity.this,ReceiveTxFileCopyActivity.class);
                                         intent.putExtra(ReceiveTxFileCopyActivity.PARAM_CONTENT,(String) data);
+                                        intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_ID,vcashSlate.uuid);
+                                        intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,vcashSlate.amount);
+                                        intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,vcashSlate.fee);
+                                        intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,true);
                                         nv(intent);
                                         finish();
                                     }else {

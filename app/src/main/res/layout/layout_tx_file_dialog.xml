@@ -39,8 +39,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="80dp"
                     android:gravity="right"
+                    android:minWidth="80dp"
                     android:text="@string/tx_id"
                     android:textColor="@color/A1"
                     android:textSize="14sp" />
@@ -65,21 +65,34 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="80dp"
                     android:gravity="right"
+                    android:minWidth="80dp"
                     android:text="@string/tx_amount"
                     android:textColor="@color/A1"
                     android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/tv_tx_amount"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_weight="2"
-                    android:textColor="@color/A1"
-                    android:textSize="14sp"
-                    tools:text="5.31311 Vcash" />
+                    android:layout_weight="2">
+
+                    <TextView
+                        android:id="@+id/tv_tx_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/A1"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="5.31311" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" VCash"
+                        android:textColor="@color/A1"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -91,30 +104,43 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="80dp"
                     android:gravity="right"
+                    android:minWidth="80dp"
                     android:text="@string/tx_fee"
                     android:textColor="@color/A1"
                     android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/tv_tx_fee"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_weight="2"
-                    android:textColor="@color/A1"
-                    android:textSize="14sp"
-                    tools:text="0.31311 Vcash" />
+                    android:layout_weight="2">
+
+                    <TextView
+                        android:id="@+id/tv_tx_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/A1"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0.31311" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" VCash"
+                        android:textColor="@color/A1"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
 
             <LinearLayout
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"

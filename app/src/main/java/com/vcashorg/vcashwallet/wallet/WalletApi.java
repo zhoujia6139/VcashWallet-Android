@@ -597,13 +597,15 @@ public class WalletApi {
     public static ArrayList<VcashTxLog> getFileReceiveTxArr(){
         ArrayList<VcashTxLog> txArr = getTransationArr();
         ArrayList<VcashTxLog> retArr = new ArrayList<>();
-        for (VcashTxLog txLog: txArr){
-            if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived &&
-            txLog.parter_id == null){
-                retArr.add(txLog);
+        if(txArr != null){
+            for (VcashTxLog txLog: txArr){
+                if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
+                        && UIUtils.isEmpty(txLog.parter_id)
+                        && !UIUtils.isEmpty(txLog.signed_slate_msg)){
+                    retArr.add(txLog);
+                }
             }
         }
-
         return retArr;
     }
 

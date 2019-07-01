@@ -36,6 +36,10 @@ public class VcashSendActivity extends ToolBarActivity {
     EditText mEtAmount;
     @BindView(R.id.btn_send)
     FrameLayout mBtnSend;
+    @BindView(R.id.line_id)
+    View mLine1;
+    @BindView(R.id.line_amount)
+    View mLine2;
 
     @Override
     protected void initToolBar() {
@@ -49,6 +53,20 @@ public class VcashSendActivity extends ToolBarActivity {
 
     @Override
     public void initView() {
+        mEtAddress.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mLine1.setBackgroundColor(UIUtils.getColor(R.color.orange));
+                mLine2.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
+            }
+        });
+        mEtAmount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mLine1.setBackgroundColor(UIUtils.getColor(R.color.grey_4));
+                mLine2.setBackgroundColor(UIUtils.getColor(R.color.orange));
+            }
+        });
         mEtAddress.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -154,6 +172,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                         Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                         intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                         intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+                                        intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
                                         nv(intent);
                                         finish();
                                     }else {

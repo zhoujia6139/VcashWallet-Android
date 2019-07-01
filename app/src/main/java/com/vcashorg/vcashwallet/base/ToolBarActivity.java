@@ -39,6 +39,10 @@ public abstract class ToolBarActivity extends BaseActivity{
         mTvTitle.setTextSize(size);
     }
 
+    protected void setSubTitleSize(int size){
+        mTvRight.setTextSize(size);
+    }
+
     private void setBackIcon(){
         if (null != getToolbar() && isShowBacking()) {
 //            getToolbar().setNavigationIcon(android.R.drawable.ar);

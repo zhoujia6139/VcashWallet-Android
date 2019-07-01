@@ -85,9 +85,9 @@
     <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.</string>
     <string name="send_vcash">Send VCash</string>
     <string name="send_to">Send to</string>
-    <string name="enter_recipient_id">Enter or scan the recipient’s ID</string>
+    <string name="enter_recipient_id">Input recipient’s ID or http address</string>
     <string name="amount">Amount</string>
-    <string name="enter_amount">Enter Amount</string>
+    <string name="enter_amount">Input Amount</string>
     <string name="receive_vcash">Receive VCash</string>
     <string name="wallet_id">Your wallet ID</string>
     <string name="scan_qr_code">Or scan the QR code</string>

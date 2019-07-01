@@ -63,6 +63,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/line_id"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="6dp"
@@ -97,7 +98,7 @@
                 android:background="@null"
                 android:hint="@string/enter_amount"
                 android:inputType="numberDecimal"
-                android:textSize="15sp" />
+                android:textSize="22sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -109,11 +110,11 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/line_amount"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="4dp"
             android:background="@color/grey_4" />
-
 
         <TextView
             android:layout_width="wrap_content"

@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="22dp"
-        android:paddingRight="22dp">
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -53,14 +53,110 @@
         <TextView
             android:id="@+id/tv_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="100dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_grey9_round_rect"
             android:scrollbars="vertical"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textColor="@color/A1"
             tools:text="ndianfioafioa" />
+
+        <TextView
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/transaction_details"
+            android:textColor="@color/A1"
+            android:textFontWeight="1"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_marginBottom="60dp"
+            android:background="@drawable/bg_grey9_round_rect"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="@string/tx_id"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_tx_id"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="2.5"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp"
+                    tools:text="fjiahjfioahfifjiahjfioahfifjiahjfioahfifjiahjfioahfifjiahjfioahfi" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="@string/tx_amount"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_tx_amount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="2.5"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp"
+                    tools:text="5.31311 Vcash" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="@string/tx_fee"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_tx_fee"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="2.5"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp"
+                    tools:text="0.31311 Vcash" />
+
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
