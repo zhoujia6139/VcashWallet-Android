@@ -448,11 +448,15 @@ public class WalletApi {
         };
 
         slate.createNewOutputsFn.onCall();
+
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        String slateStr = gson.toJson(slate);
         //save txLog
         slate.txLog.server_status = ServerTxStatus.TxReceiverd;
         if (serverTx != null){
             slate.txLog.parter_id = serverTx.sender_id;
         }
+        slate.txLog.signed_slate_msg = slateStr;
         if (!EncryptedDBHelper.getsInstance().saveTx(slate.txLog)){
             rollbackBlock.onCall();
             Log.e(Tag, "VcashDataManager saveAppendTx failed");
@@ -463,9 +467,8 @@ public class WalletApi {
         //save output status
         VcashWallet.getInstance().syncOutputInfo();
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         if (serverTx != null){
-            serverTx.slate = gson.toJson(slate);
+            serverTx.slate = slateStr;
             serverTx.status = ServerTxStatus.TxReceiverd;
             ServerApi.receiveTransaction(serverTx, new WalletCallback() {
                 @Override
@@ -488,10 +491,9 @@ public class WalletApi {
             });
         }
         else {
-            String slate_str = gson.toJson(slate);
             EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
             if (callback != null){
-                callback.onCall(true, slate_str);
+                callback.onCall(true, slateStr);
             }
         }
 
@@ -590,6 +592,19 @@ public class WalletApi {
 
     public static boolean deleteTxByTxid(String txid){
         return  EncryptedDBHelper.getsInstance().deleteTxBySlateId(txid);
+    }
+
+    public static ArrayList<VcashTxLog> getFileReceiveTxArr(){
+        ArrayList<VcashTxLog> txArr = getTransationArr();
+        ArrayList<VcashTxLog> retArr = new ArrayList<>();
+        for (VcashTxLog txLog: txArr){
+            if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived &&
+            txLog.parter_id == null){
+                retArr.add(txLog);
+            }
+        }
+
+        return retArr;
     }
 
     public static void updateOutputStatusWithComplete(final WalletCallback callback){

@@ -159,7 +159,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         }
 
         db.execSQL("REPLACE INTO VcashTxLog (" +
-                "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_state, server_status, amount_credited, amount_debited, fee, inputs, outputs)" +
+                "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_state, server_status, amount_credited, amount_debited, fee, slate_str, inputs, outputs)" +
                 "values(" +
                 txLog.tx_id + "," +
                 "'" + txLog.tx_slate_id + "'," +
@@ -172,6 +172,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 txLog.amount_credited + "," +
                 txLog.amount_debited + "," +
                 txLog.fee + "," +
+                "'" + txLog.signed_slate_msg + "'," +
                 "'" + inputStrBuilder.toString() + "'," +
                 "'" + outputStrBuilder.toString() + "'" +
                 ")");
@@ -247,6 +248,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             for (int startIndex=0; startIndex<outputStr.length(); startIndex+=66){
                 item.appendOutput(outputStr.substring(startIndex, startIndex+66));
             }
+            item.signed_slate_msg = cursor.getString(cursor.getColumnIndex("slate_str"));
             return item;
         }
 
@@ -377,6 +379,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "amount_credited    integer," +
                 "amount_debited     integer," +
                 "fee                integer," +
+                "slate_str          text," +
                 "inputs             text," +
                 "outputs            text)");
 

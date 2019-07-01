@@ -20,6 +20,7 @@ public class VcashTxLog implements Serializable {
     public long fee;
     public final ArrayList<String> inputs = new ArrayList<String>();
     public final ArrayList<String> outputs = new ArrayList<String>();
+    public String signed_slate_msg;
 
     public void appendInput(String commitment){
         inputs.add(commitment);
