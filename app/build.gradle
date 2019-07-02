@@ -58,7 +58,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation project(':update')
     implementation files('libs/bitcoinj-core-0.16-SNAPSHOT.jar')
     implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
     implementation 'com.google.guava:guava:27.1-android'
@@ -67,6 +66,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.25'
     implementation 'net.jcip:jcip-annotations:1.0'
     implementation 'org.fusesource.leveldbjni:leveldbjni-all:1.8'
+    implementation 'com.yanzhenjie:permission:2.0.0-rc4'
     // retrofit 2
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'

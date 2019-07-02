@@ -18,6 +18,7 @@ import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -73,7 +74,14 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             mnemonicData.num = confirmDataList.get(i).num;
             ensureDataList.add(mnemonicData);
         }
-        Collections.shuffle(ensureDataList);
+        Collections.sort(ensureDataList, new Comparator<MnemonicData>() {
+            @Override
+            public int compare(MnemonicData o1, MnemonicData o2) {
+                float p1 = o1.num;;
+                float p2 = o2.num;
+                return (p2 < p1) ? 1 : ((p1 == p2) ? 0 : -1);
+            }
+        });
         ensureDataList.get(0).state = MnemonicData.STATE_CHECK_NEXT;
     }
 
@@ -305,11 +313,12 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
             backSum = list.size();
         }
         for (int i = 0; i < backSum; i++) {
-//			random range 0-list.size()-1
+			//random range 0-list.size()-1
             int target = random.nextInt(list.size());
             backList.add(list.get(target));
             list.remove(target);
         }
+
         return backList;
     }
 
