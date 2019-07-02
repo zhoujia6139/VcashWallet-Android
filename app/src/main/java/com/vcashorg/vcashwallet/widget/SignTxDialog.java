@@ -93,8 +93,8 @@ public class SignTxDialog extends DialogFragment {
             VcashSlate vcashSlate = (VcashSlate) getArguments().getSerializable(KEY);
             if (vcashSlate != null) {
                 mTvTxId.setText(vcashSlate.uuid);
-                mTvTxAmount.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.amount));
-                mTvTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashSlate.fee));
+                mTvTxAmount.setText(WalletApi.nanoToVcashString(vcashSlate.amount));
+                mTvTxFee.setText(WalletApi.nanoToVcashString(vcashSlate.fee));
             }
         }
 

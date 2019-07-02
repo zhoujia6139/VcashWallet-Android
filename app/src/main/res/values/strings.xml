@@ -121,7 +121,7 @@
     <string name="enter_tx_file">Enter the received transaction file</string>
     <string name="read_tx_file">Read transaction details</string>
     <string name="receive_transaction_file_notify_2">After generating the signed transaction file, copy the contents and send it to the sender.</string>
-    <string name="sign_tx_file">Sign transaction file</string>
+    <string name="sign_tx_file">Signed transaction file</string>
 
 
     <string name="send_success">Sent successfully</string>

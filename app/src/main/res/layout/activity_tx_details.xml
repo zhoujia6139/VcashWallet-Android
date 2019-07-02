@@ -29,9 +29,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            tools:text="Tx Status: waiting for the recipient to sign"
             android:textColor="@color/black"
-            android:textSize="26sp" />
+            android:textSize="26sp"
+            tools:text="Tx Status: waiting for the recipient to sign" />
     </LinearLayout>
 
     <LinearLayout
@@ -124,14 +124,27 @@
                 android:text="@string/tx_amount"
                 android:textColor="@color/A10" />
 
-            <TextView
-                android:id="@+id/tv_tx_amount"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_weight="2"
-                android:textColor="@color/A10"
-                tools:text="5.23122 Vcash" />
+                android:layout_weight="2">
+
+                <TextView
+                    android:id="@+id/tv_tx_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/A10"
+                    android:textStyle="bold"
+                    tools:text="5.23122" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" VCash"
+                    android:textColor="@color/A10" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -147,14 +160,29 @@
                 android:text="@string/tx_fee"
                 android:textColor="@color/A10" />
 
-            <TextView
-                android:id="@+id/tv_tx_fee"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_weight="2"
-                android:textColor="@color/A10"
-                tools:text="0.03122 Vcash" />
+                android:layout_weight="2">
+
+                <TextView
+                    android:id="@+id/tv_tx_fee"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/A10"
+                    android:textStyle="bold"
+                    tools:text="0.03122" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" VCash"
+                    android:textColor="@color/A10" />
+
+            </LinearLayout>
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -182,11 +210,11 @@
 
         <LinearLayout
             android:id="@+id/ll_tx_file"
-            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -219,8 +247,8 @@
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_grey9_round_rect"
-                android:scrollbars="vertical"
                 android:padding="12dp"
+                android:scrollbars="vertical"
                 android:textColor="@color/A1"
                 tools:text="ndianfioafioa" />
         </LinearLayout>
@@ -232,8 +260,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
-        android:visibility="visible"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <FrameLayout
             android:id="@+id/fl_btn_sign"
@@ -251,9 +279,9 @@
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_round_correct"
                 android:drawablePadding="6dp"
-                tools:text="Receive and signature"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:text="Receive and signature" />
 
         </FrameLayout>
 

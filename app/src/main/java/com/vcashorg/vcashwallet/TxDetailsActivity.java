@@ -139,8 +139,8 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTvTxId.setText(serverTx.tx_id);
         mTvSender.setText(serverTx.sender_id);
         mTvRecipient.setText(serverTx.receiver_id);
-        mTxAmount.setText(WalletApi.nanoToVcashWithUnit(serverTx.slateObj.amount));
-        mTxFee.setText(WalletApi.nanoToVcashWithUnit(serverTx.slateObj.fee));
+        mTxAmount.setText(WalletApi.nanoToVcashString(serverTx.slateObj.amount));
+        mTxFee.setText(WalletApi.nanoToVcashString(serverTx.slateObj.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp2(System.currentTimeMillis()));
     }
 
@@ -185,7 +185,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
 
         mTvTxId.setText(UIUtils.isEmpty(vcashTxLog.tx_slate_id)? UIUtils.getString(R.string.unReachable) : vcashTxLog.tx_slate_id);
-        mTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.fee));
+        mTxFee.setText(WalletApi.nanoToVcashString(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
         configInfoFromTxType(vcashTxLog.tx_type);
         if(!UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
@@ -203,17 +203,17 @@ public class TxDetailsActivity extends ToolBarActivity {
                 mTvTxId.setText(R.string.coinbase);
                 mTvSender.setText(R.string.coinbase);
                 mTvRecipient.setText(R.string.coinbase);
-                mTxAmount.setText(WalletApi.nanoToVcashWithUnit(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
+                mTxAmount.setText(WalletApi.nanoToVcashString(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
                 break;
             case TxSent:
                 mTvSender.setText(WalletApi.getWalletUserId());
                 mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
-                mTxAmount.setText(WalletApi.nanoToVcashWithUnit(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited) - vcashTxLog.fee));
+                mTxAmount.setText(WalletApi.nanoToVcashString(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited) - vcashTxLog.fee));
                 break;
             case TxReceived:
                 mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
-                mTxAmount.setText(WalletApi.nanoToVcashWithUnit(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
+                mTxAmount.setText(WalletApi.nanoToVcashString(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
                 break;
             case TxReceivedCancelled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
@@ -224,7 +224,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
                 mTvSender.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
                 mTvRecipient.setText(WalletApi.getWalletUserId());
-                mTxAmount.setText(WalletApi.nanoToVcashWithUnit(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
+                mTxAmount.setText(WalletApi.nanoToVcashString(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited)));
                 break;
             case TxSentCancelled:
                 mIvStatus.setImageResource(R.drawable.ic_tx_canceled_big);
@@ -235,7 +235,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                 mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
                 mTvSender.setText(WalletApi.getWalletUserId());
                 mTvRecipient.setText(UIUtils.isEmpty(vcashTxLog.parter_id) ? UIUtils.getString(R.string.unReachable) : vcashTxLog.parter_id);
-                mTxAmount.setText(WalletApi.nanoToVcashWithUnit(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited) - vcashTxLog.fee));
+                mTxAmount.setText(WalletApi.nanoToVcashString(Math.abs(vcashTxLog.amount_credited - vcashTxLog.amount_debited) - vcashTxLog.fee));
                 break;
         }
     }
