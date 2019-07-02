@@ -1,9 +1,11 @@
 package com.vcashorg.vcashwallet;
 
 import android.content.Intent;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.api.ServerTxManager;
@@ -56,6 +58,12 @@ public class TxDetailsActivity extends ToolBarActivity {
     FrameLayout mFlCancel;
     @BindView(R.id.tv_cancel)
     TextView mTvCancel;
+    @BindView(R.id.ll_details_bot)
+    LinearLayout mLLBot;
+    @BindView(R.id.ll_tx_file)
+    LinearLayout mLLFile;
+    @BindView(R.id.tv_content)
+    TextView mTvContent;
 
     VcashTxLog vcashTxLog;
     ServerTransaction serverTx;
@@ -180,6 +188,12 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTxFee.setText(WalletApi.nanoToVcashWithUnit(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
         configInfoFromTxType(vcashTxLog.tx_type);
+        if(!UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
+            mLLBot.setVisibility(View.GONE);
+            mLLFile.setVisibility(View.VISIBLE);
+            mTvContent.setMovementMethod(ScrollingMovementMethod.getInstance());
+            mTvContent.setText(vcashTxLog.signed_slate_msg);
+        }
     }
 
 
@@ -303,6 +317,11 @@ public class TxDetailsActivity extends ToolBarActivity {
                 cancelTransaction(serverTx.tx_id);
             }
         }
+    }
+
+    @OnClick(R.id.tv_copy)
+    public void onCopyClick(){
+        UIUtils.copyText(this,mTvContent.getText().toString());
     }
 
 

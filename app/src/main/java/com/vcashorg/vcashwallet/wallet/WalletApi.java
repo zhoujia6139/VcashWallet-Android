@@ -366,7 +366,7 @@ public class WalletApi {
         VcashSlate slate;
         try {
              slate = gson.fromJson(fileContent, VcashSlate.class);
-        }catch (JsonSyntaxException e){
+        }catch (Exception e){
             if (callback != null){
                 callback.onCall(false, "Wrong Data Format");
             }
@@ -382,7 +382,7 @@ public class WalletApi {
         VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
         if (txLog != null){
             if (callback != null){
-                callback.onCall(false, "Duplicate Tx");
+                callback.onCall(false, "Duplicate transaction");
             }
             return;
         }

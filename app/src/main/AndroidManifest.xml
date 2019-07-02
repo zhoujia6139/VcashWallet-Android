@@ -19,17 +19,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".MainActivity">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
-
         <activity
             android:name=".LauncherActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Splash_style">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -85,12 +78,16 @@
         <activity
             android:name=".WalletMainActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".ReceiveTxFileActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ReceiveTxFileCopyActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ReceiveTxFileRecordActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ReceiveTxFileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ReceiveTxFileCopyActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ReceiveTxFileRecordActivity"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.vcashorg.vcashwallet.fileprovider"
