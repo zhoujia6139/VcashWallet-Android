@@ -1,13 +1,11 @@
 package com.vcashorg.vcashwallet.fragment;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -15,7 +13,6 @@ import android.widget.TextView;
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
-import com.vcashorg.vcashwallet.PasswordActivity;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.TxDetailsActivity;
 import com.vcashorg.vcashwallet.VcashReceiveActivity;
@@ -23,7 +20,6 @@ import com.vcashorg.vcashwallet.VcashSendActivity;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
-import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.base.BaseFragment;
 import com.vcashorg.vcashwallet.bean.WalletTxEntity;
 import com.vcashorg.vcashwallet.utils.DateUtil;
@@ -62,9 +58,9 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
     View footerView;
 
     //header
-    TextView mTvBalance;
     TextView mTvAvailable;
-    TextView mTvUnconfirmed;
+    TextView mTvLocked;
+    TextView mTvPending;
 
     private List<WalletTxEntity> mData = new ArrayList<>();
 
@@ -187,9 +183,9 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
     private void initHeaderView() {
         headerView = LayoutInflater.from(mActivity).inflate(R.layout.layout_vcash_tx_header, null);
-        mTvBalance = headerView.findViewById(R.id.tv_balance);
         mTvAvailable = headerView.findViewById(R.id.tv_available);
-        mTvUnconfirmed = headerView.findViewById(R.id.tv_unconfirmed);
+        mTvLocked = headerView.findViewById(R.id.tv_locked);
+        mTvPending = headerView.findViewById(R.id.tv_pending);
     }
 
     private void initFooterView() {
@@ -235,9 +231,9 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
         //refreshbalance
         WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-        mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
-        mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
-        mTvUnconfirmed.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
+        mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable));
+        mTvLocked.setText(WalletApi.nanoToVcashString(balanceInfo.locked) + " V");
+        mTvPending.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
 
         //refreshheight
         mTvHeight.setText(UIUtils.getString(R.string.height) + WalletApi.getCurChainHeight());

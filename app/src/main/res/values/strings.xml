@@ -25,6 +25,8 @@
     <string name="wait_for_process">waiting for processing</string>
     <string name="unconfirmed">Unconfirmed</string>
     <string name="available">Available</string>
+    <string name="locked">Locked</string>
+    <string name="pending">Pending</string>
     <string name="balance">Balance</string>
     <string name="recent_transaction">Recent transactions</string>
     <string name="receive">Receive</string>
