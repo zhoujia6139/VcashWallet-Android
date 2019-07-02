@@ -18,6 +18,8 @@ public class VcashReceiveActivity extends ToolBarActivity {
     ImageView mQrcode;
     @BindView(R.id.tv_wallet_id)
     TextView mWalletId;
+    @BindView(R.id.tv_receive_tx_file)
+    TextView mFileReceive;
 
     @Override
     protected void initToolBar() {
@@ -34,6 +36,8 @@ public class VcashReceiveActivity extends ToolBarActivity {
         mQrcode.setImageBitmap(bitmap);
 
         mWalletId.setText(WalletApi.getWalletUserId());
+
+        mFileReceive.setText(UIUtils.getString(R.string.receive_transaction_file) + " ->");
     }
 
     @Override
@@ -49,7 +53,6 @@ public class VcashReceiveActivity extends ToolBarActivity {
 
     @OnClick(R.id.tv_receive_tx_file)
     public void onReceiveTxFileClick(){
-
         nv(ReceiveTxFileActivity.class);
     }
 }

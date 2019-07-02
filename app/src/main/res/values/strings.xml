@@ -1,6 +1,6 @@
 <resources tools:ignore="MissingTranslation" xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="app_name">Vcash Wallet</string>
+    <string name="app_name">VCash Wallet</string>
 
     <string name="copy_ok">Copied to clipboard</string>
     <string name="copy">Copy</string>
@@ -118,8 +118,8 @@
     <string name="support_recipient_ID">support recipient’s ID and "http" methods .</string>
     <string name="send_transaction_file">Send VCash with transaction file</string>
     <string name="send_vcash_notify">Sending VCash is an interactive process that the sender and the receiver need to interact back and forth to ensure the transaction is implemented.</string>
-    <string name="receive_transaction_file">Receive from transaction file -></string>
-    <string name="receive_transaction_file_notify">You can receive vcash through the transaction file. When you receive a transaction file frome sender, you can copy it into the form below.</string>
+    <string name="receive_transaction_file">Receive from transaction file</string>
+    <string name="receive_transaction_file_notify">You can receive VCash through the transaction file. When you receive a transaction file frome sender, you can copy it into the form below.</string>
     <string name="enter_tx_file">Enter the received transaction file</string>
     <string name="read_tx_file">Read transaction details</string>
     <string name="receive_transaction_file_notify_2">After generating the signed transaction file, copy the contents and send it to the sender.</string>

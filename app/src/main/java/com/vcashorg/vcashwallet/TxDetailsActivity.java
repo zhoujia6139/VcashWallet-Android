@@ -188,7 +188,9 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTxFee.setText(WalletApi.nanoToVcashString(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
         configInfoFromTxType(vcashTxLog.tx_type);
-        if(!UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
+        if(vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
+                && UIUtils.isEmpty(vcashTxLog.parter_id)
+                && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
             mLLBot.setVisibility(View.GONE);
             mLLFile.setVisibility(View.VISIBLE);
             mTvContent.setMovementMethod(ScrollingMovementMethod.getInstance());
