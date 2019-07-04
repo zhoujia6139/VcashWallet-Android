@@ -19,7 +19,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_available"
+            android:id="@+id/tv_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="211.023165231"
@@ -33,7 +33,7 @@
             android:drawableLeft="@drawable/ic_vcash_small"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"
-            android:text="@string/available"
+            android:text="@string/balance"
             android:textColor="#777777"
             android:textSize="14sp" />
     </LinearLayout>
@@ -54,7 +54,7 @@
             android:paddingRight="26dp">
 
             <TextView
-                android:id="@+id/tv_locked"
+                android:id="@+id/tv_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="41.023165231 V"
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/locked"
+                android:text="@string/available"
                 android:textColor="#777777"
                 android:textSize="12sp" />
         </LinearLayout>

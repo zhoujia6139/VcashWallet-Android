@@ -33,7 +33,7 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
         setTitleSize(15);
         setSubTitleSize(15);
         TextView tvRight = getSubTitle();
-        tvRight.setText("Record");
+        tvRight.setText("Records");
         TextPaint paint = tvRight.getPaint();
         paint.setFakeBoldText(true);
         tvRight.setTextColor(UIUtils.getColor(R.color.orange));

@@ -58,8 +58,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
     View footerView;
 
     //header
-    TextView mTvAvailable;
-    TextView mTvLocked;
+    TextView mTvBalance;
+    TextView mTvAvaliable;
     TextView mTvPending;
 
     private List<WalletTxEntity> mData = new ArrayList<>();
@@ -183,8 +183,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
     private void initHeaderView() {
         headerView = LayoutInflater.from(mActivity).inflate(R.layout.layout_vcash_tx_header, null);
-        mTvAvailable = headerView.findViewById(R.id.tv_available);
-        mTvLocked = headerView.findViewById(R.id.tv_locked);
+        mTvBalance = headerView.findViewById(R.id.tv_balance);
+        mTvAvaliable = headerView.findViewById(R.id.tv_available);
         mTvPending = headerView.findViewById(R.id.tv_pending);
     }
 
@@ -231,8 +231,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
         //refreshbalance
         WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
-        mTvAvailable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable));
-        mTvLocked.setText(WalletApi.nanoToVcashString(balanceInfo.locked) + " V");
+        mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
+        mTvAvaliable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
         mTvPending.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
 
         //refreshheight

@@ -128,12 +128,12 @@ public class WalletDrawer {
         //Vcash Wallet
         MenuItem item1 = new MenuItem();
         item1.checked = true;
-        item1.name = "Vcash Wallet";
+        item1.name = UIUtils.getString(R.string.app_name);
         item1.checkId = R.drawable.ic_menu_wallet_check;
         item1.uncheckId = R.drawable.ic_menu_wallet_uncheck;
         //Setting
         MenuItem item2 = new MenuItem();
-        item2.name = "Setting";
+        item2.name = UIUtils.getString(R.string.setting);
         item2.checkId = R.drawable.ic_menu_setting_check;
         item2.uncheckId = R.drawable.ic_menu_setting_uncheck;
         //Address book
