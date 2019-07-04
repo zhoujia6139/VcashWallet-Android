@@ -210,6 +210,13 @@ public class VcashWallet {
             actualFee = calcuteFee(spendable.size(), 2);
         }
         amount_with_fee = amount + actualFee;
+        if (total < amount_with_fee){
+            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
+            if (callback!=null){
+                callback.onCall(false, errMsg);
+            }
+            return;
+        }
         long change = total - amount_with_fee;
 
         //2 fill txLog and slate
