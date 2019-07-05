@@ -32,7 +32,7 @@ import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.Outpu
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures.OutputFeaturePlain;
 
 public class VcashSlate implements Serializable {
-    public VersionCompatInfo version_info = new VersionCompatInfo(2, 2, 2);
+    public VersionCompatInfo version_info = new VersionCompatInfo(2, 2, 1);
     public String uuid = Generators.randomBasedGenerator().generate().toString();
     public short num_participants;
     public long amount;
@@ -54,12 +54,12 @@ public class VcashSlate implements Serializable {
     public class VersionCompatInfo implements Serializable {
         private int version;
         private int orig_version;
-        private int min_compat_version;
+        private int block_header_version;
 
-        public VersionCompatInfo(int ver, int orig, int min_compat){
+        public VersionCompatInfo(int ver, int orig, int header_version){
             version = ver;
             orig_version = orig;
-            min_compat_version = min_compat;
+            block_header_version = header_version;
         }
     }
 
@@ -243,6 +243,18 @@ public class VcashSlate implements Serializable {
         return true;
     }
 
+    public boolean isValidForFinalize(){
+        if (participant_data.size() != 2){
+            return false;
+        }
+
+        if (tx.body.inputs.size() == 0 || tx.body.kernels.size() == 0){
+            return false;
+        }
+
+        return true;
+    }
+
     private byte[] createTxOutputWithAmount(final long amount){
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
         final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath);
@@ -368,11 +380,11 @@ public class VcashSlate implements Serializable {
                 String public_nonceStr = AppUtil.hex(compressKey);
                 jsonWriter.name("public_nonce").value(public_nonceStr);
 
-                //byte[] compressSig = NativeSecp256k1.instance().signatureToCompactData(data.part_sig);
-                String part_sigStr = AppUtil.hex(data.part_sig);
+                byte[] compressSig = NativeSecp256k1.instance().signatureToCompactData(data.part_sig);
+                String part_sigStr = AppUtil.hex(compressSig);
                 jsonWriter.name("part_sig").value(part_sigStr);
-                //compressSig = NativeSecp256k1.instance().signatureToCompactData(data.message_sig);
-                String message_sigStr = AppUtil.hex(data.message_sig);
+                compressSig = NativeSecp256k1.instance().signatureToCompactData(data.message_sig);
+                String message_sigStr = AppUtil.hex(compressSig);
                 jsonWriter.name("message_sig").value(message_sigStr);
                 jsonWriter.endObject();
             }
@@ -409,6 +421,7 @@ public class VcashSlate implements Serializable {
                             if (jsonReader.peek() != JsonToken.NULL) {
                                 String part_sig_str = jsonReader.nextString();
                                 data.part_sig = AppUtil.decode(part_sig_str);
+                                data.part_sig = NativeSecp256k1.instance().compactDataToSignature(data.part_sig);
                             }
                             else{
                                 jsonReader.nextNull();
@@ -419,6 +432,7 @@ public class VcashSlate implements Serializable {
                             if (jsonReader.peek() != JsonToken.NULL) {
                                 String message_sig_str = jsonReader.nextString();
                                 data.message_sig = AppUtil.decode(message_sig_str);
+                                data.message_sig = NativeSecp256k1.instance().compactDataToSignature(data.message_sig);
                             }
                             else{
                                 jsonReader.nextNull();

@@ -329,6 +329,37 @@ public class WalletApi {
         });
     }
 
+    public static void sendTransactionByFile(final VcashSlate slate, final WalletCallback callback){
+        Log.w(Tag, String.format("start sendTransaction by file"));
+        EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
+
+        final WalletNoParamCallBack rollbackBlock = new WalletNoParamCallBack() {
+            @Override
+            public void onCall() {
+                EncryptedDBHelper.getsInstance().rollbackDataTransaction();
+                VcashWallet.getInstance().reloadOutputInfo();
+            }
+        };
+
+        sendTransaction(slate, new WalletCallback(){
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo){
+                    Log.w(Tag, String.format("sendTransaction by file suc"));
+                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                    final Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, slate.new VcashSlateTypeAdapter()).create();
+                    String slate_str = gson.toJson(slate);
+                    callback.onCall(true, slate_str);
+                }
+                else{
+                    Log.e(Tag, "sendTransaction by file error!");
+                    rollbackBlock.onCall();
+                    callback.onCall(false, data);
+                }
+            }
+        });
+    }
+
     private static void sendTransaction(VcashSlate slate, final WalletCallback callback){
         slate.lockOutputsFn.onCall();
         if (slate.createNewOutputsFn != null){
@@ -361,7 +392,7 @@ public class WalletApi {
         }
     }
 
-    public static void isValidSlateConent(String fileContent, final WalletCallback callback){
+    public static void isValidSlateConentForReceive(String fileContent, final WalletCallback callback){
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         VcashSlate slate;
         try {
@@ -499,6 +530,37 @@ public class WalletApi {
 
     }
 
+    public static void isValidSlateConentForFinalize(String fileContent, final WalletCallback callback){
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        VcashSlate slate;
+        try {
+            slate = gson.fromJson(fileContent, VcashSlate.class);
+        }catch (Exception e){
+            if (callback != null){
+                callback.onCall(false, "Wrong Data Format");
+            }
+            return;
+        }
+        if (slate == null || !slate.isValidForFinalize()){
+            if (callback != null){
+                callback.onCall(false, "Wrong Data Format");
+            }
+            return;
+        }
+
+        VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+        if (txLog == null){
+            if (callback != null){
+                callback.onCall(false, "Tx missed");
+            }
+            return;
+        }
+
+        if (callback != null){
+            callback.onCall(true, slate);
+        }
+    }
+
     public static void finalizeServerTransaction(final ServerTransaction tx, final WalletCallback callback){
         finalizeTransaction(tx.slateObj, new WalletCallback() {
             @Override
@@ -526,7 +588,7 @@ public class WalletApi {
         });
     }
 
-    private static void finalizeTransaction(final VcashSlate slate, final WalletCallback callback){
+    public static void finalizeTransaction(final VcashSlate slate, final WalletCallback callback){
         VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(slate.uuid);
         if (context == null){
             Log.e(Tag, "database record is broke, cannot finalize tx");

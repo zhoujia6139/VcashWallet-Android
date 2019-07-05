@@ -28,6 +28,6 @@ public interface NodeApiUrl {
     @GET("/v1/chain")
     Observable<NodeChainInfo> getChainHeight();
 
-    @POST("/v1/pool/push?fluff")
+    @POST("/v1/pool/push_tx?fluff")
     Observable<ResponseBody> postTx(@Body JsonObject body);
 }

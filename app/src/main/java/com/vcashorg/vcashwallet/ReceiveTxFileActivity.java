@@ -77,7 +77,7 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
     @OnClick(R.id.btn_read_tx)
     public void onReadTxClick(){
         if(mEtContent.getText().toString().trim().equals(""))return;
-        WalletApi.isValidSlateConent(mEtContent.getText().toString(), new WalletCallback() {
+        WalletApi.isValidSlateConentForReceive(mEtContent.getText().toString(), new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data) {
                 if(yesOrNo){
