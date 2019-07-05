@@ -23,7 +23,8 @@ import butterknife.OnClick;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
-public class TxDetailsActivity extends ToolBarActivity {
+public class
+TxDetailsActivity extends ToolBarActivity {
 
     public static final int TYPE_TX_SERVER = 0;
     public static final int TYPE_TX_LOG = 1;

@@ -8,6 +8,8 @@ public class WalletTxEntity implements MultiItemEntity {
 
     public static final int TYPE_SERVER_TX = 1;
     public static final int TYPE_TX_LOG = 2;
+    public static final int TYPE_TX_ONGOING = 3;
+    public static final int TYPE_TX_COMPLETE = 4;
 
     private int itemType;
 

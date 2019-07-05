@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
@@ -88,7 +89,12 @@ public class ServerTxManager {
 
                         for (ServerTransaction item : txs) {
                             Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
-                            item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
+
+                            try {
+                                item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
+                            }catch (JsonSyntaxException e){
+                                continue;
+                            }
                             if (item.slateObj != null) {
                                 VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(item.slateObj.uuid);
 

@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.LockScreenActivity;
-import com.vcashorg.vcashwallet.PasswordChangeActivity;
+import com.vcashorg.vcashwallet.PasswordVerifyActivity;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.base.BaseFragment;
@@ -49,8 +49,18 @@ public class SettingFragment extends BaseFragment {
 
     @OnClick(R.id.tv_change_psw)
     public void onChangePswClick(){
-        nv(PasswordChangeActivity.class);
+        Intent intent = new Intent(mActivity,PasswordVerifyActivity.class);
+        intent.putExtra(PasswordVerifyActivity.PARAM_TYPE,PasswordVerifyActivity.TYPE_CHANGE_PSW);
+        nv(intent);
     }
+
+    @OnClick(R.id.tv_recover_phrase)
+    public void onRecoverPhraseClick(){
+        Intent intent = new Intent(mActivity,PasswordVerifyActivity.class);
+        intent.putExtra(PasswordVerifyActivity.PARAM_TYPE,PasswordVerifyActivity.TYPE_RESTORE_PHRASE);
+        nv(intent);
+    }
+
 
     @OnClick(R.id.iv_open_menu)
     public void onMenuClick(){

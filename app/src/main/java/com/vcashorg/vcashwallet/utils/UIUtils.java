@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.VcashApp;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
 
 public class UIUtils {
 
@@ -245,11 +247,16 @@ public class UIUtils {
         return localVersion;
     }
 
-
-
     public static void copyText(Context context, String text){
-        ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager cm = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
         cm.setPrimaryClip(ClipData.newPlainText("", text));
         showToastCenter(context.getString(R.string.copy_ok));
+    }
+
+    public static String getClipboardText(Context context){
+        ClipboardManager cm = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+        ClipData data = cm.getPrimaryClip();
+        ClipData.Item item = data.getItemAt(0);
+        return item.getText().toString();
     }
 }

@@ -8,6 +8,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -28,6 +29,10 @@ import butterknife.OnClick;
 public class MnemonicConfirmActivity extends ToolBarActivity {
 
     public static final String PARAM_MNEMONIC_LIST = "mnemonic_list";
+    public static final String PARAM_TYPE = "type";
+
+    public static final int TYPE_MNEMONIC_CONFIRM = 0;
+    public static final int TYPE_RECOVER_PHRASE = 1;
 
     @BindView(R.id.rv_confirm)
     RecyclerView mRvConfirm;
@@ -38,12 +43,17 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @BindView(R.id.btn_check)
     FrameLayout mBtnCheck;
 
+    @BindView(R.id.tv_check)
+    TextView mTvCheck;
+
     ArrayList<String> mnemonicList;
     List<MnemonicData> confirmDataList;
     List<MnemonicData> ensureDataList;
 
     MnemonicConfirmAdapter confirmAdapter;
     MnemonicEnsureAdapter ensureAdapter;
+
+    private int type;
 
     @Override
     protected void initToolBar() {
@@ -58,6 +68,10 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         mnemonicList = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
+        type = getIntent().getIntExtra(PARAM_TYPE,TYPE_MNEMONIC_CONFIRM);
+        if(type == TYPE_RECOVER_PHRASE){
+            mTvCheck.setText(R.string.done);
+        }
 
         ArrayList<MnemonicData> mnemonicDataList = (ArrayList<MnemonicData>) buildMnemonicDataList(mnemonicList);
 
@@ -270,30 +284,39 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @OnClick(R.id.btn_check)
     public void onCheckClick() {
         if (btnState() && validate()) {
-            UIUtils.showToastCenter(R.string.confirm_seed_phrase_success);
-            Intent intent = new Intent(MnemonicConfirmActivity.this, PasswordActivity.class);
-            intent.putExtra(PasswordActivity.PARAM_MNEMONIC_LIST, mnemonicList);
-            intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_CREATE);
-            nv(intent);
+
+            if(type == TYPE_MNEMONIC_CONFIRM){
+                UIUtils.showToastCenter(R.string.confirm_seed_phrase_success);
+                Intent intent = new Intent(MnemonicConfirmActivity.this, PasswordActivity.class);
+                intent.putExtra(PasswordActivity.PARAM_MNEMONIC_LIST, mnemonicList);
+                intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_CREATE);
+                nv(intent);
+            }else {
+                UIUtils.showToastCenter(R.string.backup_success);
+            }
             finish();
         }
     }
 
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.back_seed_phrase)
-                .setMessage(R.string.back_seed_phrase_content)
-                .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        nv(MnemonicCreateActivity.class);
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.cancel,null)
-                .show();
-        //super.onBackPressed();
+        if(type == TYPE_MNEMONIC_CONFIRM){
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.back_seed_phrase)
+                    .setMessage(R.string.back_seed_phrase_content)
+                    .setPositiveButton(R.string.generate, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            nv(MnemonicCreateActivity.class);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel,null)
+                    .show();
+        }else {
+            super.onBackPressed();
+        }
+
     }
 
     /**

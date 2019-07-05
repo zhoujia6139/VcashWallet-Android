@@ -16,7 +16,13 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class PasswordChangeActivity extends ToolBarActivity {
+public class PasswordVerifyActivity extends ToolBarActivity {
+
+    public static final int TYPE_CHANGE_PSW = 0;
+    public static final int TYPE_RESTORE_PHRASE = 1;
+
+    public static final String PARAM_TYPE = "type";
+
 
     @BindView(R.id.til_psw)
     TextInputLayout textInputLayout;
@@ -25,15 +31,27 @@ public class PasswordChangeActivity extends ToolBarActivity {
     @BindView(R.id.btn_next)
     Button btnNext;
 
+    private int type;
+
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle(UIUtils.getString(R.string.change_password));
+       // setToolBarTitle(UIUtils.getString(R.string.change_password));
     }
 
     @Override
     protected int provideContentViewId() {
-        return R.layout.activity_change_psw;
+        return R.layout.activity_psw_verify;
+    }
+
+    @Override
+    public void initParams() {
+        type = getIntent().getIntExtra(PARAM_TYPE,TYPE_RESTORE_PHRASE);
+        if(type == TYPE_CHANGE_PSW){
+            setToolBarTitle(UIUtils.getString(R.string.change_password));
+        }else {
+            setToolBarTitle(UIUtils.getString(R.string.verify_psw));
+        }
     }
 
     @Override
@@ -66,10 +84,17 @@ public class PasswordChangeActivity extends ToolBarActivity {
             ArrayList<String> words = (ArrayList<String>) ValidateUtil.validate2(editText.getText().toString());
             if(words != null){
                 textInputLayout.setErrorEnabled(false);
-                Intent intent = new Intent(PasswordChangeActivity.this,PasswordActivity.class);
-                intent.putExtra(PasswordActivity.PARAM_MODE,PasswordActivity.MODE_CHANGE_PSW);
-                intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,words);
-                startActivity(intent);
+                if(type == TYPE_CHANGE_PSW){
+                    Intent intent = new Intent(PasswordVerifyActivity.this,PasswordActivity.class);
+                    intent.putExtra(PasswordActivity.PARAM_MODE,PasswordActivity.MODE_CHANGE_PSW);
+                    intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,words);
+                    startActivity(intent);
+                }else {
+                    Intent intent = new Intent(PasswordVerifyActivity.this,RecoverPhraseActivity.class);
+                    intent.putStringArrayListExtra(RecoverPhraseActivity.PARAM_PHRASE,words);
+                    startActivity(intent);
+                    finish();
+                }
             }else {
                 textInputLayout.setError(UIUtils.getString(R.string.old_psw_incorrect));
                 textInputLayout.setErrorEnabled(true);

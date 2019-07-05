@@ -55,9 +55,6 @@
             android:name=".VcashReceiveActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".widget.qrcode.ScannerActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -70,7 +67,7 @@
             android:name=".LockScreenActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PasswordChangeActivity"
+            android:name=".PasswordVerifyActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".WalletMainActivity"
@@ -84,6 +81,8 @@
         <activity
             android:name=".ReceiveTxFileRecordActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".RecoverPhraseActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -8,8 +8,10 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -84,10 +86,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
         mRvTx.setLayoutManager(new LinearLayoutManager(mActivity));
         RecyclerViewDivider divider = new RecyclerViewDivider(mActivity, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
-        divider.hideFirstDecoration();
-        divider.hideLastDecoration();
-        divider.setMarginLeft(12);
-        divider.setMarginRight(12);
         mRvTx.addItemDecoration(divider);
 
         adapter = new VcashTxAdapter(mData);
@@ -209,19 +207,43 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
         mData.clear();
 
+        List<WalletTxEntity> onGoingList = new ArrayList<>();
+        List<WalletTxEntity> completeList = new ArrayList<>();
+
         for (int i = 0; i < serverTxs.size(); i++) {
             WalletTxEntity entity = new WalletTxEntity();
             entity.setItemType(WalletTxEntity.TYPE_SERVER_TX);
             entity.setServerTxEntity(serverTxs.get(i));
-            mData.add(entity);
+            onGoingList.add(entity);
         }
 
         for (int i = 0; i < txLogs.size(); i++) {
             WalletTxEntity entity = new WalletTxEntity();
             entity.setItemType(WalletTxEntity.TYPE_TX_LOG);
             entity.setTxLogEntity(txLogs.get(i));
-            mData.add(entity);
+            if(txLogs.get(i).confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed
+                    ||txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxSentCancelled
+                    ||txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxReceivedCancelled){
+                completeList.add(entity);
+            }else {
+                onGoingList.add(entity);
+            }
         }
+
+        if(onGoingList.size() != 0){
+            WalletTxEntity entity = new WalletTxEntity();
+            entity.setItemType(WalletTxEntity.TYPE_TX_ONGOING);
+            onGoingList.add(0,entity);
+        }
+
+        if(completeList.size() != 0){
+            WalletTxEntity entity = new WalletTxEntity();
+            entity.setItemType(WalletTxEntity.TYPE_TX_COMPLETE);
+            completeList.add(0,entity);
+        }
+
+        mData.addAll(onGoingList);
+        mData.addAll(completeList);
 
         if (mData != null && mData.size() != 0) {
             adapter.removeFooterView(footerView);
@@ -281,6 +303,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
             super(data);
             addItemType(WalletTxEntity.TYPE_SERVER_TX, R.layout.item_vcash_tx);
             addItemType(WalletTxEntity.TYPE_TX_LOG, R.layout.item_vcash_tx);
+            addItemType(WalletTxEntity.TYPE_TX_ONGOING,R.layout.layout_vcash_tx_title);
+            addItemType(WalletTxEntity.TYPE_TX_COMPLETE,R.layout.layout_vcash_tx_title);
         }
 
         @Override
@@ -288,7 +312,9 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
             switch (item.getItemType()) {
                 case WalletTxEntity.TYPE_SERVER_TX:
                     ServerTransaction serverTx = item.getServerTxEntity();
-                    helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
+
+                    Glide.with(mActivity).load(serverTx.isSend ? R.drawable.gif_send : R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
+                   // helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
                     helper.setText(R.id.tv_tx_id, TextUtils.isEmpty(serverTx.tx_id) ? "" : serverTx.tx_id);
                     helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(serverTx.slateObj.amount));
                     helper.setText(R.id.tv_tx_state, R.string.wait_for_process);
@@ -311,15 +337,31 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     long amount = txLog.amount_credited - txLog.amount_debited;
 
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
+                    VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
+
                     switch (txType) {
                         case ConfirmedCoinbase:
                             helper.setText(R.id.tv_tx_id, R.string.coinbase);
                         case TxReceived:
+                            if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
+                                helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
+                            }else {
+                                Glide.with(mActivity).load(R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
+                            }
+                            helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
+                            break;
                         case TxReceivedCancelled:
                             helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
                             helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
                             break;
                         case TxSent:
+                            if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
+                                helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
+                            }else {
+                                Glide.with(mActivity).load(R.drawable.gif_send).into((ImageView) helper.getView(R.id.iv_tx));
+                            }
+                            helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
+                            break;
                         case TxSentCancelled:
                             helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
                             helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
@@ -327,8 +369,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     }
 
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeStamp(txLog.create_time));
-
-                    VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
 
                     TextView txState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
@@ -366,13 +406,19 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     }
 
                     break;
+                case WalletTxEntity.TYPE_TX_ONGOING:
+                    helper.setText(R.id.tv_title,R.string.ongoing_tx);
+                    break;
+                case WalletTxEntity.TYPE_TX_COMPLETE:
+                    helper.setText(R.id.tv_title,R.string.complete_tx);
+                    break;
             }
 
-            if (helper.getAdapterPosition() == getData().size()) {
-                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow_2);
-            } else {
-                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow);
-            }
+//            if (helper.getAdapterPosition() == getData().size()) {
+//                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow_2);
+//            } else {
+//                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow);
+//            }
         }
     }
 

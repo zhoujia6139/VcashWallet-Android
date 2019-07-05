@@ -78,7 +78,7 @@
     <string name="storage_permission">Need Storage Permission</string>
     <string name="password_dont_match">Passwords do not match</string>
     <string name="create_wallet_success">Wallet is ready for use</string>
-    <string name="create_wallet_failed">Failed to create wallet, please check the information you filled out Is the seed phrase correct</string>
+    <string name="create_wallet_failed">Incorrect seed phrase. Please double check and correct them.</string>
     <string name="creating_wallet">Creating wallet…</string>
     <string name="restoring_wallet">Restoring wallet…Please do not close wallet</string>
     <string name="loading_wallet">Loading wallet…</string>
@@ -124,6 +124,12 @@
     <string name="read_tx_file">Read transaction details</string>
     <string name="receive_transaction_file_notify_2">Copy the signed transaction file and send it to the sender.</string>
     <string name="sign_tx_file">Signed transaction file</string>
+    <string name="ongoing_tx">Ongoing transactions</string>
+    <string name="complete_tx">Completed transactions</string>
+    <string name="recover_phrase">Recover Phrase</string>
+    <string name="verify_psw">Verify wallet password</string>
+    <string name="backup_success">Backup successfully</string>
+    <string name="backup_phrase">Backup Phrase</string>
 
 
     <string name="send_success">Sent successfully</string>

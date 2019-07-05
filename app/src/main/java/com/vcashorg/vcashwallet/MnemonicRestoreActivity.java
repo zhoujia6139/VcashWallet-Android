@@ -1,15 +1,20 @@
 package com.vcashorg.vcashwallet;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -22,6 +27,7 @@ import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -81,6 +87,12 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
         return R.layout.activity_mnemonic_restore;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showWordsDialog();
+    }
+
     class MnemonicRestoreAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder>{
 
         public MnemonicRestoreAdapter(int layoutResId, @Nullable List<MnemonicData> data) {
@@ -91,6 +103,25 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
         protected void convert(final BaseViewHolder helper, final MnemonicData item) {
             final EditText etWord = helper.getView(R.id.et_word);
             helper.setText(R.id.tv_num,String.valueOf(helper.getAdapterPosition() + 1));
+            if(!TextUtils.isEmpty(item.data)){
+                helper.setText(R.id.et_word,item.data);
+                if(item.state == MnemonicData.STATE_CHECK_TRUE){
+                    helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
+                    helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.green));
+                }else if(item.state == MnemonicData.STATE_CHECK_FALSE){
+                    helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
+                    helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
+                }
+            }
+
+            etWord.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if(hasFocus){
+                        parse = false;
+                    }
+                }
+            });
 
             etWord.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -105,36 +136,38 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    String str = s.toString();
-                    if (str.indexOf("/r") >= 0 || str.indexOf("\n") >= 0){
-                        EditText nextEdt = (EditText) adapter.getViewByPosition(helper.getAdapterPosition() + 1,R.id.et_word);
-                        etWord.setText(str.replace("/r", "").replace("\n", ""));
-                        if (nextEdt != null) {
-                            nextEdt.requestFocus();
-                            nextEdt.setSelection(nextEdt.getText().length());
+                    if(!parse){
+                        String str = s.toString();
+                        if (str.indexOf("/r") >= 0 || str.indexOf("\n") >= 0){
+                            EditText nextEdt = (EditText) adapter.getViewByPosition(helper.getAdapterPosition() + 1,R.id.et_word);
+                            etWord.setText(str.replace("/r", "").replace("\n", ""));
+                            if (nextEdt != null) {
+                                nextEdt.requestFocus();
+                                nextEdt.setSelection(nextEdt.getText().length());
+                            }
+                        }
+
+                        if(!str.replace("/r", "").replace("\n", "").equals("")){
+                            if(allPhraseWords.contains(s.toString())){
+                                item.state = MnemonicData.STATE_CHECK_TRUE;
+                                item.data = s.toString();
+                                helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
+                                helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.green));
+                            }else {
+                                item.state = MnemonicData.STATE_CHECK_FALSE;
+                                item.data = "";
+                                helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
+                                helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
+                            }
+                        }else {
+                            item.state = MnemonicData.STATE_UNCHECK;
+                            item.data = "";
+                            helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_grey);
                         }
                     }
 
-                    if(!str.replace("/r", "").replace("\n", "").equals("")){
-                        if(allPhraseWords.contains(s.toString())){
-                            item.state = MnemonicData.STATE_CHECK_TRUE;
-                            item.data = s.toString();
-                            helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
-                            helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.green));
-                        }else {
-                            item.state = MnemonicData.STATE_CHECK_FALSE;
-                            item.data = "";
-                            helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
-                            helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
-                        }
-                    }else {
-                        item.state = MnemonicData.STATE_UNCHECK;
-                        item.data = "";
-                        helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_grey);
-                    }
 
                     btnState();
-
                 }
             });
         }
@@ -200,7 +233,6 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                 });
     }
 
-
     private void btnState(){
         for (MnemonicData data : restoreMnemonicData){
             if(data.state == MnemonicData.STATE_UNCHECK || data.state == MnemonicData.STATE_CHECK_FALSE){
@@ -228,5 +260,61 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
             result.add(data.data);
         }
         return result;
+    }
+
+    private boolean parse;
+
+    private void showWordsDialog(){
+        if(wordsInBoard() != null){
+            new AlertDialog.Builder(this)
+                    .setMessage("You can copy seed phrase from your backup.")
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            List<String> words = wordsInBoard();
+                            if(words != null){
+                                for (int i=0;i<restoreMnemonicData.size();i++){
+                                    MnemonicData data = restoreMnemonicData.get(i);
+                                    String word = words.get(i);
+                                    data.data = word;
+                                    data.state = allPhraseWords.contains(word) ? MnemonicData.STATE_CHECK_TRUE : MnemonicData.STATE_CHECK_FALSE;
+                                }
+                                parse = true;
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+        }
+
+    }
+
+
+    private List<String> wordsInBoard(){
+        String board = UIUtils.getClipboardText(this).trim();
+        if(board.contains(" ")){
+            String trim = board.replaceAll("\\s{1,}", " ");
+            String[] w1 = trim.split(" ");
+            if(w1.length == 24){
+                return Arrays.asList(w1);
+            }
+        }
+
+        if(board.contains("-")){
+            String[] w2 = board.split("-");
+            if(w2.length == 24){
+                return Arrays.asList(w2);
+            }
+        }
+
+        if(board.contains("\n")){
+            String[] w3 = board.split("\n");
+            if(w3.length == 24){
+                return Arrays.asList(w3);
+            }
+        }
+
+        return null;
     }
 }

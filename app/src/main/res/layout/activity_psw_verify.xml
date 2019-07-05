@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -25,7 +26,10 @@
             android:id="@+id/til_psw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp">
+            android:layout_marginTop="22dp"
+            app:passwordToggleDrawable="@drawable/password_toogle_see"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/grey_5">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/et_psw"
@@ -42,6 +46,7 @@
 
             <Button
                 android:id="@+id/btn_next"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
                 android:layout_gravity="bottom"
@@ -50,8 +55,7 @@
                 android:text="@string/next"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="15sp"
-                style="?android:attr/borderlessButtonStyle"/>
+                android:textSize="15sp" />
         </FrameLayout>
     </LinearLayout>
 
