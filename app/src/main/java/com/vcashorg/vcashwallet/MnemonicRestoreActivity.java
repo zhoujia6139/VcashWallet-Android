@@ -267,7 +267,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     private void showWordsDialog(){
         if(wordsInBoard() != null){
             new AlertDialog.Builder(this)
-                    .setMessage("You can copy seed phrase from your backup.")
+                    .setMessage("Paste 24 words from the clipboard?")
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

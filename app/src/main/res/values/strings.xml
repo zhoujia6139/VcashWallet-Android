@@ -84,7 +84,7 @@
     <string name="loading_wallet">Loading wallet…</string>
     <string name="restore_success">Successful restore</string>
     <string name="restore_fail">Restore failure</string>
-    <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.</string>
+    <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.You can copy seed phrase from your backup</string>
     <string name="send_vcash">Send VCash</string>
     <string name="send_to">Send to</string>
     <string name="enter_recipient_id">Input recipient’s ID or http address</string>
