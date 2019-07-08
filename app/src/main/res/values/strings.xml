@@ -124,7 +124,7 @@
     <string name="read_tx_file">Read transaction details</string>
     <string name="receive_transaction_file_notify_2">Copy the signed transaction file and send it to the sender.</string>
     <string name="sign_tx_file">Signed transaction file</string>
-    <string name="ongoing_tx">Ongoing transactions</string>
+    <string name="ongoing_tx">Pending transactions</string>
     <string name="complete_tx">Completed transactions</string>
     <string name="recover_phrase">Recover Phrase</string>
     <string name="verify_psw">Verify wallet password</string>

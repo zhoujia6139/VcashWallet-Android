@@ -71,6 +71,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".WalletMainActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ReceiveTxFileActivity"

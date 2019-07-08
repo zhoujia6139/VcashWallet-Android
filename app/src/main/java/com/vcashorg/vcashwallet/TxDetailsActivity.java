@@ -23,6 +23,7 @@ import com.vcashorg.vcashwallet.wallet.WalletApi;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.NetConfirmed;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
 public class TxDetailsActivity extends ToolBarActivity {
@@ -194,7 +195,11 @@ public class TxDetailsActivity extends ToolBarActivity {
                 && UIUtils.isEmpty(vcashTxLog.parter_id)
                 && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
             mFlSign.setVisibility(View.GONE);
-            mFlCancel.setVisibility(View.VISIBLE);
+            if(vcashTxLog.confirm_state == NetConfirmed){
+                mFlCancel.setVisibility(View.GONE);
+            }else {
+                mFlCancel.setVisibility(View.VISIBLE);
+            }
             mTvCancel.setText(R.string.delete_transaction);
             mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
             mLLFile.setVisibility(View.VISIBLE);

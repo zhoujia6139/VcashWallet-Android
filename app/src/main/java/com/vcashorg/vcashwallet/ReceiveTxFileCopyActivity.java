@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
+import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
@@ -66,8 +67,7 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
             tvRight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    nv(ReceiveTxFileRecordActivity.class);
-                    finish();
+                    nv(WalletMainActivity.class);
                 }
             });
         }

@@ -32,6 +32,13 @@ public class WalletMainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        WalletMainFragment fragment = new WalletMainFragment();
+        replaceFragment(fragment);
+    }
+
+    @Override
     public void initView() {
         walletDrawer = new WalletDrawer(this);
 

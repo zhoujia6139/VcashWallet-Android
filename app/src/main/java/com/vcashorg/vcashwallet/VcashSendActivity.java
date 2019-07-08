@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
@@ -38,6 +39,8 @@ public class VcashSendActivity extends ToolBarActivity {
     EditText mEtAmount;
     @BindView(R.id.btn_send)
     FrameLayout mBtnSend;
+    @BindView(R.id.tv_available)
+    TextView mTvAvailable;
     @BindView(R.id.line_id)
     View mLine1;
     @BindView(R.id.line_amount)
@@ -101,6 +104,7 @@ public class VcashSendActivity extends ToolBarActivity {
                 btnState();
             }
         });
+        mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(WalletApi.getWalletBalanceInfo().spendable) + " V");
     }
 
     private boolean btnState() {
