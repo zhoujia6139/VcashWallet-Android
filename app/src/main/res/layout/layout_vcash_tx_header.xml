@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="200dp">
 
     <ImageView
         android:layout_width="match_parent"
@@ -22,9 +22,9 @@
             android:id="@+id/tv_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="211.023165231"
             android:textColor="@color/white"
-            android:textSize="32sp" />
+            android:textSize="32sp"
+            tools:text="211.023165231" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -40,13 +40,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="65dp"
         android:layout_below="@+id/ll_top"
         android:background="#1affffff">
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingLeft="26dp"
@@ -57,8 +57,8 @@
                 android:id="@+id/tv_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="41.023165231 V"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                tools:text="41.023165231 V" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="right"
             android:orientation="vertical"
@@ -81,8 +81,8 @@
                 android:id="@+id/tv_pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="170.000000000 V"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                tools:text="170.000000000 V" />
 
             <TextView
                 android:layout_width="wrap_content"

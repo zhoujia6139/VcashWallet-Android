@@ -107,7 +107,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                 helper.setText(R.id.et_word,item.data);
                 if(item.state == MnemonicData.STATE_CHECK_TRUE){
                     helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
-                    helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.green));
+                    helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.black));
                 }else if(item.state == MnemonicData.STATE_CHECK_FALSE){
                     helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
                     helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
@@ -152,7 +152,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                                 item.state = MnemonicData.STATE_CHECK_TRUE;
                                 item.data = s.toString();
                                 helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
-                                helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.green));
+                                helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.black));
                             }else {
                                 item.state = MnemonicData.STATE_CHECK_FALSE;
                                 item.data = "";

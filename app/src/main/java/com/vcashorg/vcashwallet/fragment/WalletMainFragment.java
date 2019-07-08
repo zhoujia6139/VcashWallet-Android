@@ -323,6 +323,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     txState1.setCompoundDrawablesWithIntrinsicBounds(
                             UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                     helper.setText(R.id.tv_tx_time, R.string.now);
+                    helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
                     break;
                 case WalletTxEntity.TYPE_TX_LOG:
                     VcashTxLog txLog = item.getTxLogEntity();
@@ -339,6 +340,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
                     VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
 
+                    helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_white_grey);
+
                     switch (txType) {
                         case ConfirmedCoinbase:
                             helper.setText(R.id.tv_tx_id, R.string.coinbase);
@@ -346,6 +349,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                             if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
                                 helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
                             }else {
+                                helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
                                 Glide.with(mActivity).load(R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
                             }
                             helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
@@ -358,9 +362,10 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                             if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
                                 helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
                             }else {
+                                helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
                                 Glide.with(mActivity).load(R.drawable.gif_send).into((ImageView) helper.getView(R.id.iv_tx));
                             }
-                            helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
+                            helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
                             break;
                         case TxSentCancelled:
                             helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
