@@ -8,6 +8,7 @@
 
     <include layout="@layout/layout_toolbar" />
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,12 +37,9 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="26dp"
-        android:paddingTop="26dp"
-        android:paddingRight="26dp">
+        android:padding="26dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -208,51 +206,53 @@
                 tools:text="2019-05-15 11:09:22" />
         </LinearLayout>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_tx_file"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingLeft="26dp"
+        android:paddingRight="26dp"
+        android:visibility="invisible">
+
         <LinearLayout
-            android:id="@+id/ll_tx_file"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/sign_tx_file"
-                    android:textColor="@color/A1"
-                    android:textFontWeight="1"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/tv_copy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_copy_orange"
-                    android:drawablePadding="8dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/copy"
-                    android:textColor="@color/orange" />
-            </LinearLayout>
+            android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/tv_content"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_grey9_round_rect"
-                android:padding="12dp"
-                android:scrollbars="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sign_tx_file"
                 android:textColor="@color/A1"
-                tools:text="ndianfioafioa" />
+                android:textFontWeight="1"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tv_copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_copy_orange"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:text="@string/copy"
+                android:textColor="@color/orange" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_grey9_round_rect"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:textColor="@color/A1"
+            tools:text="ndianfioafioa" />
     </LinearLayout>
 
     <LinearLayout
@@ -309,5 +309,6 @@
         </FrameLayout>
 
     </LinearLayout>
+
 
 </LinearLayout>

@@ -1,6 +1,8 @@
 package com.vcashorg.vcashwallet;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -23,8 +25,7 @@ import butterknife.OnClick;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
-public class
-TxDetailsActivity extends ToolBarActivity {
+public class TxDetailsActivity extends ToolBarActivity {
 
     public static final int TYPE_TX_SERVER = 0;
     public static final int TYPE_TX_LOG = 1;
@@ -192,7 +193,10 @@ TxDetailsActivity extends ToolBarActivity {
         if(vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
                 && UIUtils.isEmpty(vcashTxLog.parter_id)
                 && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
-            mLLBot.setVisibility(View.GONE);
+            mFlSign.setVisibility(View.GONE);
+            mFlCancel.setVisibility(View.VISIBLE);
+            mTvCancel.setText(R.string.delete_transaction);
+            mTvCancel.setCompoundDrawablesWithIntrinsicBounds(UIUtils.getResource().getDrawable(R.drawable.ic_delete), null, null, null);
             mLLFile.setVisibility(View.VISIBLE);
             mTvContent.setMovementMethod(ScrollingMovementMethod.getInstance());
             mTvContent.setText(vcashTxLog.signed_slate_msg);
@@ -312,6 +316,22 @@ TxDetailsActivity extends ToolBarActivity {
                 case TxSentCancelled:
                 case TxReceivedCancelled:
                     deleteTransaction();
+                    break;
+                case TxReceived:
+                    if(UIUtils.isEmpty(vcashTxLog.parter_id)
+                        && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
+                        new AlertDialog.Builder(this)
+                                .setTitle("Are you sure delete the transaction?")
+                                .setMessage("The transaction will not be shown on your phone after being deleted.")
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        deleteTransaction();
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .show();
+                    }
                     break;
             }
         }

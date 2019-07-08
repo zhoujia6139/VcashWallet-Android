@@ -254,9 +254,14 @@ public class UIUtils {
     }
 
     public static String getClipboardText(Context context){
-        ClipboardManager cm = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
-        ClipData data = cm.getPrimaryClip();
-        ClipData.Item item = data.getItemAt(0);
-        return item.getText().toString();
+        try {
+            ClipboardManager cm = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+            ClipData data = cm.getPrimaryClip();
+            ClipData.Item item = data.getItemAt(0);
+            return item.getText().toString();
+        }catch (NullPointerException e){
+            return "";
+        }
+
     }
 }
