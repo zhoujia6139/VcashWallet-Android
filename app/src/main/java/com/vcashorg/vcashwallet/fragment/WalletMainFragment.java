@@ -97,6 +97,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 WalletTxEntity entity = (WalletTxEntity) adapter.getData().get(position);
+                if(entity.getItemType() == WalletTxEntity.TYPE_TX_ONGOING || entity.getItemType() == WalletTxEntity.TYPE_TX_COMPLETE) return;
                 if(entity.getItemType() == WalletTxEntity.TYPE_SERVER_TX){
                     ServerTransaction serverTx = entity.getServerTxEntity();
                     ServerTxManager.getInstance().addBlackList(serverTx);
