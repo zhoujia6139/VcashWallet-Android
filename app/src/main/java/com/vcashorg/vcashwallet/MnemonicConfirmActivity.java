@@ -91,7 +91,7 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
         Collections.sort(ensureDataList, new Comparator<MnemonicData>() {
             @Override
             public int compare(MnemonicData o1, MnemonicData o2) {
-                float p1 = o1.num;;
+                float p1 = o1.num;
                 float p2 = o2.num;
                 return (p2 < p1) ? 1 : ((p1 == p2) ? 0 : -1);
             }
@@ -284,7 +284,6 @@ public class MnemonicConfirmActivity extends ToolBarActivity {
     @OnClick(R.id.btn_check)
     public void onCheckClick() {
         if (btnState() && validate()) {
-
             if(type == TYPE_MNEMONIC_CONFIRM){
                 UIUtils.showToastCenter(R.string.confirm_seed_phrase_success);
                 Intent intent = new Intent(MnemonicConfirmActivity.this, PasswordActivity.class);

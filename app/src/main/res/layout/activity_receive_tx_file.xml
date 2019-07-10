@@ -41,16 +41,16 @@
         android:id="@+id/et_tx_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
+        android:background="#F9F9F9"
         android:gravity="start"
         android:minHeight="100dp"
         android:padding="12dp"
         android:textSize="14sp"
         android:focusable="true"
+        android:hint="Please enter"
         android:focusableInTouchMode="true"
         android:lines="10"
-        android:scrollbars="vertical"
-        tools:text="fnaoinfioanfinaif" />
+        android:scrollbars="vertical" />
 
     <View
         android:layout_width="match_parent"

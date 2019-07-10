@@ -1,5 +1,7 @@
 package com.vcashorg.vcashwallet.wallet;
 
+import android.util.Log;
+
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
 

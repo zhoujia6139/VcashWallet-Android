@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.ValidateUtil;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 
@@ -25,6 +28,8 @@ public class RecoverPhraseActivity extends ToolBarActivity {
 
     @BindView(R.id.rv_mneonic)
     RecyclerView mRv;
+    @BindView(R.id.tv_copy_mneonic)
+    TextView mTvCopy;
 
     private ArrayList<String> mnemonicListData;
 
@@ -46,16 +51,16 @@ public class RecoverPhraseActivity extends ToolBarActivity {
         mRv.setHasFixedSize(true);
         mRv.setNestedScrollingEnabled(false);
 
-        mnemonicListData = (ArrayList<String>) WalletApi.generateMnemonicPassphrase();
-
         MnemonicAdapter adapter = new MnemonicAdapter(R.layout.item_mnemonic,mnemonicListData);
 
         mRv.setAdapter(adapter);
+
+        mTvCopy.setVisibility(View.VISIBLE);
     }
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle(UIUtils.getString(R.string.recover_phrase));
+        setToolBarTitle(UIUtils.getString(R.string.backup_phrase));
     }
 
     class MnemonicAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
@@ -72,10 +77,23 @@ public class RecoverPhraseActivity extends ToolBarActivity {
 
     }
 
+    @OnClick(R.id.tv_copy_mneonic)
+    public void onCopyClick(){
+        if(mnemonicListData != null){
+            StringBuilder sb = new StringBuilder();
+            for (String word : mnemonicListData){
+                sb.append(word);
+                sb.append(" ");
+            }
+            UIUtils.copyText(this,sb.toString().trim());
+        }
+    }
+
     @OnClick(R.id.btn_next)
     public void onNextClick(){
         Intent intent = new Intent(this,MnemonicConfirmActivity.class);
         intent.putStringArrayListExtra(MnemonicConfirmActivity.PARAM_MNEMONIC_LIST,mnemonicListData);
+        intent.putExtra(MnemonicConfirmActivity.PARAM_TYPE,MnemonicConfirmActivity.TYPE_RECOVER_PHRASE);
         nv(intent);
         finish();
     }

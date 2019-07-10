@@ -117,6 +117,9 @@
     native <methods>;
 }
 
+
+-keep class com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo {*;}
+
 #####################################################
 
 -keepclassmembers public class com.vcashorg.** {*;}

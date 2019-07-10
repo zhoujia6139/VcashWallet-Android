@@ -114,6 +114,7 @@
             android:padding="10dp"
             android:text="@string/receive_transaction_file"
             android:textColor="@color/blue"
+            android:textStyle="bold"
             android:textSize="15sp" />
 
     </FrameLayout>

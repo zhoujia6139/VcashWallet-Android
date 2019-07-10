@@ -37,7 +37,7 @@
                 android:text="@string/sign_tx_file"
                 android:textColor="@color/A1"
                 android:textFontWeight="1"
-                android:textSize="18sp" />
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/tv_copy"
@@ -70,7 +70,7 @@
             android:text="@string/transaction_details"
             android:textColor="@color/A1"
             android:textFontWeight="1"
-            android:textSize="18sp" />
+            android:textSize="17sp" />
 
         <LinearLayout
             android:layout_marginBottom="60dp"

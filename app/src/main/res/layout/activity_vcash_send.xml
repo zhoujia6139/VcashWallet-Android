@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:textColor="#3399CC"
+                android:textColor="@color/orange"
                 android:textSize="12sp"
                 tools:text="Available: 2.22222222 V" />
         </RelativeLayout>

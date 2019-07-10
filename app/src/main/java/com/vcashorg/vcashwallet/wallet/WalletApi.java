@@ -633,14 +633,18 @@ public class WalletApi {
             txLog.cancelTxlog();
             EncryptedDBHelper.getsInstance().saveTx(txLog);
         }
-        ServerApi.cancelTransaction(tx_id, new WalletCallback() {
-            @Override
-            public void onCall(boolean yesOrNo, Object data) {
-                if (!yesOrNo){
-                    Log.e(Tag, "cancel tx to Server failed");
+
+        if (txLog != null && !UIUtils.isEmpty(txLog.parter_id)){
+            ServerApi.cancelTransaction(tx_id, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if (!yesOrNo){
+                        Log.e(Tag, "cancel tx to Server failed");
+                    }
                 }
-            }
-        });
+            });
+        }
+
         return true;
     }
 

@@ -331,7 +331,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        deleteTransaction();
+                                        deleteFileTx(vcashTxLog.tx_slate_id);
                                     }
                                 })
                                 .setNegativeButton(R.string.cancel, null)
@@ -372,6 +372,20 @@ public class TxDetailsActivity extends ToolBarActivity {
             finish();
         } else {
             UIUtils.showToastCenter(R.string.cancel_failed);
+        }
+    }
+
+    private void deleteFileTx(String tx_id){
+        if(WalletApi.cancelTransaction(tx_id)){
+            boolean result = WalletApi.deleteTxByTxid(tx_id);
+            if(result){
+                UIUtils.showToastCenter(R.string.delete_success);
+                finish();
+            }else {
+                UIUtils.showToastCenter(R.string.delete_failed);
+            }
+        } else {
+            UIUtils.showToastCenter(R.string.delete_failed);
         }
     }
 }
