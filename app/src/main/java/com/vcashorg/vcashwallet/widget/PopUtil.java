@@ -19,7 +19,7 @@ public class PopUtil extends PopupWindow {
 
     private Activity activity;
     private View mPopWindow;
-    private TextView tvConfirm, tvCancel;
+    private TextView tvConfirm, tvCancel,tvMessage;
     private ServerTransaction ServerTx;
 
     public interface PopOnCall {
@@ -33,6 +33,12 @@ public class PopUtil extends PopupWindow {
         mPopWindow = LayoutInflater.from(activity).inflate(R.layout.layout_top_pop, null);
         tvConfirm = mPopWindow.findViewById(R.id.tv_confirm);
         tvCancel = mPopWindow.findViewById(R.id.tv_cancel);
+        tvMessage = mPopWindow.findViewById(R.id.tv_message);
+        if(serverTx.isSend){
+            tvMessage.setText(R.string.new_transaction_sender);
+        }else {
+            tvMessage.setText(R.string.new_transaction_receiver);
+        }
         tvCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +57,7 @@ public class PopUtil extends PopupWindow {
         //设置SelectPicPopupWindow弹出窗体的宽
         this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         //设置SelectPicPopupWindow弹出窗体的高
-        this.setHeight(dip2px(activity, 124));
+        this.setHeight(dip2px(activity, 134));
         //  设置SelectPicPopupWindow弹出窗体可点击
         this.setFocusable(false);
         //   设置背景透明

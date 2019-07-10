@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -42,6 +43,8 @@ public class RecoverPhraseActivity extends ToolBarActivity {
     @Override
     public void initParams() {
         mnemonicListData = getIntent().getStringArrayListExtra(PARAM_PHRASE);
+
+         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     @Override

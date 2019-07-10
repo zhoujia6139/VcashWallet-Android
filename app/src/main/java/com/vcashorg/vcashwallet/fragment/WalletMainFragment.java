@@ -419,12 +419,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     helper.setText(R.id.tv_title,R.string.complete_tx);
                     break;
             }
-
-//            if (helper.getAdapterPosition() == getData().size()) {
-//                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow_2);
-//            } else {
-//                helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_shadow);
-//            }
         }
     }
 

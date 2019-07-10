@@ -84,7 +84,7 @@
     <string name="loading_wallet">Loading wallet…</string>
     <string name="restore_success">Successful restore</string>
     <string name="restore_fail">Restore failure</string>
-    <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet.You can copy seed phrase from your backup</string>
+    <string name="wallet_mneonic_restore">This is a 24 word phrase you were given when you created your previous wallet. You can copy seed phrase from your backup.</string>
     <string name="send_vcash">Send VCash</string>
     <string name="send_to">Send to</string>
     <string name="enter_recipient_id">Input recipient’s ID or http address</string>
@@ -110,7 +110,8 @@
     <string name="psw_incorrect">Incorrect Password</string>
     <string name="old_psw_incorrect">The password you have entered is incorrect</string>
     <string name="enter_current_psw">Enter your current password</string>
-    <string name="new_transaction_come">A new transaction is waiting for your signature</string>
+    <string name="new_transaction_receiver">A new transaction is waiting for your signature</string>
+    <string name="new_transaction_sender">The transaction you sent has been signed, and is waiting for your signature and confirmation.</string>
     <string name="not_process_yet">Process later</string>
     <string name="go_and_see">Go and See</string>
     <string name="cancel_transaction">Cancel the transaction</string>

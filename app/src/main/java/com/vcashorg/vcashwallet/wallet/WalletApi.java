@@ -275,46 +275,59 @@ public class WalletApi {
                             }
 
                             @Override
-                            public void onResponse(Call call, Response response) throws IOException {
+                            public void onResponse(final Call call, Response response) throws IOException {
                                 Log.w(Tag, String.format("sendTransaction post to %s suc!", full_url));
-                                String json = response.body().string();
-                                if (json.startsWith("\"")){
-                                    if (json.endsWith("\"")){
-                                        json = json.substring(0, json.length()-1);
-                                    }
-                                    json = json.replaceFirst("\"", "");
-                                    json = json.replaceAll("\\\\", "");
+                                try {
+                                    String json = response.body().string();
+                                    if (json.startsWith("\"")){
+                                        if (json.endsWith("\"")){
+                                            json = json.substring(0, json.length()-1);
+                                        }
+                                        json = json.replaceFirst("\"", "");
+                                        json = json.replaceAll("\\\\", "");
 
-                                }
-                                final VcashSlate resSlate = gson.fromJson(json, VcashSlate.class);
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        finalizeTransaction(resSlate, new WalletCallback() {
-                                            @Override
-                                            public void onCall(boolean yesOrNo, Object data) {
-                                                if (yesOrNo){
-                                                    Log.w(Tag, "finalizeTransaction sec!");
-                                                    EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
-                                                    if (callback != null){
-                                                        callback.onCall(true, null);
-                                                    }
-                                                }
-                                                else{
-                                                    Log.e(Tag, "finalizeTransaction failed!");
-                                                    rollbackBlock.onCall();
-                                                    if (callback != null){
-                                                        callback.onCall(false, data);
-                                                    }
-                                                }
-                                            }
-                                        });
                                     }
-                                });
+
+                                    final VcashSlate resSlate = gson.fromJson(json, VcashSlate.class);
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            finalizeTransaction(resSlate, new WalletCallback() {
+                                                @Override
+                                                public void onCall(boolean yesOrNo, Object data) {
+                                                    if (yesOrNo){
+                                                        Log.w(Tag, "finalizeTransaction sec!");
+                                                        EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
+                                                        if (callback != null){
+                                                            callback.onCall(true, null);
+                                                        }
+                                                    }
+                                                    else{
+                                                        Log.e(Tag, "finalizeTransaction failed!");
+                                                        rollbackBlock.onCall();
+                                                        if (callback != null){
+                                                            callback.onCall(false, data);
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                }catch (Exception e){
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            rollbackBlock.onCall();
+                                            if(callback != null){
+                                                callback.onCall(false, null);
+                                            }
+                                        }
+                                    });
+                                }
+
                             }
                         });
-                    }
-                    catch (Exception exc){
+                    } catch (Exception exc){
                         Log.e(Tag, "Url is illegal");
                         rollbackBlock.onCall();
                         callback.onCall(false, null);

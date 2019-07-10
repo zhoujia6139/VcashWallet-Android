@@ -8,19 +8,20 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="124dp"
+        android:layout_height="134dp"
         android:background="@drawable/bg_pop"
         android:orientation="vertical"
         android:paddingTop="16dp"
         android:paddingBottom="16dp">
 
         <TextView
+            android:id="@+id/tv_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"
             android:lineSpacingMultiplier="1.2"
-            android:text="@string/new_transaction_come"
+            android:text="@string/new_transaction_sender"
             android:textColor="@color/A4"
             android:textSize="15sp" />
 
