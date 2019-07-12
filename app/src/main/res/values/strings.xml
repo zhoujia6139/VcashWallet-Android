@@ -14,6 +14,7 @@
     <string name="warning">Warning</string>
     <string name="wait">Waiting…</string>
     <string name="setting">Setting</string>
+    <string name="save">Save</string>
     <string name="height">Height:</string>
 
     <string name="coinbase">CoinBase</string>
@@ -131,6 +132,7 @@
     <string name="verify_psw">Verify wallet password</string>
     <string name="backup_success">Backup successfully</string>
     <string name="backup_phrase">Backup Phrase</string>
+    <string name="address_book">Address book</string>
 
 
     <string name="send_success">Sent successfully</string>

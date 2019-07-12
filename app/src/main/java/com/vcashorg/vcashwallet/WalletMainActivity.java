@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.widget.FrameLayout;
 
 import com.vcashorg.vcashwallet.base.BaseActivity;
+import com.vcashorg.vcashwallet.bean.Address;
+import com.vcashorg.vcashwallet.fragment.AddressBookFragment;
 import com.vcashorg.vcashwallet.fragment.SettingFragment;
 import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
 import com.vcashorg.vcashwallet.utils.UIUtils;
@@ -48,7 +50,10 @@ public class WalletMainActivity extends BaseActivity {
                 if(name.equals(UIUtils.getString(R.string.setting))){
                     SettingFragment settingFragment = new SettingFragment();
                     replaceFragment(settingFragment);
-                }else {
+                }else if(name.equals(UIUtils.getString(R.string.address_book))){
+                    AddressBookFragment addressBookFragment = new AddressBookFragment();
+                    replaceFragment(addressBookFragment);
+                } else {
                     WalletMainFragment fragment = new WalletMainFragment();
                     replaceFragment(fragment);
                 }

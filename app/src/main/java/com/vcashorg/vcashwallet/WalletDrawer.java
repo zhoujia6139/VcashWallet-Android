@@ -137,14 +137,14 @@ public class WalletDrawer {
         item2.checkId = R.drawable.ic_menu_setting_check;
         item2.uncheckId = R.drawable.ic_menu_setting_uncheck;
         //Address book
-//        MenuItem item3 = new MenuItem();
-//        item3.name = "Address book";
-//        item3.checkId = R.drawable.ic_menu_address_check;
-//        item3.uncheckId = R.drawable.ic_menu_address_uncheck;
+        MenuItem item3 = new MenuItem();
+        item3.name = UIUtils.getString(R.string.address_book);
+        item3.checkId = R.drawable.ic_menu_address_check;
+        item3.uncheckId = R.drawable.ic_menu_address_uncheck;
 
         itemList.add(item1);
         itemList.add(item2);
-//        itemList.add(item3);
+        itemList.add(item3);
     }
 
     public OnDrawerItemSelectListener listener;

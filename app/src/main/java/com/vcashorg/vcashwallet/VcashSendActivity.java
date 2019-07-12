@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
+import com.vcashorg.vcashwallet.bean.Address;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -134,6 +135,11 @@ public class VcashSendActivity extends ToolBarActivity {
                 .start();
     }
 
+    @OnClick(R.id.tv_address_book)
+    public void onAddressBookClick(){
+        nv2(AddressBookActivity.class,100);
+    }
+
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(btnState() && validate() != -1){
@@ -243,6 +249,11 @@ public class VcashSendActivity extends ToolBarActivity {
         if (requestCode == BasicScannerActivity.REQUEST_CODE_SCANNER && resultCode == RESULT_OK) {
             if (data != null) {
                 String result = data.getStringExtra(Scanner.Scan.RESULT);
+                mEtAddress.setText(result);
+            }
+        }else if(requestCode == 100 && resultCode == RESULT_OK){
+            if (data != null){
+                String result = data.getStringExtra(Address.RESULT_ADDRESS);
                 mEtAddress.setText(result);
             }
         }

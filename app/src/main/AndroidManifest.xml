@@ -84,6 +84,10 @@
             android:screenOrientation="portrait" />
         <activity android:name=".RecoverPhraseActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".AddressBookActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".AddressAddActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
