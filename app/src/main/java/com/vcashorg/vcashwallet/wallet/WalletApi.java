@@ -158,6 +158,7 @@ public class WalletApi {
                             VcashTxLog tx = new VcashTxLog();
                             tx.tx_id = VcashWallet.getInstance().getNextLogId();
                             tx.create_time = AppUtil.getCurrentTimeSecs();
+                            tx.confirm_height = item.height;
                             tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                             tx.amount_credited = item.value;
                             tx.tx_type = item.is_coinbase? VcashTxLog.TxLogEntryType.ConfirmedCoinbase: VcashTxLog.TxLogEntryType.TxReceived;
@@ -729,6 +730,7 @@ public class WalletApi {
                                 if (tx != null){
                                     tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                                     tx.confirm_time = AppUtil.getCurrentTimeSecs();
+                                    tx.confirm_height = nodeOutput.height;
                                     tx.server_status = ServerTxStatus.TxFinalized;
                                 }
                                 item.height = nodeOutput.height;
@@ -758,6 +760,20 @@ public class WalletApi {
                                     tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                                     tx.confirm_time = AppUtil.getCurrentTimeSecs();
                                     tx.server_status = ServerTxStatus.TxFinalized;
+                                    final VcashTxLog callback_tx = tx;
+                                    NodeApi.getOutputsByCommitArr(tx.outputs, new WalletCallback() {
+                                        @Override
+                                        public void onCall(boolean yesOrNo, Object data) {
+                                            if (yesOrNo){
+                                                ArrayList<NodeRefreshOutput> apiOutputs = (ArrayList<NodeRefreshOutput>)data;
+                                                if (apiOutputs.size() > 0){
+                                                    NodeRefreshOutput output = apiOutputs.get(0);
+                                                    callback_tx.confirm_height = output.height;
+                                                    EncryptedDBHelper.getsInstance().saveTx(callback_tx);
+                                                }
+                                            }
+                                        }
+                                    });
                                 }
                                 item.status = VcashOutput.OutputStatus.Spent;
                                 hasChange = true;
