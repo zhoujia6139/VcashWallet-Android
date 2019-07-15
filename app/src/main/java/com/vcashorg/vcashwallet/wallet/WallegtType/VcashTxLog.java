@@ -14,6 +14,7 @@ public class VcashTxLog implements Serializable {
     public TxLogEntryType tx_type;
     public long create_time;
     public long confirm_time;
+    public long confirm_height;
     public TxLogConfirmType confirm_state;
     public ServerTxStatus server_status;
     public long amount_credited;

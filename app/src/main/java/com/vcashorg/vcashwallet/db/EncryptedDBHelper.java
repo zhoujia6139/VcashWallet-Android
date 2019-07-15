@@ -21,7 +21,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public static final String PASSPHRASE = "vcash_wallet";
 
     private static final String DATABASE_NAME = "vcash_wallet_encrypted.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     static private Context mContext;
     private String mPassphrase;
@@ -159,7 +159,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         }
 
         db.execSQL("REPLACE INTO VcashTxLog (" +
-                "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_state, server_status, amount_credited, amount_debited, fee, slate_str, inputs, outputs)" +
+                "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_height, confirm_state, server_status, amount_credited, amount_debited, fee, slate_str, inputs, outputs)" +
                 "values(" +
                 txLog.tx_id + "," +
                 "'" + txLog.tx_slate_id + "'," +
@@ -167,6 +167,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 txLog.tx_type.ordinal() + "," +
                 txLog.create_time + "," +
                 txLog.confirm_time + "," +
+                txLog.confirm_height + "," +
                 txLog.confirm_state.ordinal() + "," +
                 txLog.server_status.ordinal() + "," +
                 txLog.amount_credited + "," +
@@ -235,6 +236,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             item.tx_type = VcashTxLog.TxLogEntryType.values()[cursor.getInt(cursor.getColumnIndex("tx_type"))];
             item.create_time = cursor.getLong(cursor.getColumnIndex("create_time"));
             item.confirm_time = cursor.getLong(cursor.getColumnIndex("confirm_time"));
+            item.confirm_height = cursor.getLong(cursor.getColumnIndex("confirm_height"));
             item.confirm_state = VcashTxLog.TxLogConfirmType.values()[cursor.getInt(cursor.getColumnIndex("confirm_state"))];
             item.server_status = ServerTxStatus.values()[cursor.getInt(cursor.getColumnIndex("server_status"))];
             item.amount_credited = cursor.getLong(cursor.getColumnIndex("amount_credited"));
@@ -374,6 +376,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "tx_type            integer," +
                 "create_time        integer," +
                 "confirm_time       integer," +
+                "confirm_height     integer," +
                 "confirm_state      integer," +
                 "server_status      integer," +
                 "amount_credited    integer," +
@@ -397,9 +400,13 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        // db version log:
+        // version 2: add confirm_height for VcashTxLog
+        if (oldVersion == 1 && newVersion >= 2){
+            db.execSQL("ALTER TABLE VcashTxLog ADD COLUMN confirm_height integer BEFORE confirm_state");
+        }
 
         // OPTIONAL: backup master info for corruption recovery.
-        RepairKit.MasterInfo.save(db, db.getPath() + "-mbak", mPassphrase.getBytes());
+        //RepairKit.MasterInfo.save(db, db.getPath() + "-mbak", mPassphrase.getBytes());
     }
 }
