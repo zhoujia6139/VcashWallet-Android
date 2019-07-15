@@ -1,9 +1,13 @@
 package com.vcashorg.vcashwallet.fragment;
 
 import android.content.Intent;
+import android.support.v7.widget.SwitchCompat;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.nestia.biometriclib.BiometricPromptManager;
 import com.vcashorg.vcashwallet.LockScreenActivity;
 import com.vcashorg.vcashwallet.PasswordVerifyActivity;
 import com.vcashorg.vcashwallet.R;
@@ -25,6 +29,14 @@ public class SettingFragment extends BaseFragment {
     @BindView(R.id.tv_version_name)
     TextView tvVersionName;
 
+    @BindView(R.id.layout_touch_id)
+    LinearLayout mLayoutTouch;
+
+    @BindView(R.id.switcher)
+    SwitchCompat mSwitcher;
+
+    private BiometricPromptManager mManager;
+
     @Override
     protected int provideContentViewId() {
         return R.layout.fragment_setting;
@@ -34,11 +46,57 @@ public class SettingFragment extends BaseFragment {
     public void initView(View rootView) {
         tvTimeOut.setText(TimeOutUtil.getInstance().getTimeOutString());
         tvVersionName.setText(UIUtils.getString(R.string.app_version) + " " + UIUtils.getVersionName(mActivity));
+
+        mManager = BiometricPromptManager.from(mActivity);
+
+        if(mManager.isBiometricPromptEnable()){
+            mLayoutTouch.setVisibility(View.VISIBLE);
+            mSwitcher.setChecked(mManager.isBiometricSettingEnable());
+        }else {
+            mLayoutTouch.setVisibility(View.GONE);
+        }
     }
 
     @Override
     protected void loadData() {
 
+    }
+
+    @OnClick(R.id.trans_btn)
+    public void onTransBtnClick(){
+        if(!mSwitcher.isChecked()){
+            mManager.authenticate(new BiometricPromptManager.OnBiometricIdentifyCallback() {
+                @Override
+                public void onUsePassword() {
+                    UIUtils.showToastCenter("onUsePassword");
+                }
+
+                @Override
+                public void onSucceeded() {
+                    UIUtils.showToastCenter("onSucceeded");
+                    mSwitcher.setChecked(true);
+                    mManager.setBiometricSettingEnable(true);
+                }
+
+                @Override
+                public void onFailed() {
+                    UIUtils.showToastCenter("onFailed");
+                }
+
+                @Override
+                public void onError(int code, String reason) {
+                    UIUtils.showToastCenter("onError");
+                }
+
+                @Override
+                public void onCancel() {
+                    UIUtils.showToastCenter("onCancel");
+                }
+            });
+        }else {
+            mSwitcher.setChecked(false);
+            mManager.setBiometricSettingEnable(false);
+        }
     }
 
     @OnClick(R.id.rl_lock_screen)

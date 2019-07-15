@@ -99,4 +99,12 @@ public class AddressFileUtil {
         }
         return 0;
     }
+
+    public static boolean deleteAddress(Context context,Address address){
+        List<Address> addressList = readAddressList(context);
+        if (addressList == null || address == null) return false;
+        addressList.remove(address);
+        return saveAddressList(context,addressList);
+    }
+
 }

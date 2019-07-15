@@ -133,7 +133,8 @@
     <string name="backup_success">Backup successfully</string>
     <string name="backup_phrase">Backup Phrase</string>
     <string name="address_book">Address book</string>
-
+    <string name="save_address_book">Save to address book</string>
+    <string name="enable_touch_id">Enable Touch ID</string>
 
     <string name="send_success">Sent successfully</string>
     <string name="send_failed">Failed to send your transaction</string>

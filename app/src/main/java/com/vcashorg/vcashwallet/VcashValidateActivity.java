@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.CancellationSignal;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import android.widget.FrameLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.nestia.biometriclib.BiometricPromptManager;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.payload.PayloadUtil;
@@ -94,6 +96,50 @@ public class VcashValidateActivity extends BaseActivity {
                 }
             }
         });
+
+        BiometricPromptManager manager = BiometricPromptManager.from(this);
+        if(manager.isBiometricPromptEnable() && manager.isBiometricSettingEnable() && mode == MODE_TIMEOUT_VALIDATE){
+            CancellationSignal signal = new CancellationSignal();
+            signal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
+                @Override
+                public void onCancel() {
+
+                }
+            });
+
+            manager.authenticate(new CancellationSignal(),new BiometricPromptManager.OnBiometricIdentifyCallback() {
+                @Override
+                public void onUsePassword() {
+
+                }
+
+                @Override
+                public void onSucceeded() {
+                    TimeOutUtil.getInstance().updateLastTime();
+                    finish();
+                }
+
+                @Override
+                public void onFailed() {
+
+                }
+
+                @Override
+                public void onError(int code, String reason) {
+
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public void initData() {
+        TimeOutUtil.getInstance().updateLastTime();
     }
 
     @OnClick(R.id.open_wallet)
@@ -126,7 +172,7 @@ public class VcashValidateActivity extends BaseActivity {
     private void validateLauncher() {
         List<String> mneonicList = ValidateUtil.validate2(mEtValidate.getText().toString());
         if (mneonicList != null) {
-            validate(mneonicList, mEtValidate.getText().toString());
+            validate(mneonicList);
         } else {
             errorNotify();
         }
@@ -137,7 +183,7 @@ public class VcashValidateActivity extends BaseActivity {
         mTilPsw.setError(UIUtils.getString(R.string.psw_incorrect));
     }
 
-    private void validate(final List<String> words, final String psw) {
+    private void validate(final List<String> words) {
 
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setCancelable(false);
@@ -150,7 +196,7 @@ public class VcashValidateActivity extends BaseActivity {
             @Override
             public void subscribe(ObservableEmitter emitter) {
 
-                boolean result = WalletApi.createWallet(words, psw);
+                boolean result = WalletApi.createWallet(words,null);
                 if (result) {
                     emitter.onComplete();
                 } else {
