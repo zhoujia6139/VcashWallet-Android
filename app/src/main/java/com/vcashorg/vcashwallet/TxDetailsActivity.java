@@ -14,11 +14,13 @@ import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
+import com.vcashorg.vcashwallet.utils.AddressFileUtil;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
+import com.vcashorg.vcashwallet.widget.AddressBotDialog;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -47,6 +49,8 @@ public class TxDetailsActivity extends ToolBarActivity {
     TextView mTxFee;
     @BindView(R.id.tv_tx_time)
     TextView mTxTime;
+    @BindView(R.id.tv_tx_confirm)
+    TextView mTxConfirmNum;
 
     @BindView(R.id.iv_status)
     ImageView mIvStatus;
@@ -106,6 +110,8 @@ public class TxDetailsActivity extends ToolBarActivity {
                 }
             });
         }
+
+        addressBookRemark();
     }
 
     @Override
@@ -145,6 +151,15 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTxAmount.setText(WalletApi.nanoToVcashString(serverTx.slateObj.amount));
         mTxFee.setText(WalletApi.nanoToVcashString(serverTx.slateObj.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp2(System.currentTimeMillis()));
+        if(serverTx.isSend){
+            if(!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+                mTvRecipient.setTextColor(UIUtils.getColor(R.color.blue));
+            }
+        }else {
+            if(!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+                mTvSender.setTextColor(UIUtils.getColor(R.color.blue));
+            }
+        }
     }
 
 
@@ -190,7 +205,21 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTvTxId.setText(UIUtils.isEmpty(vcashTxLog.tx_slate_id)? UIUtils.getString(R.string.unReachable) : vcashTxLog.tx_slate_id);
         mTxFee.setText(WalletApi.nanoToVcashString(vcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(vcashTxLog.create_time));
+        if(vcashTxLog.confirm_height == 0){
+            mTxConfirmNum.setText("0");
+        }else {
+            mTxConfirmNum.setText((WalletApi.getCurChainHeight() - vcashTxLog.confirm_height) + "");
+        }
         configInfoFromTxType(vcashTxLog.tx_type);
+        if(vcashTxLog.tx_type == TxSent){
+            if(!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+                mTvRecipient.setTextColor(UIUtils.getColor(R.color.blue));
+            }
+        }else {
+            if(!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+                mTvSender.setTextColor(UIUtils.getColor(R.color.blue));
+            }
+        }
         if(vcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
                 && UIUtils.isEmpty(vcashTxLog.parter_id)
                 && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
@@ -252,6 +281,25 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
     }
 
+    private void addressBookRemark(){
+        if(mTvSender.getText().toString().trim().equals(WalletApi.getWalletUserId())){
+            mTvSender.setText(mTvSender.getText().toString() + "(me)");
+        }else {
+            String senderRemark = AddressFileUtil.findRemarkByAddress(this,mTvSender.getText().toString().trim());
+            if(senderRemark != null){
+                mTvSender.setText(mTvSender.getText().toString() + "("+ senderRemark + ")");
+            }
+        }
+
+        if(mTvRecipient.getText().toString().trim().equals(WalletApi.getWalletUserId())){
+            mTvRecipient.setText(mTvRecipient.getText().toString() + "(me)");
+        }else {
+            String receiveRemark = AddressFileUtil.findRemarkByAddress(this,mTvRecipient.getText().toString().trim());
+            if(receiveRemark != null){
+                mTvRecipient.setText(mTvRecipient.getText().toString() + "("+ receiveRemark + ")");
+            }
+        }
+    }
 
     @OnClick(R.id.fl_btn_sign)
     public void onSignClick() {
@@ -352,6 +400,34 @@ public class TxDetailsActivity extends ToolBarActivity {
         UIUtils.copyText(this,mTvContent.getText().toString());
     }
 
+
+    @OnClick(R.id.sender_id)
+    public void onSenderIdClick(){
+        boolean isSend = false;
+        if (serverTx != null) {
+            isSend = serverTx.isSend;
+        }
+        if (vcashTxLog != null) {
+            isSend = (vcashTxLog.tx_type == TxSent);
+        }
+        if(!isSend && !mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+            new AddressBotDialog(this,mTvSender.getText().toString().trim().split("\\(")[0],1).show();
+        }
+    }
+
+    @OnClick(R.id.receiver_id)
+    public void onReceiverClick(){
+        boolean isSend = false;
+        if (serverTx != null) {
+            isSend = serverTx.isSend;
+        }
+        if (vcashTxLog != null) {
+            isSend = (vcashTxLog.tx_type == TxSent);
+        }
+        if(isSend && !mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+            new AddressBotDialog(this,mTvRecipient.getText().toString().trim().split("\\(")[0],1).show();
+        }
+    }
 
     public void deleteTransaction() {
         boolean result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);

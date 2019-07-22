@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:text="No Address"
+        android:text="No addresses"
         android:textColor="@color/A2"
         android:textSize="15sp" />
 

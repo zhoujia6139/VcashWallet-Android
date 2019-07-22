@@ -18,7 +18,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/biometric_dialog_title"
             android:textColor="@android:color/black"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
             android:layout_marginTop="12dp"
             android:text="@string/biometric_dialog_subtitle"
             android:textColor="#75000000"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -51,7 +51,7 @@
                 android:layout_marginLeft="8dp"
                 android:text="@string/biometric_dialog_state_normal"
                 android:textColor="#CDCED0"
-                android:textSize="16dp"
+                android:textSize="16sp"
                 android:typeface="normal" />
         </LinearLayout>
 
@@ -70,7 +70,7 @@
                 android:gravity="center"
                 android:text="@string/biometric_dialog_use_password"
                 android:textColor="#419BF9"
-                android:textSize="14dp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/cancel_btn"
@@ -80,7 +80,7 @@
                 android:gravity="center"
                 android:text="@string/biometric_dialog_cancel"
                 android:textColor="#419BF9"
-                android:textSize="14dp" />
+                android:textSize="14sp" />
 
         </LinearLayout>
     </LinearLayout>

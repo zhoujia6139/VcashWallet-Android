@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,9 +12,18 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -21,10 +31,12 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.MnemonicData;
 import com.vcashorg.vcashwallet.net.RxHelper;
+import com.vcashorg.vcashwallet.utils.ACTVHeightUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.MnemonicHelper;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
+import com.vcashorg.vcashwallet.widget.WordAutoCompleteTextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,6 +105,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
         showWordsDialog();
     }
 
+
     class MnemonicRestoreAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder>{
 
         public MnemonicRestoreAdapter(int layoutResId, @Nullable List<MnemonicData> data) {
@@ -101,7 +114,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
         @Override
         protected void convert(final BaseViewHolder helper, final MnemonicData item) {
-            final EditText etWord = helper.getView(R.id.et_word);
+            final WordAutoCompleteTextView etWord = helper.getView(R.id.et_word);
             helper.setText(R.id.tv_num,String.valueOf(helper.getAdapterPosition() + 1));
             if(!TextUtils.isEmpty(item.data)){
                 helper.setText(R.id.et_word,item.data);
@@ -166,10 +179,22 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                         }
                     }
 
-
                     btnState();
                 }
             });
+
+            etWord.setThreshold(1);
+            etWord.setDropDownWidth(350);
+            etWord.setOnShowWindowListener(new WordAutoCompleteTextView.OnShowWindowListener() {
+                @Override
+                public boolean beforeShow() {
+                    ACTVHeightUtil.setDropDownHeight(etWord, 4);
+                    return true;
+                }
+            });
+            etWord.setDropDownHeight(UIUtils.dip2Px(180));
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.pop_item, allPhraseWords);
+            etWord.setAdapter(adapter);
         }
     }
 

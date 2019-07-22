@@ -27,6 +27,8 @@ import butterknife.OnClick;
 
 public class AddressAddActivity extends ToolBarActivity {
 
+    public static final String PARAM_TYPE = "type";
+
     @BindView(R.id.et_user_id)
     EditText mEtId;
     @BindView(R.id.et_remark)
@@ -34,10 +36,26 @@ public class AddressAddActivity extends ToolBarActivity {
     @BindView(R.id.btn_save)
     Button mBtnSave;
 
+    private String type = "add";
+
     @Override
     protected void initToolBar() {
         setToolBarTitle("Address Book");
         setToolBarBgColor(R.color.white);
+    }
+
+    @Override
+    public void initParams() {
+        type = getIntent().getStringExtra(PARAM_TYPE);
+        if(type.equals("edit")){
+            String id = getIntent().getStringExtra("id");
+            mEtId.setText(id);
+            mEtId.setFocusable(false);
+            mEtId.setFocusableInTouchMode(false);
+        }else {
+            String id = getIntent().getStringExtra("id");
+            mEtId.setText(id);
+        }
     }
 
     @Override
@@ -97,18 +115,29 @@ public class AddressAddActivity extends ToolBarActivity {
     public void onSaveClick(){
         if(!mEtId.getText().toString().trim().equals("")
                 && !mEtRemark.getText().toString().trim().equals("")){
-            Address address = new Address();
-            address.userId = mEtId.getText().toString().trim();
-            address.remark = mEtRemark.getText().toString().trim();
-            int result = AddressFileUtil.addAddress(AddressAddActivity.this,address);
-            if(result == 0){
-                UIUtils.showToastCenter("Add Failed");
-            }else if(result == 1){
-                UIUtils.showToastCenter("Add Success");
-                finish();
-            }else if(result == 2){
-                UIUtils.showToastCenter("UserId Already Exist");
+            if(type.equals("edit")){
+                boolean result = AddressFileUtil.updateAddress(AddressAddActivity.this,mEtId.getText().toString(),mEtRemark.getText().toString());
+                if(result){
+                    UIUtils.showToastCenter("Save Success");
+                    finish();
+                }else {
+                    UIUtils.showToastCenter("Save Failed");
+                }
+           }else {
+                Address address = new Address();
+                address.userId = mEtId.getText().toString().trim();
+                address.remark = mEtRemark.getText().toString().trim();
+                int result = AddressFileUtil.addAddress(AddressAddActivity.this,address);
+                if(result == 0){
+                    UIUtils.showToastCenter("Add Failed");
+                }else if(result == 1){
+                    UIUtils.showToastCenter("Add Success");
+                    finish();
+                }else if(result == 2){
+                    UIUtils.showToastCenter("UserId Already Exist");
+                }
             }
+
         }
     }
 

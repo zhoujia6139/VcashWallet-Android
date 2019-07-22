@@ -11,8 +11,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -64,6 +66,14 @@ public class VcashValidateActivity extends BaseActivity {
     @BindView(R.id.open_wallet)
     FrameLayout mOpenWallet;
 
+    @BindView(R.id.tv_recover)
+    TextView mTvRecover;
+
+    @BindView(R.id.tv_fingerprint)
+    TextView mTvFinger;
+
+    BiometricPromptManager manager;
+
     @Override
     protected int provideContentViewId() {
         return R.layout.activity_vcash_validate;
@@ -72,6 +82,25 @@ public class VcashValidateActivity extends BaseActivity {
     @Override
     public void initParams() {
         mode = getIntent().getIntExtra(PARAM_MODE, MODE_TIMEOUT_VALIDATE);
+        if(mode == MODE_LAUNCHER_VALIDATE){
+            mTvRecover.setVisibility(View.VISIBLE);
+            mTvFinger.setVisibility(View.GONE);
+        }else {
+            try {
+                manager = BiometricPromptManager.from(this);
+                if(manager.isBiometricPromptEnable() && manager.isBiometricSettingEnable()){
+                    mTvRecover.setVisibility(View.GONE);
+                    mTvFinger.setVisibility(View.VISIBLE);
+                }else {
+                    mTvRecover.setVisibility(View.INVISIBLE);
+                    mTvFinger.setVisibility(View.GONE);
+                }
+            }catch (Exception e){
+                mTvRecover.setVisibility(View.INVISIBLE);
+                mTvFinger.setVisibility(View.GONE);
+            }
+
+        }
     }
 
     @Override
@@ -97,44 +126,7 @@ public class VcashValidateActivity extends BaseActivity {
             }
         });
 
-        BiometricPromptManager manager = BiometricPromptManager.from(this);
-        if(manager.isBiometricPromptEnable() && manager.isBiometricSettingEnable() && mode == MODE_TIMEOUT_VALIDATE){
-            CancellationSignal signal = new CancellationSignal();
-            signal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
-                @Override
-                public void onCancel() {
-
-                }
-            });
-
-            manager.authenticate(new CancellationSignal(),new BiometricPromptManager.OnBiometricIdentifyCallback() {
-                @Override
-                public void onUsePassword() {
-
-                }
-
-                @Override
-                public void onSucceeded() {
-                    TimeOutUtil.getInstance().updateLastTime();
-                    finish();
-                }
-
-                @Override
-                public void onFailed() {
-
-                }
-
-                @Override
-                public void onError(int code, String reason) {
-
-                }
-
-                @Override
-                public void onCancel() {
-
-                }
-            });
-        }
+        showFingerprintDialog();
     }
 
     @Override
@@ -151,6 +143,11 @@ public class VcashValidateActivity extends BaseActivity {
                 validateTimeOut();
             }
         }
+    }
+
+    @OnClick(R.id.tv_fingerprint)
+    public void onFingerprintClick(){
+        showFingerprintDialog();
     }
 
     @Override
@@ -181,6 +178,44 @@ public class VcashValidateActivity extends BaseActivity {
     private void errorNotify() {
         mTilPsw.setErrorEnabled(true);
         mTilPsw.setError(UIUtils.getString(R.string.psw_incorrect));
+    }
+
+    private void showFingerprintDialog(){
+        try {
+            if(mode == MODE_TIMEOUT_VALIDATE && manager.isBiometricPromptEnable() && manager.isBiometricSettingEnable()){
+
+                manager.authenticate(new BiometricPromptManager.OnBiometricIdentifyCallback() {
+                    @Override
+                    public void onUsePassword() {
+
+                    }
+
+                    @Override
+                    public void onSucceeded() {
+                        TimeOutUtil.getInstance().updateLastTime();
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailed() {
+
+                    }
+
+                    @Override
+                    public void onError(int code, String reason) {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+            }
+        }catch (Exception e){
+
+        }
+
     }
 
     private void validate(final List<String> words) {
@@ -248,7 +283,6 @@ public class VcashValidateActivity extends BaseActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         Intent intent = new Intent(VcashValidateActivity.this, MnemonicRestoreActivity.class);
-//                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         nv(intent);
                                     }
                                 })

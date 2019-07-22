@@ -10,6 +10,8 @@
     <string name="done">Done</string>
     <string name="ok">OK</string>
     <string name="check">Check</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
     <string name="generate">Got it</string>
     <string name="warning">Warning</string>
     <string name="wait">Waiting…</string>
@@ -135,6 +137,7 @@
     <string name="address_book">Address book</string>
     <string name="save_address_book">Save to address book</string>
     <string name="enable_touch_id">Enable Touch ID</string>
+    <string name="copy_address">Copy address</string>
 
     <string name="send_success">Sent successfully</string>
     <string name="send_failed">Failed to send your transaction</string>

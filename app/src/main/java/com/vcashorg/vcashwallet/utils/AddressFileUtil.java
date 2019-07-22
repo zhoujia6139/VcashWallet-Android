@@ -100,11 +100,41 @@ public class AddressFileUtil {
         return 0;
     }
 
-    public static boolean deleteAddress(Context context,Address address){
+    public static String findRemarkByAddress(Context context,String address){
+        if(UIUtils.isEmpty(address)) return null;
         List<Address> addressList = readAddressList(context);
-        if (addressList == null || address == null) return false;
-        addressList.remove(address);
-        return saveAddressList(context,addressList);
+        if(addressList == null) return null;
+        for (Address ad : addressList){
+            if(ad.userId.equals(address)){
+                return ad.remark;
+            }
+        }
+        return null;
+    }
+
+
+    public static boolean deleteAddress(Context context,String id){
+        List<Address> addressList = readAddressList(context);
+        if (addressList == null || id == null) return false;
+        for (Address ad : addressList){
+            if(ad.userId.equals(id)){
+                addressList.remove(ad);
+                return saveAddressList(context,addressList);
+            }
+        }
+        return false;
+    }
+
+    public static boolean updateAddress(Context context ,String id,String remark){
+        List<Address> addressList = readAddressList(context);
+        if (addressList == null || id == null || remark == null) return false;
+        for (Address ad : addressList){
+            if(ad.userId.equals(id)){
+                ad.remark = remark;
+                return saveAddressList(context,addressList);
+            }
+        }
+        return false;
     }
 
 }

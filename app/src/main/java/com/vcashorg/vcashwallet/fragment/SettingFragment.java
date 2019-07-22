@@ -47,12 +47,16 @@ public class SettingFragment extends BaseFragment {
         tvTimeOut.setText(TimeOutUtil.getInstance().getTimeOutString());
         tvVersionName.setText(UIUtils.getString(R.string.app_version) + " " + UIUtils.getVersionName(mActivity));
 
-        mManager = BiometricPromptManager.from(mActivity);
+        try {
+            mManager = BiometricPromptManager.from(mActivity);
 
-        if(mManager.isBiometricPromptEnable()){
-            mLayoutTouch.setVisibility(View.VISIBLE);
-            mSwitcher.setChecked(mManager.isBiometricSettingEnable());
-        }else {
+            if(mManager.isBiometricPromptEnable()){
+                mLayoutTouch.setVisibility(View.VISIBLE);
+                mSwitcher.setChecked(mManager.isBiometricSettingEnable());
+            }else {
+                mLayoutTouch.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
             mLayoutTouch.setVisibility(View.GONE);
         }
     }

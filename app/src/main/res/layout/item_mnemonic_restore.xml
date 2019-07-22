@@ -22,7 +22,7 @@
             tools:text="2" />
     </FrameLayout>
 
-    <EditText
+    <com.vcashorg.vcashwallet.widget.WordAutoCompleteTextView
         android:id="@+id/et_word"
         android:layout_width="match_parent"
         android:background="@null"

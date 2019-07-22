@@ -17,6 +17,7 @@ import com.vcashorg.vcashwallet.base.BaseFragment;
 import com.vcashorg.vcashwallet.bean.Address;
 import com.vcashorg.vcashwallet.utils.AddressFileUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.widget.AddressBotDialog;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import butterknife.OnClick;
 public class AddressBookFragment extends BaseFragment {
 
     private static final int REQUEST_CODE_ADD = 101;
+    private static final int REQUEST_CODE_EDIT = 102;
 
     @BindView(R.id.rv_address)
     RecyclerView mRvAddress;
@@ -53,9 +55,23 @@ public class AddressBookFragment extends BaseFragment {
         addressAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                Address address = (Address) adapter.getData().get(position);
+                final Address address = (Address) adapter.getData().get(position);
+                AddressBotDialog dialog = new AddressBotDialog(mActivity,address.userId,0);
+                dialog.setCallBack(new AddressBotDialog.AddressHandleCallBack() {
+                    @Override
+                    public void onAddressDelete() {
+                        addressAdapter.setNewData(AddressFileUtil.readAddressList(mActivity));
+                    }
 
-                UIUtils.copyText(mActivity,address.userId);
+                    @Override
+                    public void onAddressEdit() {
+                        Intent intent = new Intent(mActivity,AddressAddActivity.class);
+                        intent.putExtra(AddressAddActivity.PARAM_TYPE,"edit");
+                        intent.putExtra("id",address.userId);
+                        nv2(intent,REQUEST_CODE_EDIT);
+                    }
+                });
+                dialog.show();
             }
         });
 
@@ -69,7 +85,9 @@ public class AddressBookFragment extends BaseFragment {
 
     @OnClick(R.id.iv_add_address)
     public void onAddClick(){
-        nv2(AddressAddActivity.class,REQUEST_CODE_ADD);
+        Intent intent = new Intent(mActivity,AddressAddActivity.class);
+        intent.putExtra(AddressAddActivity.PARAM_TYPE,"add");
+        nv2(intent,REQUEST_CODE_ADD);
     }
 
     @OnClick(R.id.iv_open_menu)
@@ -80,7 +98,7 @@ public class AddressBookFragment extends BaseFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_CODE_ADD){
+        if(requestCode == REQUEST_CODE_ADD || requestCode == REQUEST_CODE_EDIT){
             addressAdapter.setNewData(AddressFileUtil.readAddressList(mActivity));
         }
     }
