@@ -15,6 +15,7 @@ import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
+import com.vcashorg.vcashwallet.wallet.VcashKeychain;
 import com.vcashorg.vcashwallet.wallet.VcashKeychainPath;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
 
@@ -79,14 +80,14 @@ public class VcashSlate implements Serializable {
             }
 
             VcashKeychainPath keypath = new VcashKeychainPath(3, AppUtil.decode(item.keyPath));
-            byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(item.value, keypath);
+            byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(item.value, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
             String temp = AppUtil.hex(commitment);
             VcashTransaction.Input input = tx.new Input();
             input.commit = commitment;
             input.features = (item.is_coinbase?OutputFeatureCoinbase:OutputFeaturePlain);
 
             tx.body.inputs.add(input);
-            byte[] secKey = VcashWallet.getInstance().mKeyChain.deriveBindKey(item.value, keypath);
+            byte[] secKey = VcashWallet.getInstance().mKeyChain.deriveBindKey(item.value, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
             negativeArr.add(secKey);
 
             lockOutput.add(item);
@@ -257,7 +258,7 @@ public class VcashSlate implements Serializable {
 
     private byte[] createTxOutputWithAmount(final long amount){
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
-        final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath);
+        final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
         byte[] proof = VcashWallet.getInstance().mKeyChain.createRangeProof(amount, keypath);
         VcashTransaction.Output output = tx.new Output();
         output.features = OutputFeaturePlain;
@@ -283,7 +284,7 @@ public class VcashSlate implements Serializable {
             }
         };
 
-        return VcashWallet.getInstance().mKeyChain.deriveBindKey(amount, keypath);
+        return VcashWallet.getInstance().mKeyChain.deriveBindKey(amount, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
     }
 
     public class VcashSlateTypeAdapter extends TypeAdapter<VcashSlate> {

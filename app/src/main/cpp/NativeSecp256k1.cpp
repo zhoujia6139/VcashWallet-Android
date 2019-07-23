@@ -14,7 +14,7 @@
 #define MAX_WIDTH (1 << 20)
 #define SCRATCH_SPACE_SIZE (256 * MAX_WIDTH)
 #define MAX_PROOF_SIZE 5134
-#define BULLET_PROOF_MSG_SIZE 16
+#define BULLET_PROOF_MSG_SIZE 20
 
 #define TAG    "------vwallet jni"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
@@ -472,9 +472,10 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1createbullet_1proof
-        (JNIEnv *env, jobject claseObject, jlong context, jlong value, jbyteArray key, jbyteArray nounce, jbyteArray msg){
+        (JNIEnv *env, jobject claseObject, jlong context, jlong value, jbyteArray key, jbyteArray rewindNounce, jbyteArray privateNounce, jbyteArray msg){
     unsigned char* keys = ConvertJByteaArrayToUnsingedChars(env, key);
-    unsigned char* nounces = ConvertJByteaArrayToUnsingedChars(env, nounce);
+    unsigned char* rewindNounces = ConvertJByteaArrayToUnsingedChars(env, rewindNounce);
+    unsigned char* privateNounces = ConvertJByteaArrayToUnsingedChars(env, privateNounce);
     unsigned char* msgs = ConvertJByteaArrayToUnsingedChars(env, msg);
 
     uint8_t proof[MAX_PROOF_SIZE];
@@ -499,14 +500,15 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
                                                      1,
                                                      &secp256k1_generator_const_h,
                                                      64,
-                                                     nounces,
-                                                     NULL,
+                                                     rewindNounces,
+                                                     privateNounces,
                                                      NULL,
                                                      0,
                                                      msgs);
     secp256k1_scratch_space_destroy(scratch);
     delete keys;
-    delete nounces;
+    delete rewindNounces;
+    delete privateNounces;
     delete msgs;
 
     if (ret == 1){
@@ -553,7 +555,6 @@ JNIEXPORT jobject JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_s
     unsigned char* nounces = ConvertJByteaArrayToUnsingedChars(env, nounce);
 
     int ret = secp256k1_bulletproof_rangeproof_rewind((secp256k1_context*)(uintptr_t)context,
-                                                      sharedGenerators((secp256k1_context*)(uintptr_t)context),
                                                       &value,
                                                       blindOut,
                                                       proofs,

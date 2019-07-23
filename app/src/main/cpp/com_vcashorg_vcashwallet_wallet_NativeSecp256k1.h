@@ -146,10 +146,10 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 /*
  * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
  * Method:    secp256k1_createbullet_proof
- * Signature: (JJ[B[B[B)[B
+ * Signature: (JJ[B[B[B[B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1createbullet_1proof
-        (JNIEnv *, jobject, jlong, jlong, jbyteArray, jbyteArray, jbyteArray);
+        (JNIEnv *, jobject, jlong, jlong, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
 
 /*
  * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1

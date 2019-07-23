@@ -16,6 +16,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,6 +26,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
+import static com.vcashorg.vcashwallet.wallet.VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxReceived;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
@@ -160,10 +162,22 @@ public class VcashWallet {
         byte[] commit = AppUtil.decode(nodeOutput.commit);
         byte[] proof = AppUtil.decode(nodeOutput.proof);
         VcashProofInfo info = mKeyChain.rewindProof(commit, proof);
-        if (info != null){
+        if (info != null && info.msg.length == 20){
+            VcashKeychain.SwitchCommitmentType commitmentType = SwitchCommitmentTypeRegular;
+            byte[] keyPathMsg = Arrays.copyOfRange(info.msg, 4, 20);
+            if (info.version == 1){
+                int type = info.msg[2];
+                commitmentType = VcashKeychain.SwitchCommitmentType.values()[type];
+            }
+            byte[] retCommit = mKeyChain.createCommitment(info.value, new VcashKeychainPath(3, keyPathMsg), commitmentType);
+            if (!Arrays.equals(commit, retCommit)){
+                Log.e(Tag, String.format("rewindProof suc, but message data is invalid. commit = %s", nodeOutput.commit));
+                return null;
+            }
+
             VcashOutput output = new VcashOutput();
             output.commitment = nodeOutput.commit;
-            output.keyPath = AppUtil.hex(info.msg);
+            output.keyPath = AppUtil.hex(keyPathMsg);
             output.mmr_index = nodeOutput.mmr_index;
             output.value = info.value;
             output.height = nodeOutput.block_height;
