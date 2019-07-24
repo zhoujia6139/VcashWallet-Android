@@ -104,8 +104,8 @@ public class NativeSecp256k1 {
         return this.secp256k1_get_pubkey_from_secretKey(mContext, secKey);
     }
 
-    public byte[] createbulletProof(long value, byte[] secKey, byte[] nounce, byte[] msg){
-        return this.secp256k1_createbullet_proof(mContext, value, secKey, nounce, msg);
+    public byte[] createbulletProof(long value, byte[] secKey, byte[] rewindNounce, byte[] privateNounce, byte[] msg){
+        return this.secp256k1_createbullet_proof(mContext, value, secKey, rewindNounce, privateNounce, msg);
     }
 
     public boolean verifyBulletProof(byte[] commitment, byte[] proof){
@@ -169,7 +169,7 @@ public class NativeSecp256k1 {
 
     private native byte[] secp256k1_get_pubkey_from_secretKey(long context, byte[] secKey);
 
-    private native byte[] secp256k1_createbullet_proof(long context, long value, byte[] secKey, byte[] nounce, byte[] msg);
+    private native byte[] secp256k1_createbullet_proof(long context, long value, byte[] secKey, byte[] rewindNounce, byte[] privateNounce, byte[] msg);
 
     private native boolean secp256k1_verify_bullet_proof(long context, byte[] commitment, byte[] proof);
 
