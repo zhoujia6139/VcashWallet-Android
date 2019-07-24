@@ -75,6 +75,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ReceiveTxFileActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ReceiveTxFileCopyActivity"
