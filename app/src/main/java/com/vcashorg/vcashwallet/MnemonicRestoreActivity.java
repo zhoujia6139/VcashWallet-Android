@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -16,6 +18,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -28,6 +31,7 @@ import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.vcashorg.vcashwallet.adapter.MnemonicFilterAdapter;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.MnemonicData;
 import com.vcashorg.vcashwallet.net.RxHelper;
@@ -37,6 +41,8 @@ import com.vcashorg.vcashwallet.wallet.MnemonicHelper;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.GridLineItemDecoration;
 import com.vcashorg.vcashwallet.widget.WordAutoCompleteTextView;
+import com.vcashorg.vcashwallet.widget.keyboard.GlobalLayoutListener;
+import com.vcashorg.vcashwallet.widget.keyboard.OnKeyboardChangedListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +67,9 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     @BindView(R.id.btn_next)
     Button btnNext;
 
+    @BindView(R.id.scrollView)
+    NestedScrollView mScrollView;
+
     MnemonicRestoreAdapter adapter;
 
     @Override
@@ -72,7 +81,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     public void initView() {
         allPhraseWords = WalletApi.getAllPhraseWords();
 
-        adapter = new MnemonicRestoreAdapter(R.layout.item_mnemonic_restore,restoreMnemonicData);
+        adapter = new MnemonicRestoreAdapter(R.layout.item_mnemonic_restore, restoreMnemonicData);
         adapter.bindToRecyclerView(mRvRestore);
 
         mRvRestore.setLayoutManager(new GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false));
@@ -86,7 +95,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     @Override
     public void initData() {
-        for (int i=1 ;i<=24;i++){
+        for (int i = 1; i <= 24; i++) {
             MnemonicData data = new MnemonicData();
             data.num = i;
             restoreMnemonicData.add(data);
@@ -106,7 +115,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     }
 
 
-    class MnemonicRestoreAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder>{
+    class MnemonicRestoreAdapter extends BaseQuickAdapter<MnemonicData, BaseViewHolder> {
 
         public MnemonicRestoreAdapter(int layoutResId, @Nullable List<MnemonicData> data) {
             super(layoutResId, data);
@@ -115,13 +124,13 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
         @Override
         protected void convert(final BaseViewHolder helper, final MnemonicData item) {
             final WordAutoCompleteTextView etWord = helper.getView(R.id.et_word);
-            helper.setText(R.id.tv_num,String.valueOf(helper.getAdapterPosition() + 1));
-            if(!TextUtils.isEmpty(item.data)){
-                helper.setText(R.id.et_word,item.data);
-                if(item.state == MnemonicData.STATE_CHECK_TRUE){
+            helper.setText(R.id.tv_num, String.valueOf(helper.getAdapterPosition() + 1));
+            if (!TextUtils.isEmpty(item.data)) {
+                helper.setText(R.id.et_word, item.data);
+                if (item.state == MnemonicData.STATE_CHECK_TRUE) {
                     helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
                     helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.black));
-                }else if(item.state == MnemonicData.STATE_CHECK_FALSE){
+                } else if (item.state == MnemonicData.STATE_CHECK_FALSE) {
                     helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
                     helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
                 }
@@ -130,7 +139,7 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
             etWord.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    if(hasFocus){
+                    if (hasFocus) {
                         parse = false;
                     }
                 }
@@ -149,10 +158,10 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if(!parse){
+                    if (!parse) {
                         String str = s.toString();
-                        if (str.indexOf("/r") >= 0 || str.indexOf("\n") >= 0){
-                            EditText nextEdt = (EditText) adapter.getViewByPosition(helper.getAdapterPosition() + 1,R.id.et_word);
+                        if (str.indexOf("/r") >= 0 || str.indexOf("\n") >= 0) {
+                            EditText nextEdt = (EditText) adapter.getViewByPosition(helper.getAdapterPosition() + 1, R.id.et_word);
                             etWord.setText(str.replace("/r", "").replace("\n", ""));
                             if (nextEdt != null) {
                                 nextEdt.requestFocus();
@@ -160,19 +169,19 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                             }
                         }
 
-                        if(!str.replace("/r", "").replace("\n", "").equals("")){
-                            if(allPhraseWords.contains(s.toString())){
+                        if (!str.replace("/r", "").replace("\n", "").equals("")) {
+                            if (allPhraseWords.contains(s.toString())) {
                                 item.state = MnemonicData.STATE_CHECK_TRUE;
                                 item.data = s.toString();
                                 helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_green);
                                 helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.black));
-                            }else {
+                            } else {
                                 item.state = MnemonicData.STATE_CHECK_FALSE;
                                 item.data = "";
                                 helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_red);
                                 helper.setTextColor(R.id.et_word, UIUtils.getColor(R.color.red));
                             }
-                        }else {
+                        } else {
                             item.state = MnemonicData.STATE_UNCHECK;
                             item.data = "";
                             helper.setBackgroundRes(R.id.fl_bg, R.drawable.bg_circle_grey);
@@ -192,15 +201,15 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                     return true;
                 }
             });
-            etWord.setDropDownHeight(UIUtils.dip2Px(180));
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.pop_item, allPhraseWords);
+           // ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.pop_item, allPhraseWords);
+            MnemonicFilterAdapter adapter = new MnemonicFilterAdapter(allPhraseWords);
             etWord.setAdapter(adapter);
         }
     }
 
     @OnClick(R.id.btn_next)
-    public void onNextClick(){
-        if(validate()){
+    public void onNextClick() {
+        if (validate()) {
             validateMnemonic(buildMnemonicList());
         }
     }
@@ -251,37 +260,37 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
                             progress.dismiss();
                         }
                         Intent intent = new Intent(MnemonicRestoreActivity.this, PasswordActivity.class);
-                        intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST,buildMnemonicList());
+                        intent.putStringArrayListExtra(PasswordActivity.PARAM_MNEMONIC_LIST, buildMnemonicList());
                         intent.putExtra(PasswordActivity.PARAM_MODE, PasswordActivity.MODE_RESTORE);
                         nv(intent);
                     }
                 });
     }
 
-    private void btnState(){
-        for (MnemonicData data : restoreMnemonicData){
-            if(data.state == MnemonicData.STATE_UNCHECK || data.state == MnemonicData.STATE_CHECK_FALSE){
+    private void btnState() {
+        for (MnemonicData data : restoreMnemonicData) {
+            if (data.state == MnemonicData.STATE_UNCHECK || data.state == MnemonicData.STATE_CHECK_FALSE) {
                 btnNext.setBackgroundResource(R.drawable.bg_orange_light_round_rect);
-                return ;
+                return;
             }
         }
         btnNext.setBackgroundResource(R.drawable.selector_orange);
     }
 
-    private boolean validate(){
-        for (MnemonicData data : restoreMnemonicData){
-            if(data.state == MnemonicData.STATE_UNCHECK){
+    private boolean validate() {
+        for (MnemonicData data : restoreMnemonicData) {
+            if (data.state == MnemonicData.STATE_UNCHECK) {
                 return false;
-            }else if(data.state == MnemonicData.STATE_CHECK_FALSE){
+            } else if (data.state == MnemonicData.STATE_CHECK_FALSE) {
                 return false;
             }
         }
         return true;
     }
 
-    private ArrayList<String> buildMnemonicList(){
+    private ArrayList<String> buildMnemonicList() {
         ArrayList<String> result = new ArrayList<>();
-        for (MnemonicData data : restoreMnemonicData){
+        for (MnemonicData data : restoreMnemonicData) {
             result.add(data.data);
         }
         return result;
@@ -289,16 +298,16 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
 
     private boolean parse;
 
-    private void showWordsDialog(){
-        if(wordsInBoard() != null){
+    private void showWordsDialog() {
+        if (wordsInBoard() != null) {
             new AlertDialog.Builder(this)
                     .setMessage("Paste 24 words from the clipboard?")
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             List<String> words = wordsInBoard();
-                            if(words != null){
-                                for (int i=0;i<restoreMnemonicData.size();i++){
+                            if (words != null) {
+                                for (int i = 0; i < restoreMnemonicData.size(); i++) {
                                     MnemonicData data = restoreMnemonicData.get(i);
                                     String word = words.get(i);
                                     data.data = word;
@@ -316,26 +325,26 @@ public class MnemonicRestoreActivity extends ToolBarActivity {
     }
 
 
-    private List<String> wordsInBoard(){
+    private List<String> wordsInBoard() {
         String board = UIUtils.getClipboardText(this).trim();
-        if(board.contains(" ")){
+        if (board.contains(" ")) {
             String trim = board.replaceAll("\\s{1,}", " ");
             String[] w1 = trim.split(" ");
-            if(w1.length == 24){
+            if (w1.length == 24) {
                 return Arrays.asList(w1);
             }
         }
 
-        if(board.contains("-")){
+        if (board.contains("-")) {
             String[] w2 = board.split("-");
-            if(w2.length == 24){
+            if (w2.length == 24) {
                 return Arrays.asList(w2);
             }
         }
 
-        if(board.contains("\n")){
+        if (board.contains("\n")) {
             String[] w3 = board.split("\n");
-            if(w3.length == 24){
+            if (w3.length == 24) {
                 return Arrays.asList(w3);
             }
         }

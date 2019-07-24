@@ -72,29 +72,25 @@ public class SettingFragment extends BaseFragment {
             mManager.authenticate(new BiometricPromptManager.OnBiometricIdentifyCallback() {
                 @Override
                 public void onUsePassword() {
-                    UIUtils.showToastCenter("onUsePassword");
                 }
 
                 @Override
                 public void onSucceeded() {
-                    UIUtils.showToastCenter("onSucceeded");
                     mSwitcher.setChecked(true);
                     mManager.setBiometricSettingEnable(true);
                 }
 
                 @Override
                 public void onFailed() {
-                    UIUtils.showToastCenter("onFailed");
+
                 }
 
                 @Override
                 public void onError(int code, String reason) {
-                    UIUtils.showToastCenter("onError");
                 }
 
                 @Override
                 public void onCancel() {
-                    UIUtils.showToastCenter("onCancel");
                 }
             });
         }else {

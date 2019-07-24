@@ -68,6 +68,7 @@ public class AddressBookFragment extends BaseFragment {
                         Intent intent = new Intent(mActivity,AddressAddActivity.class);
                         intent.putExtra(AddressAddActivity.PARAM_TYPE,"edit");
                         intent.putExtra("id",address.userId);
+                        intent.putExtra("remark",address.remark);
                         nv2(intent,REQUEST_CODE_EDIT);
                     }
                 });

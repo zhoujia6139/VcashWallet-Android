@@ -49,6 +49,8 @@ public class AddressAddActivity extends ToolBarActivity {
         type = getIntent().getStringExtra(PARAM_TYPE);
         if(type.equals("edit")){
             String id = getIntent().getStringExtra("id");
+            String remark = getIntent().getStringExtra("remark");
+            mEtRemark.setText(remark);
             mEtId.setText(id);
             mEtId.setFocusable(false);
             mEtId.setFocusableInTouchMode(false);

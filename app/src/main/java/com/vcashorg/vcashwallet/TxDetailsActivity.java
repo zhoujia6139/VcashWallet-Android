@@ -3,7 +3,10 @@ package com.vcashorg.vcashwallet;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -283,22 +286,33 @@ public class TxDetailsActivity extends ToolBarActivity {
 
     private void addressBookRemark(){
         if(mTvSender.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            mTvSender.setText(mTvSender.getText().toString() + "(me)");
+            buildSpanRemark(mTvSender.getText().toString(),"me",mTvSender);
         }else {
             String senderRemark = AddressFileUtil.findRemarkByAddress(this,mTvSender.getText().toString().trim());
             if(senderRemark != null){
-                mTvSender.setText(mTvSender.getText().toString() + "("+ senderRemark + ")");
+                buildSpanRemark(mTvSender.getText().toString(),senderRemark,mTvSender);
             }
         }
 
         if(mTvRecipient.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            mTvRecipient.setText(mTvRecipient.getText().toString() + "(me)");
+            buildSpanRemark(mTvRecipient.getText().toString(),"me",mTvRecipient);
         }else {
             String receiveRemark = AddressFileUtil.findRemarkByAddress(this,mTvRecipient.getText().toString().trim());
             if(receiveRemark != null){
-                mTvRecipient.setText(mTvRecipient.getText().toString() + "("+ receiveRemark + ")");
+                buildSpanRemark(mTvRecipient.getText().toString(),receiveRemark,mTvRecipient);
             }
         }
+    }
+
+    private void buildSpanRemark(String id,String remark,TextView textView){
+        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(UIUtils.getColor(R.color.colorPrimary));
+        String value = id + "(" + remark + ")";
+        SpannableString ssText = new SpannableString(value);
+        int index = value.indexOf("(");
+        if(index != -1){
+            ssText.setSpan(foregroundColorSpan, index, value.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        textView.setText(ssText);
     }
 
     @OnClick(R.id.fl_btn_sign)
@@ -411,7 +425,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             isSend = (vcashTxLog.tx_type == TxSent);
         }
         if(!isSend && !mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
-            new AddressBotDialog(this,mTvSender.getText().toString().trim().split("\\(")[0],1).show();
+            new AddressBotDialog(this,mTvSender.getText().toString().trim().split("\\(")[0].trim(),1).show();
         }
     }
 
@@ -425,7 +439,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             isSend = (vcashTxLog.tx_type == TxSent);
         }
         if(isSend && !mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
-            new AddressBotDialog(this,mTvRecipient.getText().toString().trim().split("\\(")[0],1).show();
+            new AddressBotDialog(this,mTvRecipient.getText().toString().trim().split("\\(")[0].trim(),1).show();
         }
     }
 

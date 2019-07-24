@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -230,6 +231,26 @@ public class UIUtils {
     public static boolean isEmpty(String value){
         return TextUtils.isEmpty(value) || value.equals("null");
     }
+
+
+    /**
+     * get view location in screen
+     *
+     * @param v view
+     */
+    public static Rect getLocation(View v) {
+        Rect rect = new Rect();
+        int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        rect.left = location[0];
+        rect.top = location[1];
+
+        rect.right = rect.left + v.getMeasuredWidth();
+        rect.bottom = rect.top + v.getMeasuredHeight();
+
+        return rect;
+    }
+
 
     /**
      * getVersionName
