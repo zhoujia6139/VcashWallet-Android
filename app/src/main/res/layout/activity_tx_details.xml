@@ -8,7 +8,7 @@
 
     <include layout="@layout/layout_toolbar" />
 
-    <ScrollView
+    <com.vcashorg.vcashwallet.widget.ScrollviewBot
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -341,7 +341,7 @@
             </LinearLayout>
         </LinearLayout>
 
-    </ScrollView>
+    </com.vcashorg.vcashwallet.widget.ScrollviewBot>
 
     <LinearLayout
         android:id="@+id/ll_details_bot"
