@@ -80,7 +80,7 @@ public class ServerTransaction implements Serializable {
             jsonWriter.name("sender_id").value(tx.sender_id);
             jsonWriter.name("receiver_id").value(tx.receiver_id);
             jsonWriter.name("slate").value(tx.slate);
-            jsonWriter.name("status").value(tx.status.ordinal());
+            jsonWriter.name("status").value(tx.status.code());
             jsonWriter.name("msg_sig").value(tx.msg_sig);
             jsonWriter.name("tx_sig").value(tx.tx_sig);
             jsonWriter.endObject();
@@ -105,7 +105,7 @@ public class ServerTransaction implements Serializable {
                         tx.slate = jsonReader.nextString();
                         break;
                     case "status":
-                        tx.status = ServerTxStatus.values()[jsonReader.nextInt()];
+                        tx.status = ServerTxStatus.locateEnum(jsonReader.nextInt());
                         break;
                     case "msg_sig":
                         tx.msg_sig = jsonReader.nextString();

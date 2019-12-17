@@ -9,6 +9,7 @@ public class NodeOutputs {
 
     public class NodeOutput{
         public String output_type;
+        public String token_type;
         public String commit;
         public boolean spent;
         public String proof;

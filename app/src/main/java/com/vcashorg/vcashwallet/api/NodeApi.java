@@ -6,12 +6,14 @@ import com.google.gson.JsonObject;
 import com.vcashorg.vcashwallet.api.bean.NodeChainInfo;
 import com.vcashorg.vcashwallet.api.bean.NodeOutputs;
 import com.vcashorg.vcashwallet.api.bean.NodeRefreshOutput;
+import com.vcashorg.vcashwallet.api.bean.NodeRefreshTokenOutput;
 import com.vcashorg.vcashwallet.net.CommonObserver;
 import com.vcashorg.vcashwallet.net.RetrofitUtils;
 import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class NodeApi {
             @Override
             public void onSuccess(NodeOutputs result) {
                 for (NodeOutputs.NodeOutput item :result.outputs){
-                    VcashOutput output = VcashWallet.getInstance().identifyUtxoOutput(item);
+                    VcashOutput output = (VcashOutput)VcashWallet.getInstance().identifyUtxoOutput(item);
                     if (output != null){
                         retArr.add(output);
                     }
@@ -44,7 +46,7 @@ public class NodeApi {
                         callback.onCall(true, percent);
                     }
                 }
-                else if(result.highest_index == result.last_retrieved_index){
+                else {
                     if (callback != null){
                         callback.onCall(true, retArr);
                     }
@@ -59,6 +61,42 @@ public class NodeApi {
                 }
             }
         });
+    }
+
+    public static void getTokenOutputsByPmmrIndex(long startHeight, final ArrayList<VcashTokenOutput> retArr, final WalletCallback callback){
+        RetrofitUtils.getNodeApiUrl().getTokenOutputs(startHeight)
+                .compose(RxHelper.<NodeOutputs>io2main())
+                .subscribe(new CommonObserver<NodeOutputs>() {
+                    @Override
+                    public void onSuccess(NodeOutputs result) {
+                        for (NodeOutputs.NodeOutput item :result.outputs){
+                            VcashTokenOutput output = (VcashTokenOutput)VcashWallet.getInstance().identifyUtxoOutput(item);
+                            if (output != null){
+                                retArr.add(output);
+                            }
+                        }
+                        if (result.highest_index > result.last_retrieved_index){
+                            NodeApi.getTokenOutputsByPmmrIndex(result.last_retrieved_index, retArr, callback);
+                            double percent = (double)result.last_retrieved_index / (double)result.highest_index;
+                            if (callback != null){
+                                callback.onCall(true, percent);
+                            }
+                        }
+                        else{
+                            if (callback != null){
+                                callback.onCall(true, retArr);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e, String errorMsg) {
+                        Log.e(Tag, String.format("getTokenOutputsByPmmrIndex failed:%s", errorMsg));
+                        if (callback != null){
+                            callback.onCall(false, null);
+                        }
+                    }
+                });
     }
 
     public static void getOutputsByCommitArr(ArrayList<String> commitArr, final WalletCallback callback){
@@ -88,7 +126,35 @@ public class NodeApi {
                         }
                     }
                 });
+    }
 
+    public static void getTokenOutputsByCommitArr(String tokenType, ArrayList<String> commitArr, final WalletCallback callback){
+        StringBuffer sb = new StringBuffer();
+        for (String item :commitArr){
+            sb.append(item);
+            sb.append(",");
+        }
+        String param = sb.toString();
+        param = param.substring(0,  param.length()-1);
+
+        RetrofitUtils.getNodeApiUrl().getTokenOutputsByCommitArr(tokenType, param)
+                .compose(RxHelper.<ArrayList<NodeRefreshTokenOutput>>io2main())
+                .subscribe(new CommonObserver<ArrayList<NodeRefreshTokenOutput>>() {
+                    @Override
+                    public void onSuccess(ArrayList<NodeRefreshTokenOutput> result) {
+                        if (callback != null){
+                            callback.onCall(true, result);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e, String errorMsg) {
+                        Log.e(Tag, String.format("getTokenOutputsByCommitArr failed:%s", errorMsg));
+                        if (callback != null){
+                            callback.onCall(false, null);
+                        }
+                    }
+                });
     }
 
     public static long getChainHeight(final WalletCallback callback){

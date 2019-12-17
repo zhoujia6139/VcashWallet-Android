@@ -55,7 +55,7 @@ public class RetrofitUtils {
 
     private static String getNodeBaseUrl(){
         if (AppUtil.isInTestNet){
-            return "http://47.75.163.56:13513";
+            return "http://10.0.0.17:13513";
         }
         else{
             return "https://api-node.vcashwallet.app";
@@ -64,7 +64,7 @@ public class RetrofitUtils {
 
     private static String getServerBaseUrl(){
         if (AppUtil.isInTestNet){
-            return "http://47.75.163.56:13515";
+            return "https://api.vcashwallet.app";
         }
         else{
             return "https://api.vcashwallet.app";

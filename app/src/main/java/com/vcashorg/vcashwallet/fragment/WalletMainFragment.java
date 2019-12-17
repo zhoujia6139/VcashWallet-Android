@@ -198,6 +198,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 setNewData();
             }
         });
+        WalletApi.updateTokenOutputStatusWithComplete(null);
     }
 
     private void setNewData(){

@@ -10,6 +10,8 @@ import com.tencent.wcdb.repair.RepairKit;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
@@ -21,7 +23,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public static final String PASSPHRASE = "vcash_wallet";
 
     private static final String DATABASE_NAME = "vcash_wallet_encrypted.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     static private Context mContext;
     private String mPassphrase;
@@ -68,7 +70,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                         item.height + "," +
                         item.lock_height + "," +
                         (item.is_coinbase?1:0) + "," +
-                        item.status.ordinal() + "," +
+                        item.status.code() + "," +
                         item.tx_log_id +
                         ")");
             }
@@ -84,9 +86,9 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     public ArrayList<VcashOutput> getActiveOutputData(){
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<VcashOutput> arr = null;
-        Cursor cursor = db.rawQuery("SELECT * FROM VcashOutput WHERE status != ?", new String[] {Integer.toString(VcashOutput.OutputStatus.Spent.ordinal())});
+        Cursor cursor = db.rawQuery("SELECT * FROM VcashOutput WHERE status != ?", new String[] {Integer.toString(VcashOutput.OutputStatus.Spent.code())});
         if (cursor != null && cursor.moveToFirst()) {
-            arr = new ArrayList<VcashOutput>();
+            arr = new ArrayList<>();
             do {
                 VcashOutput item = new VcashOutput();
                 item.commitment = cursor.getString(cursor.getColumnIndex("commitment"));
@@ -96,9 +98,67 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 item.height = cursor.getLong(cursor.getColumnIndex("height"));
                 item.lock_height = cursor.getLong(cursor.getColumnIndex("lock_height"));
                 item.is_coinbase = (cursor.getInt(cursor.getColumnIndex("is_coinbase")) == 1);
-                item.status = VcashOutput.OutputStatus.values()[cursor.getInt(cursor.getColumnIndex("status"))];
+                item.status = VcashOutput.OutputStatus.locateEnum(cursor.getInt(cursor.getColumnIndex("status")));
                 item.tx_log_id = cursor.getShort(cursor.getColumnIndex("tx_log_id"));
                 if (getActiveTxByTxId(item.tx_log_id) != null){
+                    arr.add(item);
+                } else if (getActiveTokenTxByTxId(item.tx_log_id) != null){
+                    arr.add(item);
+                }
+            } while (cursor.moveToNext());
+        }
+        return arr;
+    }
+
+    public boolean saveTokenOutputData(ArrayList<VcashTokenOutput> arr){
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isSuc = true;
+        try {
+            db.delete("VcashTokenOutput", null, null);
+            for (VcashTokenOutput item : arr) {
+                db.execSQL("REPLACE INTO VcashTokenOutput (" +
+                        "commitment, token_type, keypath, mmr_index, value, height, lock_height, is_token_issue, status, tx_log_id)" +
+                        "values(" +
+                        "'" + item.commitment + "'," +
+                        "'" + item.token_type + "'," +
+                        "'" + item.keyPath + "'," +
+                        item.mmr_index + "," +
+                        item.value + "," +
+                        item.height + "," +
+                        item.lock_height + "," +
+                        (item.is_token_issue?1:0) + "," +
+                        item.status.code() + "," +
+                        item.tx_log_id +
+                        ")");
+            }
+        } catch (SQLException e){
+            isSuc = false;
+            e.printStackTrace();
+        } finally {
+        }
+
+        return isSuc;
+    }
+
+    public ArrayList<VcashTokenOutput> getActiveTokenOutputData(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<VcashTokenOutput> arr = null;
+        Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenOutput WHERE status != ?", new String[] {Integer.toString(VcashOutput.OutputStatus.Spent.code())});
+        if (cursor != null && cursor.moveToFirst()) {
+            arr = new ArrayList<>();
+            do {
+                VcashTokenOutput item = new VcashTokenOutput();
+                item.commitment = cursor.getString(cursor.getColumnIndex("commitment"));
+                item.token_type = cursor.getString(cursor.getColumnIndex("token_type"));
+                item.keyPath = cursor.getString(cursor.getColumnIndex("keypath"));
+                item.mmr_index = cursor.getLong(cursor.getColumnIndex("mmr_index"));
+                item.value = cursor.getLong(cursor.getColumnIndex("value"));
+                item.height = cursor.getLong(cursor.getColumnIndex("height"));
+                item.lock_height = cursor.getLong(cursor.getColumnIndex("lock_height"));
+                item.is_token_issue = (cursor.getInt(cursor.getColumnIndex("is_token_issue")) == 1);
+                item.status = VcashOutput.OutputStatus.locateEnum(cursor.getInt(cursor.getColumnIndex("status")));
+                item.tx_log_id = cursor.getShort(cursor.getColumnIndex("tx_log_id"));
+                if (getActiveTokenTxByTxId(item.tx_log_id) != null){
                     arr.add(item);
                 }
             } while (cursor.moveToNext());
@@ -164,12 +224,12 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 txLog.tx_id + "," +
                 "'" + txLog.tx_slate_id + "'," +
                 "'" + txLog.parter_id + "'," +
-                txLog.tx_type.ordinal() + "," +
+                txLog.tx_type.code() + "," +
                 txLog.create_time + "," +
                 txLog.confirm_time + "," +
                 txLog.confirm_height + "," +
-                txLog.confirm_state.ordinal() + "," +
-                txLog.server_status.ordinal() + "," +
+                txLog.confirm_state.code() + "," +
+                txLog.server_status.code() + "," +
                 txLog.amount_credited + "," +
                 txLog.amount_debited + "," +
                 txLog.fee + "," +
@@ -177,6 +237,100 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "'" + inputStrBuilder.toString() + "'," +
                 "'" + outputStrBuilder.toString() + "'" +
                 ")");
+        return true;
+    }
+
+    public boolean saveTokenTxDataArr(ArrayList<VcashTokenTxLog> arr){
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isSuc = true;
+        try {
+            for (VcashTokenTxLog item : arr) {
+                saveTokenTx_imp(item, db);
+            }
+        } catch (SQLException e){
+            isSuc = false;
+            e.printStackTrace();
+        } finally {
+        }
+
+        if (isSuc){
+            notifyTxDataListener();
+        }
+
+        return isSuc;
+    }
+
+    public boolean saveTokenTx(VcashTokenTxLog txLog){
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isSuc = true;
+        try {
+            saveTokenTx_imp(txLog, db);
+        }catch (SQLException e){
+            isSuc = false;
+            e.printStackTrace();
+        }
+
+        if (isSuc){
+            notifyTxDataListener();
+        }
+
+        return isSuc;
+    }
+
+    private boolean saveTokenTx_imp(VcashTokenTxLog txLog, SQLiteDatabase db){
+        StringBuilder inputStrBuilder = new StringBuilder();
+        if (txLog.inputs != null){
+            for (String str :txLog.inputs){
+                inputStrBuilder.append(str);
+            }
+        }
+
+        StringBuilder tokenInputStrBuilder = new StringBuilder();
+        if (txLog.token_inputs != null){
+            for (String str :txLog.token_inputs){
+                tokenInputStrBuilder.append(str);
+            }
+        }
+
+        StringBuilder outputStrBuilder = new StringBuilder();
+        if (txLog.outputs != null){
+            for (String str :txLog.outputs){
+                outputStrBuilder.append(str);
+            }
+        }
+
+        StringBuilder tokenOutputStrBuilder = new StringBuilder();
+        if (txLog.token_outputs != null){
+            for (String str :txLog.token_outputs){
+                tokenOutputStrBuilder.append(str);
+            }
+        }
+
+        db.execSQL("REPLACE INTO VcashTokenTxLog (" +
+                "tx_id, tx_slate_id, parter_id, tx_type, create_time, confirm_time, confirm_height, confirm_state, server_status, token_type, amount_credited, amount_debited, token_amount_credited, token_amount_debited, fee, slate_str, token_inputs, token_outputs, inputs, outputs)" +
+                "values(" +
+                txLog.tx_id + "," +
+                "'" + txLog.tx_slate_id + "'," +
+                "'" + txLog.parter_id + "'," +
+                txLog.tx_type.code() + "," +
+                txLog.create_time + "," +
+                txLog.confirm_time + "," +
+                txLog.confirm_height + "," +
+                txLog.confirm_state.code() + "," +
+                txLog.server_status.code() + "," +
+                "'" + txLog.token_type + "'," +
+                txLog.amount_credited + "," +
+                txLog.amount_debited + "," +
+                txLog.token_amount_credited + "," +
+                txLog.token_amount_debited + "," +
+                txLog.fee + "," +
+                "'" + txLog.signed_slate_msg + "'," +
+                "'" + tokenInputStrBuilder.toString() + "'," +
+                "'" + tokenOutputStrBuilder.toString() + "'," +
+                "'" + inputStrBuilder.toString() + "'," +
+                "'" + outputStrBuilder.toString() + "'" +
+                ")");
+
         return true;
     }
 
@@ -233,12 +387,12 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             item.tx_id = cursor.getShort(cursor.getColumnIndex("tx_id"));
             item.tx_slate_id = cursor.getString(cursor.getColumnIndex("tx_slate_id"));
             item.parter_id = cursor.getString(cursor.getColumnIndex("parter_id"));
-            item.tx_type = VcashTxLog.TxLogEntryType.values()[cursor.getInt(cursor.getColumnIndex("tx_type"))];
+            item.tx_type = VcashTxLog.TxLogEntryType.locateEnum(cursor.getInt(cursor.getColumnIndex("tx_type")));
             item.create_time = cursor.getLong(cursor.getColumnIndex("create_time"));
             item.confirm_time = cursor.getLong(cursor.getColumnIndex("confirm_time"));
             item.confirm_height = cursor.getLong(cursor.getColumnIndex("confirm_height"));
-            item.confirm_state = VcashTxLog.TxLogConfirmType.values()[cursor.getInt(cursor.getColumnIndex("confirm_state"))];
-            item.server_status = ServerTxStatus.values()[cursor.getInt(cursor.getColumnIndex("server_status"))];
+            item.confirm_state = VcashTxLog.TxLogConfirmType.locateEnum(cursor.getInt(cursor.getColumnIndex("confirm_state")));
+            item.server_status = ServerTxStatus.locateEnum(cursor.getInt(cursor.getColumnIndex("server_status")));
             item.amount_credited = cursor.getLong(cursor.getColumnIndex("amount_credited"));
             item.amount_debited = cursor.getLong(cursor.getColumnIndex("amount_debited"));
             item.fee = cursor.getLong(cursor.getColumnIndex("fee"));
@@ -249,6 +403,94 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             String outputStr = cursor.getString(cursor.getColumnIndex("outputs"));
             for (int startIndex=0; startIndex<outputStr.length(); startIndex+=66){
                 item.appendOutput(outputStr.substring(startIndex, startIndex+66));
+            }
+            item.signed_slate_msg = cursor.getString(cursor.getColumnIndex("slate_str"));
+            return item;
+        }
+
+        return null;
+    }
+
+    public ArrayList<VcashTokenTxLog> getTokenTxData(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<VcashTokenTxLog> arr = null;
+        Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenTxLog ORDER BY tx_id ASC", null);
+        if (cursor != null && cursor.moveToFirst()) {
+            arr = new ArrayList<VcashTokenTxLog>();
+            do {
+                arr.add(parseTokenTxLog(cursor));
+            } while (cursor.moveToNext());
+        }
+        return arr;
+    }
+
+    public VcashTokenTxLog getTokenTxBySlateId(String slate_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
+        if (cursor != null && cursor.moveToFirst()){
+
+            return parseTokenTxLog(cursor);
+        }
+        return null;
+    }
+
+    public VcashTokenTxLog getActiveTokenTxByTxId(int tx_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = String.format("SELECT * FROM VcashTokenTxLog WHERE tx_id = %s AND server_status <> 3", tx_id);
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null && cursor.moveToFirst()){
+
+            return parseTokenTxLog(cursor);
+        }
+        return null;
+    }
+
+    public boolean deleteTokenTxBySlateId(String slate_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isSuc = true;
+        try {
+            db.delete("VcashTokenTxLog", "tx_slate_id = ?", new String[] {slate_id});
+        }catch (SQLException e){
+            isSuc = false;
+            e.printStackTrace();
+        }
+
+        return isSuc;
+    }
+
+    private VcashTokenTxLog parseTokenTxLog(Cursor cursor){
+        if (cursor != null){
+            VcashTokenTxLog item = new VcashTokenTxLog();
+            item.tx_id = cursor.getShort(cursor.getColumnIndex("tx_id"));
+            item.tx_slate_id = cursor.getString(cursor.getColumnIndex("tx_slate_id"));
+            item.parter_id = cursor.getString(cursor.getColumnIndex("parter_id"));
+            item.tx_type = VcashTokenTxLog.TokenTxLogEntryType.locateEnum(cursor.getInt(cursor.getColumnIndex("tx_type")));
+            item.create_time = cursor.getLong(cursor.getColumnIndex("create_time"));
+            item.confirm_time = cursor.getLong(cursor.getColumnIndex("confirm_time"));
+            item.confirm_height = cursor.getLong(cursor.getColumnIndex("confirm_height"));
+            item.confirm_state = VcashTxLog.TxLogConfirmType.locateEnum(cursor.getInt(cursor.getColumnIndex("confirm_state")));
+            item.server_status = ServerTxStatus.locateEnum(cursor.getInt(cursor.getColumnIndex("server_status")));
+            item.token_type = cursor.getString(cursor.getColumnIndex("token_type"));
+            item.amount_credited = cursor.getLong(cursor.getColumnIndex("amount_credited"));
+            item.amount_debited = cursor.getLong(cursor.getColumnIndex("amount_debited"));
+            item.token_amount_credited = cursor.getLong(cursor.getColumnIndex("token_amount_credited"));
+            item.token_amount_debited = cursor.getLong(cursor.getColumnIndex("token_amount_debited"));
+            item.fee = cursor.getLong(cursor.getColumnIndex("fee"));
+            String inputStr = cursor.getString(cursor.getColumnIndex("inputs"));
+            for (int startIndex=0; startIndex<inputStr.length(); startIndex+=66){
+                item.appendInput(inputStr.substring(startIndex, startIndex+66));
+            }
+            String outputStr = cursor.getString(cursor.getColumnIndex("outputs"));
+            for (int startIndex=0; startIndex<outputStr.length(); startIndex+=66){
+                item.appendOutput(outputStr.substring(startIndex, startIndex+66));
+            }
+            String tokenInputStr = cursor.getString(cursor.getColumnIndex("token_inputs"));
+            for (int startIndex=0; startIndex<tokenInputStr.length(); startIndex+=66){
+                item.appendTokenInput(tokenInputStr.substring(startIndex, startIndex+66));
+            }
+            String tokenOutputStr = cursor.getString(cursor.getColumnIndex("token_outputs"));
+            for (int startIndex=0; startIndex<tokenOutputStr.length(); startIndex+=66){
+                item.appendTokenOutput(tokenOutputStr.substring(startIndex, startIndex+66));
             }
             item.signed_slate_msg = cursor.getString(cursor.getColumnIndex("slate_str"));
             return item;
@@ -296,10 +538,11 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         boolean isSuc = true;
         try {
             db.execSQL("REPLACE INTO VcashContext (" +
-                    "slate_id, sec_key, sec_nounce)" +
+                    "slate_id, sec_key, token_sec_key, sec_nounce)" +
                     "values(" +
                     "'" + context.slate_id + "'," +
                     "'" + context.sec_key + "'," +
+                    "'" + context.token_sec_key + "'," +
                     "'" + context.sec_nounce + "'" +
                     ")");
         }catch (SQLException e){
@@ -316,6 +559,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         if (cursor != null && cursor.moveToFirst()){
             VcashContext context = new VcashContext();
             context.sec_key = cursor.getString(cursor.getColumnIndex("sec_key"));
+            context.token_sec_key = cursor.getString(cursor.getColumnIndex("token_sec_key"));
             context.sec_nounce = cursor.getString(cursor.getColumnIndex("sec_nounce"));
             context.slate_id = cursor.getString(cursor.getColumnIndex("slate_id"));
             return context;
@@ -395,7 +639,11 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE VcashContext (" +
                 "slate_id       text primary key NOT NULL," +
                 "sec_nounce     text," +
-                "sec_key        text)");
+                "sec_key        text," +
+                "token_sec_key  text)");
+
+        createTableVcashTokenOutput(db);
+        createTableVcashTokenTxLog(db);
     }
 
     @Override
@@ -406,7 +654,52 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE VcashTxLog ADD COLUMN confirm_height integer BEFORE confirm_state");
         }
 
+        // version 3:
+        if (oldVersion == 2 && newVersion >= 3){
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN token_sec_key text");
+            createTableVcashTokenOutput(db);
+            createTableVcashTokenTxLog(db);
+        }
+
         // OPTIONAL: backup master info for corruption recovery.
         //RepairKit.MasterInfo.save(db, db.getPath() + "-mbak", mPassphrase.getBytes());
+    }
+
+    private void createTableVcashTokenOutput(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE VcashTokenOutput (" +
+                "commitment     text primary key NOT NULL," +
+                "token_type     text," +
+                "keypath        text," +
+                "mmr_index      integer," +
+                "value          integer," +
+                "height         integer," +
+                "lock_height    integer," +
+                "is_token_issue integer," +
+                "status         integer," +
+                "tx_log_id      integer)");
+    }
+
+    private void createTableVcashTokenTxLog(SQLiteDatabase db){
+        db.execSQL("CREATE TABLE VcashTokenTxLog (" +
+                "tx_id              integer primary key," +
+                "tx_slate_id        text," +
+                "parter_id          text," +
+                "tx_type            integer," +
+                "create_time        integer," +
+                "confirm_time       integer," +
+                "confirm_height     integer," +
+                "confirm_state      integer," +
+                "server_status      integer," +
+                "token_type         text," +
+                "amount_credited    integer," +
+                "amount_debited     integer," +
+                "token_amount_credited    integer," +
+                "token_amount_debited     integer," +
+                "fee                integer," +
+                "slate_str          text," +
+                "token_inputs       text," +
+                "token_outputs      text," +
+                "inputs             text," +
+                "outputs            text)");
     }
 }
