@@ -10,6 +10,7 @@ import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
@@ -96,7 +97,7 @@ public class ServerTxManager {
                                 continue;
                             }
                             if (item.slateObj != null) {
-                                VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(item.slateObj.uuid);
+                                AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(item.slateObj.uuid);
 
                                 //check as receiver
                                 if (item.receiver_id.equals(VcashWallet.getInstance().mUserId)) {

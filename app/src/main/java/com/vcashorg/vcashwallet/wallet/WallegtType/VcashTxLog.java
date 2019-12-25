@@ -7,16 +7,8 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class VcashTxLog implements Serializable {
-    public short tx_id;
-    public String tx_slate_id;
-    public String parter_id;
+public class VcashTxLog extends AbstractVcashTxLog implements Serializable {
     public TxLogEntryType tx_type;
-    public long create_time;
-    public long confirm_time;
-    public long confirm_height;
-    public TxLogConfirmType confirm_state;
-    public ServerTxStatus server_status;
     public long amount_credited;
     public long amount_debited;
     public long fee;

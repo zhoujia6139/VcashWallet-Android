@@ -16,6 +16,7 @@ import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.Address;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
@@ -163,7 +164,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                             dismissProgressDialog();
                                             if(yesOrNo){
                                                 UIUtils.showToastCenter(R.string.send_success);
-                                                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                                AbstractVcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
                                                 Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);

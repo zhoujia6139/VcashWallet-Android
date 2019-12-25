@@ -8,6 +8,7 @@ import com.tencent.wcdb.database.SQLiteDatabase;
 import com.tencent.wcdb.database.SQLiteOpenHelper;
 import com.tencent.wcdb.repair.RepairKit;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
@@ -186,11 +187,18 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         return isSuc;
     }
 
-    public boolean saveTx(VcashTxLog txLog){
+    public boolean saveTx(AbstractVcashTxLog tx){
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
         try {
-            saveTx_imp(txLog, db);
+            if (tx instanceof VcashTxLog) {
+                VcashTxLog txLog = (VcashTxLog)tx;
+                saveTx_imp(txLog, db);
+            } else if (tx instanceof  VcashTokenTxLog) {
+                VcashTokenTxLog txLog = (VcashTokenTxLog)tx;
+                saveTokenTx_imp(txLog, db);
+            }
+
         }catch (SQLException e){
             isSuc = false;
             e.printStackTrace();
@@ -251,23 +259,6 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             isSuc = false;
             e.printStackTrace();
         } finally {
-        }
-
-        if (isSuc){
-            notifyTxDataListener();
-        }
-
-        return isSuc;
-    }
-
-    public boolean saveTokenTx(VcashTokenTxLog txLog){
-        SQLiteDatabase db = this.getWritableDatabase();
-        boolean isSuc = true;
-        try {
-            saveTokenTx_imp(txLog, db);
-        }catch (SQLException e){
-            isSuc = false;
-            e.printStackTrace();
         }
 
         if (isSuc){
@@ -347,13 +338,19 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         return arr;
     }
 
-    public VcashTxLog getTxBySlateId(String slate_id){
+    public AbstractVcashTxLog getTxBySlateId(String slate_id){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
         if (cursor != null && cursor.moveToFirst()){
 
             return parseTxLog(cursor);
         }
+        Cursor tokneCursor = db.rawQuery("SELECT * FROM VcashTokenTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
+        if (tokneCursor != null && tokneCursor.moveToFirst()){
+
+            return parseTokenTxLog(tokneCursor);
+        }
+
         return null;
     }
 
@@ -422,16 +419,6 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return arr;
-    }
-
-    public VcashTokenTxLog getTokenTxBySlateId(String slate_id){
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenTxLog WHERE tx_slate_id = ?", new String[] {slate_id});
-        if (cursor != null && cursor.moveToFirst()){
-
-            return parseTokenTxLog(cursor);
-        }
-        return null;
     }
 
     public VcashTokenTxLog getActiveTokenTxByTxId(int tx_id){

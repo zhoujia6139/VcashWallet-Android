@@ -22,6 +22,7 @@ import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.utils.CoinUtils;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
@@ -256,7 +257,11 @@ public class WalletApi {
             }
         };
 
-        slate.txLog.parter_id = user;
+        if (slate.token_type != null) {
+            slate.tokenTxLog.parter_id = user;
+        } else {
+            slate.txLog.parter_id = user;
+        }
 
         sendTransaction(slate, new WalletCallback(){
             @Override
@@ -462,7 +467,7 @@ public class WalletApi {
             }
         } else {
             slate.tokenTxLog.server_status = ServerTxStatus.TxDefaultStatus;
-            if (!EncryptedDBHelper.getsInstance().saveTokenTx(slate.tokenTxLog)){
+            if (!EncryptedDBHelper.getsInstance().saveTx(slate.tokenTxLog)){
                 if (callback != null){
                     callback.onCall(false, "Db error:saveTokenTx failed");
                     return;
@@ -505,16 +510,8 @@ public class WalletApi {
             return;
         }
 
-        VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+        AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
         if (txLog != null){
-            if (callback != null){
-                callback.onCall(false, "Duplicate transaction");
-            }
-            return;
-        }
-
-        VcashTokenTxLog tokenTxLog = EncryptedDBHelper.getsInstance().getTokenTxBySlateId(slate.uuid);
-        if (tokenTxLog != null){
             if (callback != null){
                 callback.onCall(false, "Duplicate transaction");
             }
@@ -582,8 +579,6 @@ public class WalletApi {
             }
         };
 
-
-
         Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
         String slateStr = gson.toJson(slate);
 
@@ -595,7 +590,7 @@ public class WalletApi {
                 slate.tokenTxLog.parter_id = serverTx.sender_id;
             }
             slate.tokenTxLog.signed_slate_msg = slateStr;
-            if (!EncryptedDBHelper.getsInstance().saveTokenTx(slate.tokenTxLog)){
+            if (!EncryptedDBHelper.getsInstance().saveTx(slate.tokenTxLog)){
                 rollbackBlock.onCall();
                 Log.e(Tag, "VcashDataManager saveTokenTx failed");
                 callback.onCall(false, null);
@@ -673,22 +668,12 @@ public class WalletApi {
             return;
         }
 
-        if (slate.token_type != null) {
-            VcashTokenTxLog txLog = EncryptedDBHelper.getsInstance().getTokenTxBySlateId(slate.uuid);
-            if (txLog == null){
-                if (callback != null){
-                    callback.onCall(false, "Tx missed");
-                }
-                return;
+        AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+        if (txLog == null){
+            if (callback != null){
+                callback.onCall(false, "Tx missed");
             }
-        } else {
-            VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
-            if (txLog == null){
-                if (callback != null){
-                    callback.onCall(false, "Tx missed");
-                }
-                return;
-            }
+            return;
         }
 
         if (callback != null){
@@ -745,20 +730,11 @@ public class WalletApi {
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
                     callback.onCall(true, null);
-                    if (slate.token_type != null) {
-                        VcashTokenTxLog txLog = EncryptedDBHelper.getsInstance().getTokenTxBySlateId(slate.uuid);
-                        if (txLog != null){
-                            txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
-                            txLog.server_status = ServerTxStatus.TxFinalized;
-                            EncryptedDBHelper.getsInstance().saveTokenTx(txLog);
-                        }
-                    } else {
-                        VcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
-                        if (txLog != null){
-                            txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
-                            txLog.server_status = ServerTxStatus.TxFinalized;
-                            EncryptedDBHelper.getsInstance().saveTx(txLog);
-                        }
+                    AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+                    if (txLog != null){
+                        txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+                        txLog.server_status = ServerTxStatus.TxFinalized;
+                        EncryptedDBHelper.getsInstance().saveTx(txLog);
                     }
                 }
                 else {
@@ -769,7 +745,7 @@ public class WalletApi {
     }
 
     public static boolean cancelTransaction(String tx_id){
-        VcashTxLog txLog = WalletApi.getTxByTxid(tx_id);
+        AbstractVcashTxLog txLog = WalletApi.getTxByTxid(tx_id);
         if (txLog != null && !txLog.isCanBeCanneled()){
             return false;
         }
@@ -800,12 +776,8 @@ public class WalletApi {
         return EncryptedDBHelper.getsInstance().getTokenTxData();
     }
 
-    public static VcashTxLog getTxByTxid(String txid){
+    public static AbstractVcashTxLog getTxByTxid(String txid){
         return EncryptedDBHelper.getsInstance().getTxBySlateId(txid);
-    }
-
-    public static VcashTokenTxLog getTokenTxByTxid(String txid){
-        return EncryptedDBHelper.getsInstance().getTokenTxBySlateId(txid);
     }
 
     public static boolean deleteTxByTxid(String txid){
@@ -1083,7 +1055,7 @@ public class WalletApi {
                                                 if (apiOutputs.size() > 0){
                                                     NodeRefreshOutput output = apiOutputs.get(0);
                                                     callback_tx.confirm_height = output.height;
-                                                    EncryptedDBHelper.getsInstance().saveTokenTx(callback_tx);
+                                                    EncryptedDBHelper.getsInstance().saveTx(callback_tx);
                                                 }
                                             }
                                         }

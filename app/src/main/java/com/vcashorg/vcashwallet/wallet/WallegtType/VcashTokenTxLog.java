@@ -7,16 +7,8 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class VcashTokenTxLog implements Serializable {
-    public short tx_id;
-    public String tx_slate_id;
-    public String parter_id;
+public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable {
     public VcashTokenTxLog.TokenTxLogEntryType tx_type;
-    public long create_time;
-    public long confirm_time;
-    public long confirm_height;
-    public VcashTxLog.TxLogConfirmType confirm_state;
-    public ServerTxStatus server_status;
     public String token_type;
     public long amount_credited;
     public long amount_debited;
@@ -55,7 +47,7 @@ public class VcashTokenTxLog implements Serializable {
         return false;
     }
 
-    public void cancelTokenTxlog(){
+    public void cancelTxlog(){
         ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
         if (tx_type == TokenTxLogEntryType.TokenTxSent){
             for (String commitment: inputs){
