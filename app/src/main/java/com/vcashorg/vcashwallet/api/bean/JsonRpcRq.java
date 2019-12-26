@@ -12,10 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class JsonRpcRq {
-    public String jsonrpc = "2.0";
+    private String jsonrpc = "2.0";
     public String method = "receive_tx";
     public int id = 1;
-    public ArrayList<VcashSlate> params;
+    private ArrayList<VcashSlate> params;
 
     public JsonRpcRq(VcashSlate param) {
         params = new ArrayList<>();
@@ -24,15 +24,14 @@ public class JsonRpcRq {
         params.add(null);
     }
 
-    public class JsonRpcRqTypeAdapter extends TypeAdapter<JsonRpcRq> {
+    public static class JsonRpcRqTypeAdapter extends TypeAdapter<JsonRpcRq> {
         @Override
         public void write(JsonWriter jsonWriter, JsonRpcRq req) throws IOException {
             jsonWriter.beginObject();
             jsonWriter.name("jsonrpc").value(req.jsonrpc);
             jsonWriter.name("method").value(req.method);
             jsonWriter.name("id").value(req.id);
-            VcashSlate slate = new VcashSlate();
-            final Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, slate.new VcashSlateTypeAdapter()).create();
+            final Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
             String paramStr = slate_gson.toJson(req.params, new TypeToken<ArrayList<VcashSlate>>(){}.getType());
             jsonWriter.name("params").jsonValue(paramStr);
             jsonWriter.endObject();

@@ -8,23 +8,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
 import com.vcashorg.vcashwallet.wallet.VcashKeychain;
 import com.vcashorg.vcashwallet.wallet.VcashKeychainPath;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStatus.Locked;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStatus.Unconfirmed;
@@ -32,7 +26,7 @@ import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput.OutputStat
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTransaction.OutputFeatures;
 
 public class VcashSlate implements Serializable {
-    public VersionCompatInfo version_info = new VersionCompatInfo(3, 3, 2);
+    private VersionCompatInfo version_info = new VersionCompatInfo(3, 3, 2);
     public String uuid = Generators.randomBasedGenerator().generate().toString();
     public short num_participants;
     public long amount;
@@ -41,7 +35,7 @@ public class VcashSlate implements Serializable {
     public long height;
     public long lock_height;
     public VcashTransaction tx = new VcashTransaction();
-    public ArrayList<ParticipantData> participant_data = new ArrayList<>();
+    private ArrayList<ParticipantData> participant_data = new ArrayList<>();
 
     @Expose(serialize = false, deserialize = false)
     public VcashTxLog txLog;
@@ -63,7 +57,7 @@ public class VcashSlate implements Serializable {
         private int orig_version;
         private int block_header_version;
 
-        public VersionCompatInfo(int ver, int orig, int header_version){
+        VersionCompatInfo(int ver, int orig, int header_version){
             version = ver;
             orig_version = orig;
             block_header_version = header_version;
@@ -71,15 +65,15 @@ public class VcashSlate implements Serializable {
     }
 
     public byte[]addTxElement(ArrayList<VcashOutput> outputs, long change, boolean isForToken){
-        VcashTransaction.TxKernel kernel = tx.new TxKernel();
-        ArrayList<byte[]> positiveArr = new ArrayList<byte[]>();
-        ArrayList<byte[]> negativeArr = new ArrayList<byte[]>();
+        VcashTransaction.TxKernel kernel = new VcashTransaction.TxKernel();
+        ArrayList<byte[]> positiveArr = new ArrayList<>();
+        ArrayList<byte[]> negativeArr = new ArrayList<>();
 
         //1,fee
         kernel.fee = fee;
 
         //2,input
-        final ArrayList<VcashOutput> lockOutput = new ArrayList<VcashOutput>();
+        final ArrayList<VcashOutput> lockOutput = new ArrayList<>();
         for (VcashOutput item : outputs){
             if (item.status != Unspent){
                 continue;
@@ -87,7 +81,7 @@ public class VcashSlate implements Serializable {
 
             VcashKeychainPath keypath = new VcashKeychainPath(3, AppUtil.decode(item.keyPath));
             byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(item.value, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
-            VcashTransaction.Input input = tx.new Input();
+            VcashTransaction.Input input = new VcashTransaction.Input();
             input.commit = commitment;
             input.features = (item.is_coinbase?OutputFeatures.OutputFeatureCoinbase:OutputFeatures.OutputFeaturePlain);
 
@@ -125,9 +119,9 @@ public class VcashSlate implements Serializable {
     }
 
     public byte[]addTokenTxElement(ArrayList<VcashTokenOutput> token_outputs, long change){
-        VcashTransaction.TokenTxKernel txKernel = tx.new TokenTxKernel();
-        ArrayList<byte[]> positiveArr = new ArrayList<byte[]>();
-        ArrayList<byte[]> negativeArr = new ArrayList<byte[]>();
+        VcashTransaction.TokenTxKernel txKernel = new VcashTransaction.TokenTxKernel();
+        ArrayList<byte[]> positiveArr = new ArrayList<>();
+        ArrayList<byte[]> negativeArr = new ArrayList<>();
 
         final ArrayList<VcashTokenOutput> lockOutput = new ArrayList<>();
         for (VcashTokenOutput item : token_outputs){
@@ -137,7 +131,7 @@ public class VcashSlate implements Serializable {
 
             VcashKeychainPath keypath = new VcashKeychainPath(3, AppUtil.decode(item.keyPath));
             byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(item.value, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
-            VcashTransaction.TokenInput input = tx.new TokenInput();
+            VcashTransaction.TokenInput input = new VcashTransaction.TokenInput();
             input.token_type = item.token_type;
             input.commit = commitment;
             input.features = (item.is_token_issue? VcashTransaction.TokenOutputFeatures.OutputFeatureTokenIssue:VcashTransaction.TokenOutputFeatures.OutputFeatureToken);
@@ -146,6 +140,7 @@ public class VcashSlate implements Serializable {
             byte[] secKey = VcashWallet.getInstance().mKeyChain.deriveBindKey(item.value, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
             negativeArr.add(secKey);
 
+            lockOutput.add(item);
             tokenTxLog.appendTokenInput(item.commitment);
             txKernel.token_type = item.token_type;
 
@@ -298,7 +293,7 @@ public class VcashSlate implements Serializable {
         return false;
     }
 
-    public void generateOffset(VcashContext context){
+    private void generateOffset(VcashContext context){
         byte[] seed = AppUtil.randomBytes(32);
         while (!NativeSecp256k1.instance().verifyEcSecretKey(seed)){
             seed = AppUtil.randomBytes(32);
@@ -312,17 +307,17 @@ public class VcashSlate implements Serializable {
         context.sec_key = AppUtil.hex(NativeSecp256k1.instance().bindSum(positiveArr, negativeArr));
     }
 
-    public byte[] createMsgToSign(){
+    private byte[] createMsgToSign(){
         VcashTransaction.TxKernel kernel = tx.body.kernels.get(0);
         return kernel.kernelMsgToSign();
     }
 
-    public byte[] createTokenMsgToSign(){
+    private byte[] createTokenMsgToSign(){
         VcashTransaction.TokenTxKernel kernel = tx.body.token_kernels.get(0);
         return kernel.kernelMsgToSign();
     }
 
-    public void addParticipantInfo(VcashContext context, int participant_id, String message){
+    private void addParticipantInfo(VcashContext context, int participant_id, String message){
         String sec_key;
         if (token_type != null) {
             sec_key = context.token_sec_key;
@@ -368,7 +363,7 @@ public class VcashSlate implements Serializable {
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
         final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
         byte[] proof = VcashWallet.getInstance().mKeyChain.createRangeProof(amount, keypath);
-        VcashTransaction.Output output = tx.new Output();
+        VcashTransaction.Output output = new VcashTransaction.Output();
         output.features = OutputFeatures.OutputFeaturePlain;
         output.commit = commitment;
         output.proof = proof;
@@ -404,7 +399,7 @@ public class VcashSlate implements Serializable {
         final VcashKeychainPath keypath = VcashWallet.getInstance().nextChild();
         final byte[] commitment = VcashWallet.getInstance().mKeyChain.createCommitment(amount, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
         byte[] proof = VcashWallet.getInstance().mKeyChain.createRangeProof(amount, keypath);
-        VcashTransaction.TokenOutput output = tx.new TokenOutput();
+        VcashTransaction.TokenOutput output = new VcashTransaction.TokenOutput();
         output.token_type = tokenType;
         output.features = VcashTransaction.TokenOutputFeatures.OutputFeatureToken;
         output.commit = commitment;
@@ -433,7 +428,7 @@ public class VcashSlate implements Serializable {
         return VcashWallet.getInstance().mKeyChain.deriveBindKey(amount, keypath, VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular);
     }
 
-    public class VcashSlateTypeAdapter extends TypeAdapter<VcashSlate> {
+    public static class VcashSlateTypeAdapter extends TypeAdapter<VcashSlate> {
         @Override
         public void write(JsonWriter jsonWriter, VcashSlate slate) throws IOException {
             if (slate != null) {
@@ -448,12 +443,12 @@ public class VcashSlate implements Serializable {
                 Gson version_gson = new Gson();
                 String version_str = version_gson.toJson(slate.version_info);
                 jsonWriter.name("version_info").jsonValue(version_str);
-                Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
+                Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, new VcashTransaction.VcashTransactionTypeAdapter()).create();
                 String jsonStr = gson.toJson(slate.tx);
                 jsonWriter.name("tx").jsonValue(jsonStr);
 
                 ParticipantData data = slate.participant_data.get(0);
-                Gson gson1 = new GsonBuilder().serializeNulls().registerTypeAdapter(ParticipantData.class, data.new ParticipantDataTypeAdapter()).create();
+                Gson gson1 = new GsonBuilder().serializeNulls().registerTypeAdapter(ParticipantData.class, new ParticipantData.ParticipantDataTypeAdapter()).create();
                 String jsonStr1 = gson1.toJson(slate.participant_data, new TypeToken<ArrayList<ParticipantData>>(){}.getType());
                 jsonWriter.name("participant_data").jsonValue(jsonStr1);
                 jsonWriter.endObject();
@@ -499,15 +494,14 @@ public class VcashSlate implements Serializable {
                         slate.version_info = version_gson.fromJson(jsonReader, VersionCompatInfo.class);
                         break;
                     case "tx":
-                        Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, tx.new VcashTransactionTypeAdapter()).create();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(VcashTransaction.class, new VcashTransaction.VcashTransactionTypeAdapter()).create();
                         slate.tx = gson.fromJson(jsonReader, VcashTransaction.class);
                         break;
                     case "participant_data":
                         jsonReader.beginArray();
                         while(jsonReader.hasNext()){
-                            ParticipantData pData = new ParticipantData();
-                            Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, pData.new ParticipantDataTypeAdapter()).create();
-                            pData = datagson.fromJson(jsonReader, ParticipantData.class);
+                            Gson datagson = new GsonBuilder().registerTypeAdapter(ParticipantData.class, new ParticipantData.ParticipantDataTypeAdapter()).create();
+                            ParticipantData pData = datagson.fromJson(jsonReader, ParticipantData.class);
                             slate.participant_data.add(pData);
                         }
                         jsonReader.endArray();
@@ -519,15 +513,15 @@ public class VcashSlate implements Serializable {
         }
     }
 
-    public class ParticipantData implements Serializable{
-        public short pId;
-        public byte[] public_blind_excess;
-        public byte[] public_nonce;
-        public byte[] part_sig;
+    public static class ParticipantData implements Serializable{
+        short pId;
+        byte[] public_blind_excess;
+        byte[] public_nonce;
+        byte[] part_sig;
         public String message;
-        public byte[] message_sig;
+        byte[] message_sig;
 
-        public class ParticipantDataTypeAdapter extends TypeAdapter<ParticipantData> {
+        public static class ParticipantDataTypeAdapter extends TypeAdapter<ParticipantData> {
             @Override
             public void write(JsonWriter jsonWriter, ParticipantData data) throws IOException {
                 jsonWriter.beginObject();

@@ -32,7 +32,7 @@ public class ServerTransaction implements Serializable {
 
     public ServerTransaction(VcashSlate sla){
         tx_id = sla.uuid;
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, sla.new VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
         slate = gson.toJson(sla);
     }
 
@@ -72,7 +72,7 @@ public class ServerTransaction implements Serializable {
         return AppUtil.BufferToByteArr(buf);
     }
 
-    public class ServerTransactionTypeAdapter extends TypeAdapter<ServerTransaction> {
+    public static class ServerTransactionTypeAdapter extends TypeAdapter<ServerTransaction> {
         @Override
         public void write(JsonWriter jsonWriter, ServerTransaction tx) throws IOException {
             jsonWriter.beginObject();

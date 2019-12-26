@@ -316,7 +316,7 @@ public class WalletApi {
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
                     JsonRpcRq rq = new JsonRpcRq(slate);
-                    final Gson rq_gson = new GsonBuilder().registerTypeAdapter(JsonRpcRq.class, rq.new JsonRpcRqTypeAdapter()).serializeNulls().create();
+                    final Gson rq_gson = new GsonBuilder().registerTypeAdapter(JsonRpcRq.class, new JsonRpcRq.JsonRpcRqTypeAdapter()).serializeNulls().create();
                     String req_str = rq_gson.toJson(rq);
                     RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), req_str);
                     try{
@@ -339,9 +339,8 @@ public class WalletApi {
                             public void onResponse(final Call call, Response response) throws IOException {
                                 try {
                                     String json = response.body().string();
-                                    JsonRpcRes res = new JsonRpcRes();
-                                    Gson res_gson = new GsonBuilder().registerTypeAdapter(JsonRpcRes.class, res.new JsonRpcResTypeAdapter()).serializeNulls().create();
-                                    res = res_gson.fromJson(json, JsonRpcRes.class);
+                                    Gson res_gson = new GsonBuilder().registerTypeAdapter(JsonRpcRes.class, new JsonRpcRes.JsonRpcResTypeAdapter()).serializeNulls().create();
+                                    JsonRpcRes res = res_gson.fromJson(json, JsonRpcRes.class);
                                     if (res.resSlate == null){
                                         Log.e(Tag, String.format("sendTransaction post to %s failed!", full_url));
                                         handler.post(new Runnable() {
@@ -429,7 +428,7 @@ public class WalletApi {
                 if (yesOrNo){
                     Log.w(Tag, String.format("sendTransaction by file suc"));
                     EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
-                    final Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, slate.new VcashSlateTypeAdapter()).create();
+                    final Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
                     String slate_str = gson.toJson(slate);
                     callback.onCall(true, slate_str);
                 }
@@ -493,7 +492,7 @@ public class WalletApi {
     }
 
     public static void isValidSlateConentForReceive(String fileContent, final WalletCallback callback){
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
         VcashSlate slate;
         try {
              slate = gson.fromJson(fileContent, VcashSlate.class);
@@ -579,7 +578,7 @@ public class WalletApi {
             }
         };
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
         String slateStr = gson.toJson(slate);
 
         if (slate.token_type != null) {
@@ -651,7 +650,7 @@ public class WalletApi {
     }
 
     public static void isValidSlateConentForFinalize(String fileContent, final WalletCallback callback){
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
         VcashSlate slate;
         try {
             slate = gson.fromJson(fileContent, VcashSlate.class);

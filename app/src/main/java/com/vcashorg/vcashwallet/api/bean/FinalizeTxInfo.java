@@ -13,7 +13,7 @@ public class FinalizeTxInfo {
     public ServerTxStatus code;
     public String msg_sig;
 
-    public class FinalizeTxInfoTypeAdapter extends TypeAdapter<FinalizeTxInfo> {
+    public static class FinalizeTxInfoTypeAdapter extends TypeAdapter<FinalizeTxInfo> {
         @Override
         public void write(JsonWriter jsonWriter, FinalizeTxInfo tx) throws IOException {
             jsonWriter.beginObject();

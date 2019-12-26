@@ -12,7 +12,6 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashProofInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
-import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxBaseObject;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
@@ -20,11 +19,10 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
@@ -66,7 +64,7 @@ public class VcashWallet {
         SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.USER_ID,mUserId);
     }
 
-    public static void createVcashWallet(VcashKeychain keychain){
+    static void createVcashWallet(VcashKeychain keychain){
         if (instance == null){
             instance = new VcashWallet(keychain);
         }
@@ -99,7 +97,7 @@ public class VcashWallet {
         return mChainHeight;
     }
 
-    public void addChainHeightListener(WalletNoParamCallBack listener){
+    void addChainHeightListener(WalletNoParamCallBack listener){
         heightListener.add(listener);
     }
 
@@ -121,13 +119,13 @@ public class VcashWallet {
         return mKeyPath;
     }
 
-    public short getNextLogId(){
+    short getNextLogId(){
         mCurTxLogId += 1;
         saveBaseInfo();
         return mCurTxLogId;
     }
 
-    public void setChainOutputs(ArrayList<VcashOutput> chainOutputs){
+    void setChainOutputs(ArrayList<VcashOutput> chainOutputs){
         outputs = chainOutputs;
 
         VcashKeychainPath maxKeyPath = new VcashKeychainPath(3, 0, 0, 0, 0);
@@ -145,7 +143,7 @@ public class VcashWallet {
         syncOutputInfo();
     }
 
-    public void setChainTokenOutputs(ArrayList<VcashTokenOutput> chainOutputs){
+    void setChainTokenOutputs(ArrayList<VcashTokenOutput> chainOutputs){
         token_outputs = chainOutputs;
 
         VcashKeychainPath maxKeyPath = new VcashKeychainPath(3, 0, 0, 0, 0);
@@ -174,7 +172,7 @@ public class VcashWallet {
     }
 
     public void syncOutputInfo(){
-        ArrayList<VcashOutput> arrayList = new ArrayList<VcashOutput>();
+        ArrayList<VcashOutput> arrayList = new ArrayList<>();
         for (VcashOutput output:outputs){
             if (output.status == VcashOutput.OutputStatus.Spent){
                 Log.w(Tag, String.format("Output commit:%s has been spend, remove from wallet", output.commitment));
@@ -187,7 +185,7 @@ public class VcashWallet {
         EncryptedDBHelper.getsInstance().saveOutputData(outputs);
     }
 
-    public void syncTokenOutputInfo(){
+    void syncTokenOutputInfo(){
         ArrayList<VcashTokenOutput> arrayList = new ArrayList<>();
         for (VcashTokenOutput output:token_outputs){
             if (output.status == VcashOutput.OutputStatus.Spent){
@@ -201,11 +199,11 @@ public class VcashWallet {
         EncryptedDBHelper.getsInstance().saveTokenOutputData(token_outputs);
     }
 
-    public void reloadOutputInfo(){
+    void reloadOutputInfo(){
         outputs = EncryptedDBHelper.getsInstance().getActiveOutputData();
     }
 
-    public void reloadTokenOutputInfo(){
+    void reloadTokenOutputInfo(){
         token_outputs = EncryptedDBHelper.getsInstance().getActiveTokenOutputData();
         tokenOutputToDic();
     }
@@ -260,7 +258,7 @@ public class VcashWallet {
         return null;
     }
 
-    public void sendTransaction(long amount, long fee, final WalletCallback callback){
+    void sendTransaction(long amount, long fee, final WalletCallback callback){
         long total = 0;
         ArrayList<VcashOutput> spendable = new ArrayList<>();
         for (VcashOutput item : outputs){
@@ -278,7 +276,7 @@ public class VcashWallet {
         }
         long amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
-            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
+            String errMsg = String.format(Locale.getDefault(), "Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
             if (callback!=null){
                 callback.onCall(false, errMsg);
             }
@@ -291,7 +289,7 @@ public class VcashWallet {
         }
         amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
-            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
+            String errMsg = String.format(Locale.getDefault(), "Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount_with_fee));
             if (callback!=null){
                 callback.onCall(false, errMsg);
             }
@@ -347,7 +345,7 @@ public class VcashWallet {
         }
     }
 
-    public void sendTokenTransaction(String token_type, long amount, final WalletCallback callback){
+    void sendTokenTransaction(String token_type, long amount, final WalletCallback callback){
         long total = 0;
         ArrayList<VcashTokenOutput> spendable = new ArrayList<>();
         ArrayList<VcashTokenOutput> tokens = token_outputs_dic.get(token_type);
@@ -361,7 +359,7 @@ public class VcashWallet {
         }
 
         if (total < amount) {
-            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount));
+            String errMsg = String.format(Locale.getDefault(), "Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(total), WalletApi.nanoToVcash(amount));
             if (callback!=null){
                 callback.onCall(false, errMsg);
             }
@@ -383,7 +381,7 @@ public class VcashWallet {
         int token_output_count = change > 0? 2:1;
         long fee1 = calcuteFee(spendable.size()+vcash_spendable.size(), 1+token_output_count, 2);
         if (vcash_total < fee1) {
-            String errMsg = String.format("Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(vcash_total), WalletApi.nanoToVcash(fee1));
+            String errMsg = String.format(Locale.getDefault(), "Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(vcash_total), WalletApi.nanoToVcash(fee1));
             if (callback!=null){
                 callback.onCall(false, errMsg);
             }
@@ -489,7 +487,7 @@ public class VcashWallet {
         }
     }
 
-    public boolean receiveTransaction(VcashSlate slate){
+    boolean receiveTransaction(VcashSlate slate){
         //5, fill slate with receiver output
         if (slate.token_type != null) {
             VcashTokenTxLog txLog = new VcashTokenTxLog();
@@ -548,7 +546,7 @@ public class VcashWallet {
         return true;
     }
 
-    public boolean finalizeTransaction(VcashSlate slate){
+    boolean finalizeTransaction(VcashSlate slate){
         //9, sender fill round 2
         if (!slate.fillRound2(slate.context, 0)){
             Log.e(Tag, "--------sender fillRound2 failed");
@@ -586,7 +584,7 @@ public class VcashWallet {
 
 
     private long calcuteFee(int inputCount, int outputCount, int kernelCount){
-        int tx_weight = outputCount*4 + kernelCount*1 - inputCount;
+        int tx_weight = outputCount*4 + kernelCount - inputCount;
         if (tx_weight < 1){
             tx_weight = 1;
         }

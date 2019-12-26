@@ -89,7 +89,7 @@ public class ServerTxManager {
                         txMap.clear();
 
                         for (ServerTransaction item : txs) {
-                            Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, (new VcashSlate()).new VcashSlateTypeAdapter()).create();
+                            Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
 
                             try {
                                 item.slateObj = gson.fromJson(item.slate, VcashSlate.class);

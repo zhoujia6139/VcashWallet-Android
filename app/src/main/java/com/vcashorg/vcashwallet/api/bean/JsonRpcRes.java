@@ -20,7 +20,7 @@ public class JsonRpcRes {
     public VcashSlate resSlate;
     public Map error;
 
-    public class JsonRpcResTypeAdapter extends TypeAdapter<JsonRpcRes> {
+    public static class JsonRpcResTypeAdapter extends TypeAdapter<JsonRpcRes> {
         @Override
         public void write(JsonWriter jsonWriter, JsonRpcRes res) throws IOException {
             jsonWriter.beginObject();
@@ -47,8 +47,7 @@ public class JsonRpcRes {
                         Type type = new TypeToken<Map<String, JsonElement>>() {}.getType();
                         Map<String, JsonElement> slateStrMap = gson.fromJson(jsonReader, type);
                         JsonElement slateElement = slateStrMap.get("Ok");
-                        VcashSlate slate = new VcashSlate();
-                        Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, slate.new VcashSlateTypeAdapter()).serializeNulls().create();
+                        Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).serializeNulls().create();
                         res.resSlate =  slate_gson.fromJson(slateElement, VcashSlate.class);
                     }
                     break;
