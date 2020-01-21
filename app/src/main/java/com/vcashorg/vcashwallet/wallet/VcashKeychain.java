@@ -95,7 +95,26 @@ public class VcashKeychain {
     }
 
     public enum SwitchCommitmentType{
-        SwitchCommitmentTypeNone,
-        SwitchCommitmentTypeRegular,
+        SwitchCommitmentTypeNone(0),
+        SwitchCommitmentTypeRegular(1);
+
+        private final int code;
+
+        SwitchCommitmentType(int code) {
+            this.code = code;
+        }
+
+        public static SwitchCommitmentType locateEnum(int code) {
+            for (SwitchCommitmentType type: SwitchCommitmentType.values()){
+                if (code == type.code()){
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        public int code() {
+            return code;
+        }
     }
 }

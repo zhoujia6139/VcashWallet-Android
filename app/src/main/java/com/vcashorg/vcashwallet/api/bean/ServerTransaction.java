@@ -32,7 +32,7 @@ public class ServerTransaction implements Serializable {
 
     public ServerTransaction(VcashSlate sla){
         tx_id = sla.uuid;
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, sla.new VcashSlateTypeAdapter()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
         slate = gson.toJson(sla);
     }
 
@@ -72,7 +72,7 @@ public class ServerTransaction implements Serializable {
         return AppUtil.BufferToByteArr(buf);
     }
 
-    public class ServerTransactionTypeAdapter extends TypeAdapter<ServerTransaction> {
+    public static class ServerTransactionTypeAdapter extends TypeAdapter<ServerTransaction> {
         @Override
         public void write(JsonWriter jsonWriter, ServerTransaction tx) throws IOException {
             jsonWriter.beginObject();
@@ -80,7 +80,7 @@ public class ServerTransaction implements Serializable {
             jsonWriter.name("sender_id").value(tx.sender_id);
             jsonWriter.name("receiver_id").value(tx.receiver_id);
             jsonWriter.name("slate").value(tx.slate);
-            jsonWriter.name("status").value(tx.status.ordinal());
+            jsonWriter.name("status").value(tx.status.code());
             jsonWriter.name("msg_sig").value(tx.msg_sig);
             jsonWriter.name("tx_sig").value(tx.tx_sig);
             jsonWriter.endObject();
@@ -105,7 +105,7 @@ public class ServerTransaction implements Serializable {
                         tx.slate = jsonReader.nextString();
                         break;
                     case "status":
-                        tx.status = ServerTxStatus.values()[jsonReader.nextInt()];
+                        tx.status = ServerTxStatus.locateEnum(jsonReader.nextInt());
                         break;
                     case "msg_sig":
                         tx.msg_sig = jsonReader.nextString();

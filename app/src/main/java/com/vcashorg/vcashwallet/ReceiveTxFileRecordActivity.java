@@ -14,6 +14,8 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.LinerLineItemDecoration;
@@ -42,7 +44,7 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
         mRvRecord.setLayoutManager(new LinearLayoutManager(this));
         mRvRecord.addItemDecoration(new RecyclerViewDivider(this, LinearLayoutManager.VERTICAL,R.drawable.rv_divider));
 
-        ArrayList<VcashTxLog> txArr = WalletApi.getFileReceiveTxArr();
+        ArrayList<AbstractVcashTxLog> txArr = WalletApi.getFileReceiveTxArr();
         Collections.reverse(txArr);
         RecordAdapter adapter = new RecordAdapter(R.layout.item_vcash_tx_simple,txArr);
         adapter.setEmptyView(LayoutInflater.from(this).inflate(R.layout.layout_tx_empty,null));
@@ -70,14 +72,14 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
         return R.layout.activity_tx_file_record;
     }
 
-    class RecordAdapter extends BaseQuickAdapter<VcashTxLog, BaseViewHolder>{
+    class RecordAdapter extends BaseQuickAdapter<AbstractVcashTxLog, BaseViewHolder>{
 
-        public RecordAdapter(int layoutResId, @Nullable List<VcashTxLog> data) {
+        public RecordAdapter(int layoutResId, @Nullable List<AbstractVcashTxLog> data) {
             super(layoutResId, data);
         }
 
         @Override
-        protected void convert(BaseViewHolder helper, VcashTxLog item) {
+        protected void convert(BaseViewHolder helper, AbstractVcashTxLog item) {
             String txId = item.tx_slate_id;
             if (TextUtils.isEmpty(txId) || txId.equals("null")) {
                 helper.setText(R.id.tv_tx_id, R.string.unReachable);
@@ -85,11 +87,19 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
                 helper.setText(R.id.tv_tx_id, txId);
             }
 
-            long amount = item.amount_credited - item.amount_debited;
+            long amount = 0;
+            if (item instanceof VcashTxLog) {
+                VcashTxLog log = (VcashTxLog)item;
+                amount = log.amount_credited - log.amount_debited;
+            } else if (item instanceof VcashTokenTxLog) {
+                VcashTokenTxLog log = (VcashTokenTxLog)item;
+                amount = log.token_amount_credited - log.token_amount_debited;
+            }
+
 
             VcashTxLog.TxLogEntryType txType = item.tx_type;
             switch (txType) {
-                case ConfirmedCoinbase:
+                case ConfirmedCoinbaseOrTokenIssue:
                     helper.setText(R.id.tv_tx_id, R.string.coinbase);
                 case TxReceived:
                 case TxReceivedCancelled:

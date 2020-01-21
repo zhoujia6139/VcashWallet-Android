@@ -7,22 +7,11 @@ import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class VcashTxLog implements Serializable {
-    public short tx_id;
-    public String tx_slate_id;
-    public String parter_id;
-    public TxLogEntryType tx_type;
-    public long create_time;
-    public long confirm_time;
-    public long confirm_height;
-    public TxLogConfirmType confirm_state;
-    public ServerTxStatus server_status;
+public class VcashTxLog extends AbstractVcashTxLog implements Serializable {
     public long amount_credited;
     public long amount_debited;
-    public long fee;
     public final ArrayList<String> inputs = new ArrayList<String>();
     public final ArrayList<String> outputs = new ArrayList<String>();
-    public String signed_slate_msg;
 
     public void appendInput(String commitment){
         inputs.add(commitment);
@@ -68,18 +57,31 @@ public class VcashTxLog implements Serializable {
     }
 
 
-    public enum TxLogEntryType{
-        ConfirmedCoinbase,
-        TxReceived,
-        TxSent,
-        TxReceivedCancelled,
-        TxSentCancelled,
-    }
+
 
     public enum TxLogConfirmType{
-        DefaultState,
-        LoalConfirmed,
-        NetConfirmed,
+        DefaultState(0),
+        LoalConfirmed(1),
+        NetConfirmed(2);
+
+        private final int code;
+
+        TxLogConfirmType(int code) {
+            this.code = code;
+        }
+
+        public static TxLogConfirmType locateEnum(int code) {
+            for (TxLogConfirmType type: TxLogConfirmType.values()){
+                if (code == type.code()){
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        public int code() {
+            return code;
+        }
     }
 
 }

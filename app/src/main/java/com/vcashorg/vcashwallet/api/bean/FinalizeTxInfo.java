@@ -13,12 +13,12 @@ public class FinalizeTxInfo {
     public ServerTxStatus code;
     public String msg_sig;
 
-    public class FinalizeTxInfoTypeAdapter extends TypeAdapter<FinalizeTxInfo> {
+    public static class FinalizeTxInfoTypeAdapter extends TypeAdapter<FinalizeTxInfo> {
         @Override
         public void write(JsonWriter jsonWriter, FinalizeTxInfo tx) throws IOException {
             jsonWriter.beginObject();
             jsonWriter.name("tx_id").value(tx.tx_id);
-            jsonWriter.name("code").value(tx.code.ordinal());
+            jsonWriter.name("code").value(tx.code.code());
             jsonWriter.name("msg_sig").value(tx.msg_sig);
             jsonWriter.endObject();
         }
@@ -33,7 +33,7 @@ public class FinalizeTxInfo {
                         tx.tx_id = jsonReader.nextString();
                         break;
                     case "code":
-                        tx.code = ServerTxStatus.values()[jsonReader.nextInt()];
+                        tx.code = ServerTxStatus.locateEnum(jsonReader.nextInt());
                         break;
                     case "msg_sig":
                         tx.msg_sig = jsonReader.nextString();
@@ -49,7 +49,7 @@ public class FinalizeTxInfo {
         ByteBuffer buf = ByteBuffer.allocate(100);
         String short_tx_id = tx_id.replace("-", "");
         buf.put(AppUtil.decode(short_tx_id));
-        byte bit = (byte)(code.ordinal() & 0xff);
+        byte bit = (byte)(code.code() & 0xff);
         buf.put(bit);
         buf.flip();
         return AppUtil.BufferToByteArr(buf);

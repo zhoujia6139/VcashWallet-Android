@@ -14,7 +14,7 @@ import java.security.Security;
 import java.util.ArrayList;
 
 public class AppUtil {
-    public static final boolean isInTestNet = false;
+    public static final boolean isInTestNet = true;
     private static AppUtil instance = null;
     private static Context context = null;
 

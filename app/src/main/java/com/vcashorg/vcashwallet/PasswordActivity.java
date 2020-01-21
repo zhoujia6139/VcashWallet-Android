@@ -347,6 +347,7 @@ public class PasswordActivity extends ToolBarActivity {
                                 }
                             }
                         });
+                        WalletApi.checkWalletTokenUtxo(null);
                     }
                 });
     }

@@ -16,6 +16,7 @@ import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.Address;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
@@ -143,7 +144,7 @@ public class VcashSendActivity extends ToolBarActivity {
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(btnState() && validate() != -1){
-            WalletApi.createSendTransaction(WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
+            WalletApi.createSendTransaction("b6a3e3357a85d33120dc412a560fe90bd2a60ff28f3a7b3c5290583349e22a97", WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
@@ -162,7 +163,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                             dismissProgressDialog();
                                             if(yesOrNo){
                                                 UIUtils.showToastCenter(R.string.send_success);
-                                                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                                AbstractVcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
                                                 Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
@@ -184,15 +185,15 @@ public class VcashSendActivity extends ToolBarActivity {
                                         public void onCall(boolean yesOrNo, Object data) {
                                             dismissProgressDialog();
                                             if(yesOrNo){
-                                                UIUtils.showToastCenter(R.string.send_success);
-                                                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
-                                                vcashTxLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
-                                                Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
-                                                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
-                                                intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-                                                intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
-                                                nv(intent);
-                                                finish();
+//                                                UIUtils.showToastCenter(R.string.send_success);
+//                                                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+//                                                vcashTxLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+//                                                Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
+//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
+//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
+//                                                nv(intent);
+//                                                finish();
                                             }else {
                                                 if(data instanceof String){
                                                     UIUtils.showToastCenter((String) data);
