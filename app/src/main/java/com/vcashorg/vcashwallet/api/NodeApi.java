@@ -62,6 +62,13 @@ public class NodeApi {
     }
 
     public static void getOutputsByCommitArr(ArrayList<String> commitArr, final WalletCallback callback){
+        if(commitArr == null || commitArr.size() == 0){
+            if(callback != null){
+                callback.onCall(false,null);
+            }
+            return;
+        }
+
         StringBuffer sb = new StringBuffer();
         for (String item :commitArr){
             sb.append(item);

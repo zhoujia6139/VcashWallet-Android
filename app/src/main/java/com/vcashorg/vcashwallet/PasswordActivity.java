@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.gson.Gson;
@@ -73,6 +74,8 @@ public class PasswordActivity extends ToolBarActivity {
 
     @Override
     public void initParams() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         words = getIntent().getStringArrayListExtra(PARAM_MNEMONIC_LIST);
         mode = getIntent().getIntExtra(PARAM_MODE, MODE_CREATE);
         if (mode == MODE_CHANGE_PSW) {
