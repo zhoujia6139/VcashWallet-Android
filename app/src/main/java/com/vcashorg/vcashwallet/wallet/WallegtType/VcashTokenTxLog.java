@@ -8,18 +8,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable {
-    public VcashTokenTxLog.TokenTxLogEntryType tx_type;
     public String token_type;
     public long amount_credited;
     public long amount_debited;
     public long token_amount_credited;
     public long token_amount_debited;
-    public long fee;
     public final ArrayList<String> inputs = new ArrayList<>();
     public final ArrayList<String> outputs = new ArrayList<>();
     public final ArrayList<String> token_inputs = new ArrayList<>();
     public final ArrayList<String> token_outputs = new ArrayList<>();
-    public String signed_slate_msg;
 
     public void appendInput(String commitment){
         inputs.add(commitment);
@@ -38,9 +35,9 @@ public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable 
     }
 
     public boolean isCanBeCanneled(){
-        if (tx_type == TokenTxLogEntryType.TokenTxSent && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
+        if (tx_type == TxLogEntryType.TxSent && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
             return true;
-        }else if(tx_type == TokenTxLogEntryType.TokenTxReceived && UIUtils.isEmpty(parter_id) && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
+        }else if(tx_type == TxLogEntryType.TxReceived && UIUtils.isEmpty(parter_id) && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
             return true;
         }
 
@@ -49,9 +46,19 @@ public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable 
 
     public void cancelTxlog(){
         ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
-        if (tx_type == TokenTxLogEntryType.TokenTxSent){
+        ArrayList<VcashTokenOutput> walletTokenOutputs = VcashWallet.getInstance().token_outputs_dic.get(this.token_type);
+
+        if (tx_type == TxLogEntryType.TxSent){
             for (String commitment: inputs){
                 for (VcashOutput item:walletOutputs){
+                    if (commitment.equals(item.commitment)){
+                        item.status = VcashOutput.OutputStatus.Unspent;
+                    }
+                }
+            }
+
+            for (String commitment: token_inputs){
+                for (VcashTokenOutput item:walletTokenOutputs){
                     if (commitment.equals(item.commitment)){
                         item.status = VcashOutput.OutputStatus.Unspent;
                     }
@@ -66,42 +73,20 @@ public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable 
                 }
             }
         }
-        VcashWallet.getInstance().syncOutputInfo();
 
-        tx_type = ((tx_type == TokenTxLogEntryType.TokenTxSent)?TokenTxLogEntryType.TokenTxSentCancelled:TokenTxLogEntryType.TokenTxReceivedCancelled);
+        for (String commitment: token_outputs){
+            for (VcashTokenOutput item:walletTokenOutputs){
+                if (commitment.equals(item.commitment)){
+                    item.status = VcashOutput.OutputStatus.Spent;
+                }
+            }
+        }
+
+        VcashWallet.getInstance().syncOutputInfo();
+        VcashWallet.getInstance().syncTokenOutputInfo();
+
+        tx_type = ((tx_type == TxLogEntryType.TxSent)?TxLogEntryType.TxSentCancelled:TxLogEntryType.TxReceivedCancelled);
         server_status = ServerTxStatus.TxCanceled;
     }
 
-
-    public enum TokenTxLogEntryType{
-        /// Sent transaction that was rolled back by user
-        TokenIssue(0),
-        /// Outputs created when a transaction is received
-        TokenTxReceived(1),
-        /// Inputs locked + change outputs when a transaction is created
-        TokenTxSent(2),
-        /// Received token transaction that was rolled back by user
-        TokenTxReceivedCancelled(3),
-        /// Sent token transaction that was rolled back by user
-        TokenTxSentCancelled(4);
-
-        private final int code;
-
-        TokenTxLogEntryType(int code) {
-            this.code = code;
-        }
-
-        public static TokenTxLogEntryType locateEnum(int code) {
-            for (TokenTxLogEntryType type: TokenTxLogEntryType.values()){
-                if (code == type.code()){
-                    return type;
-                }
-            }
-            return null;
-        }
-
-        public int code() {
-            return code;
-        }
-    }
 }

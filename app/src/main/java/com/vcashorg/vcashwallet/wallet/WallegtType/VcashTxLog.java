@@ -8,13 +8,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class VcashTxLog extends AbstractVcashTxLog implements Serializable {
-    public TxLogEntryType tx_type;
     public long amount_credited;
     public long amount_debited;
-    public long fee;
     public final ArrayList<String> inputs = new ArrayList<String>();
     public final ArrayList<String> outputs = new ArrayList<String>();
-    public String signed_slate_msg;
 
     public void appendInput(String commitment){
         inputs.add(commitment);
@@ -60,32 +57,7 @@ public class VcashTxLog extends AbstractVcashTxLog implements Serializable {
     }
 
 
-    public enum TxLogEntryType{
-        ConfirmedCoinbase(0),
-        TxReceived(1),
-        TxSent(2),
-        TxReceivedCancelled(3),
-        TxSentCancelled(4);
 
-        private final int code;
-
-        TxLogEntryType(int code) {
-            this.code = code;
-        }
-
-        public static TxLogEntryType locateEnum(int code) {
-            for (TxLogEntryType type: TxLogEntryType.values()){
-                if (code == type.code()){
-                    return type;
-                }
-            }
-            return null;
-        }
-
-        public int code() {
-            return code;
-        }
-    }
 
     public enum TxLogConfirmType{
         DefaultState(0),

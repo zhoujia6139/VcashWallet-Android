@@ -8,7 +8,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.api.NodeApi;
 import com.vcashorg.vcashwallet.api.ServerApi;
 import com.vcashorg.vcashwallet.api.bean.JsonRpcRes;
@@ -26,6 +28,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -38,10 +41,12 @@ import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicException;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +64,107 @@ public class WalletApi {
     final public static long VCASH_BASE = 1000000000;
     private static  Context context;
     private static OkHttpClient okClient = new OkHttpClient();
+    private static Map<String, VcashTokenInfo> tokenInfoMap;
+    private static Set addedToken;
+
+    public static void initTokenInfos() {
+        if (tokenInfoMap == null) {
+            readTokenInfoFromFile();
+            readAddedTokenFromFile();
+            updateTokenInfos();
+        }
+    }
+
+    public static void updateTokenInfos() {
+        try{
+            final String full_url = "https://raw.githubusercontent.com/jdwldnqi837/VcashTokenInfo/master/VCashTokenInfo.json";
+            Request req = new Request.Builder().url(full_url).get().build();
+            okClient.newCall(req).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e(Tag, "fetch Tokeninfos failed...");
+                }
+
+                @Override
+                public void onResponse(final Call call, Response response) {
+                    try {
+                        String json = response.body().string();
+                        Type type = new TypeToken<ArrayList<VcashTokenInfo>>() {}.getType();
+                        ArrayList<JsonObject> jsonObjects = new Gson().fromJson(json, type);
+                        if (jsonObjects.size() > 0){
+                            tokenInfoMap = new HashMap<>();
+                            for (JsonObject jsonO :jsonObjects) {
+                                VcashTokenInfo info = new Gson().fromJson(jsonO, VcashTokenInfo.class);
+                                tokenInfoMap.put(info.TokenId, info);
+                            }
+
+                            writeTokenInfoToFile();
+                        }
+
+                    }catch (Exception e){
+                        Log.e(Tag, "parse tokeninfo response catch exception...");
+                    }
+
+                }
+            });
+        } catch (Exception exc){
+            Log.e(Tag, "fetch Tokeninfos catch exception...");
+        }
+    }
+
+    private static void writeTokenInfoToFile() {
+
+    }
+
+    private static void readTokenInfoFromFile() {
+
+    }
+
+    private static void writeAddedTokenToFile() {
+
+    }
+
+    private static void readAddedTokenFromFile() {
+
+    }
+
+    private static String tokenInfoSavePath(){
+        return null;
+    }
+
+    private static String addedTokenSavePath() {
+        return null;
+    }
+
+    public static Set getAllTokens() {
+        return tokenInfoMap.keySet();
+    }
+
+    public static VcashTokenInfo getTokenInfo(String tokenType) {
+        VcashTokenInfo info = tokenInfoMap.get(tokenType);
+        if (info == null && tokenType.length() == 64) {
+            info = new VcashTokenInfo();
+            info.TokenId = tokenType;
+            info.Name = tokenType.substring(0, 8);
+            info.FullName = "--";
+        }
+
+        return info;
+    }
+
+    public static Set getAddedTokens() {
+        return addedToken;
+    }
+
+    public static void addAddedToken(String tokenType) {
+        addedToken.add(tokenType);
+        writeAddedTokenToFile();
+    }
+
+    public static void deleteAddedToken(String tokenType) {
+        addedToken.remove(tokenType);
+        writeAddedTokenToFile();
+    }
 
     public static void setWalletContext(Context con){
         context = con;
@@ -150,6 +256,51 @@ public class WalletApi {
         return info;
     }
 
+    public static WalletBalanceInfo getWalletTokenBalanceInfo(String tokenType){
+        long total = 0;
+        long locked = 0;
+        long unconfirmed = 0;
+        long spendable = 0;
+
+        ArrayList<VcashTokenOutput> tokenOutputs = VcashWallet.getInstance().token_outputs_dic.get(tokenType);
+        for (VcashTokenOutput output :tokenOutputs){
+            switch (output.status){
+                case Unconfirmed:{
+                    total += output.value;
+                    unconfirmed += output.value;
+                    break;
+                }
+                case Unspent:{
+                    total += output.value;
+                    if (output.isSpendable()){
+                        spendable += output.value;
+                    }
+                    break;
+                }
+
+                case Locked:{
+                    locked += output.value;
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+        WalletBalanceInfo info = new WalletApi.WalletBalanceInfo();
+        info.total = total;
+        info.spendable = spendable;
+        info.locked = locked;
+        info.unconfirmed = unconfirmed;
+        return info;
+    }
+
+    public static Set getBalancedToken() {
+        return VcashWallet.getInstance().token_outputs_dic.keySet();
+    }
+
+
+
     public static long getCurChainHeight(){
         return VcashWallet.getInstance().getChainHeight();
     }
@@ -169,7 +320,7 @@ public class WalletApi {
                             tx.confirm_height = item.height;
                             tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                             tx.amount_credited = item.value;
-                            tx.tx_type = item.is_coinbase? VcashTxLog.TxLogEntryType.ConfirmedCoinbase: VcashTxLog.TxLogEntryType.TxReceived;
+                            tx.tx_type = item.is_coinbase? VcashTxLog.TxLogEntryType.ConfirmedCoinbaseOrTokenIssue: VcashTxLog.TxLogEntryType.TxReceived;
                             tx.server_status = ServerTxStatus.TxClosed;
                             item.tx_log_id = tx.tx_id;
                             txArr.add(tx);
@@ -210,7 +361,7 @@ public class WalletApi {
                             tx.confirm_height = item.height;
                             tx.confirm_state = VcashTxLog.TxLogConfirmType.NetConfirmed;
                             tx.token_amount_credited = item.value;
-                            tx.tx_type = item.is_token_issue? VcashTokenTxLog.TokenTxLogEntryType.TokenIssue: VcashTokenTxLog.TokenTxLogEntryType.TokenTxReceived;
+                            tx.tx_type = item.is_token_issue? VcashTxLog.TxLogEntryType.ConfirmedCoinbaseOrTokenIssue: VcashTxLog.TxLogEntryType.TxReceived;
                             tx.server_status = ServerTxStatus.TxClosed;
                             item.tx_log_id = tx.tx_id;
                             txArr.add(tx);
@@ -236,12 +387,12 @@ public class WalletApi {
         });
     }
 
-    public static void createSendTransaction(long amount, long fee, final WalletCallback callback){
-        VcashWallet.getInstance().sendTransaction(amount, fee, callback);
-    }
-
-    public static void createSendTokenTransaction(String token_type, long amount, final WalletCallback callback){
-        VcashWallet.getInstance().sendTokenTransaction(token_type, amount, callback);
+    public static void createSendTransaction(String token_type, long amount, final WalletCallback callback){
+        if (token_type != null) {
+            VcashWallet.getInstance().sendTokenTransaction(token_type, amount, callback);
+        } else {
+            VcashWallet.getInstance().sendTransaction(amount, 0, callback);
+        }
     }
 
     public static void sendTransactionForUser(final VcashSlate slate, final String user, final WalletCallback callback){
@@ -336,7 +487,7 @@ public class WalletApi {
                             }
 
                             @Override
-                            public void onResponse(final Call call, Response response) throws IOException {
+                            public void onResponse(final Call call, Response response) {
                                 try {
                                     String json = response.body().string();
                                     Gson res_gson = new GsonBuilder().registerTypeAdapter(JsonRpcRes.class, new JsonRpcRes.JsonRpcResTypeAdapter()).serializeNulls().create();
@@ -753,7 +904,8 @@ public class WalletApi {
             EncryptedDBHelper.getsInstance().saveTx(txLog);
         }
 
-        if (txLog != null && !UIUtils.isEmpty(txLog.parter_id)){
+        //if (txLog != null && !UIUtils.isEmpty(txLog.parter_id)){
+        if (txLog != null){
             ServerApi.cancelTransaction(tx_id, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
@@ -771,8 +923,8 @@ public class WalletApi {
         return EncryptedDBHelper.getsInstance().getTxData();
     }
 
-    public static ArrayList<VcashTokenTxLog> getTokenTransationArr(){
-        return EncryptedDBHelper.getsInstance().getTokenTxData();
+    public static ArrayList<VcashTokenTxLog> getTokenTransationArr(String tokenType){
+        return EncryptedDBHelper.getsInstance().getTokenTxData(tokenType);
     }
 
     public static AbstractVcashTxLog getTxByTxid(String txid){
@@ -787,9 +939,9 @@ public class WalletApi {
         return  EncryptedDBHelper.getsInstance().deleteTokenTxBySlateId(txid);
     }
 
-    public static ArrayList<VcashTxLog> getFileReceiveTxArr(){
+    public static ArrayList<AbstractVcashTxLog> getFileReceiveTxArr(){
         ArrayList<VcashTxLog> txArr = getTransationArr();
-        ArrayList<VcashTxLog> retArr = new ArrayList<>();
+        ArrayList<AbstractVcashTxLog> retArr = new ArrayList<>();
         if(txArr != null){
             for (VcashTxLog txLog: txArr){
                 if (txLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
@@ -799,21 +951,18 @@ public class WalletApi {
                 }
             }
         }
-        return retArr;
-    }
 
-    public static ArrayList<VcashTokenTxLog> getFileReceiveTokenTxArr(){
-        ArrayList<VcashTokenTxLog> txArr = getTokenTransationArr();
-        ArrayList<VcashTokenTxLog> retArr = new ArrayList<>();
-        if(txArr != null){
-            for (VcashTokenTxLog txLog: txArr){
-                if (txLog.tx_type == VcashTokenTxLog.TokenTxLogEntryType.TokenTxReceived
-                        && UIUtils.isEmpty(txLog.parter_id)
-                        && !UIUtils.isEmpty(txLog.signed_slate_msg)){
-                    retArr.add(txLog);
+        ArrayList<VcashTokenTxLog> tokenTxArr = getTokenTransationArr(null);
+        if (tokenTxArr != null) {
+            for (VcashTokenTxLog tokenLog: tokenTxArr) {
+                if (tokenLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
+                        && UIUtils.isEmpty(tokenLog.parter_id)
+                        && !UIUtils.isEmpty(tokenLog.signed_slate_msg)){
+                    retArr.add(tokenLog);
                 }
             }
         }
+
         return retArr;
     }
 
@@ -962,7 +1111,7 @@ public class WalletApi {
                     }
 
                     String nextTokenType = tokensList.get(index+1);
-                    updateTokenOutputStatus(nextTokenType, null);
+                    updateTokenOutputStatus(nextTokenType, callback);
                 } else {
                     if (callback != null){
                         callback.onCall(false, null);
@@ -973,7 +1122,7 @@ public class WalletApi {
         });
     }
 
-    private static void implUpdateTokenOutputStatus(String token_type, final WalletCallback callback) {
+    private static void implUpdateTokenOutputStatus(final String token_type, final WalletCallback callback) {
         ArrayList<String> strArr = new ArrayList<>();
         final ArrayList<VcashTokenOutput> token_arr = VcashWallet.getInstance().token_outputs_dic.get(token_type);
         for (VcashTokenOutput item: token_arr){
@@ -990,7 +1139,7 @@ public class WalletApi {
             public void onCall(boolean yesOrNo, Object data) {
                 if (yesOrNo){
                     ArrayList<NodeRefreshTokenOutput> apiOutputs = (ArrayList<NodeRefreshTokenOutput>)data;
-                    ArrayList<VcashTokenTxLog> txs = getTokenTransationArr();
+                    ArrayList<VcashTokenTxLog> txs = getTokenTransationArr(token_type);
                     boolean hasChange = false;
                     for (VcashTokenOutput item: token_arr){
                         NodeRefreshTokenOutput nodeOutput = null;

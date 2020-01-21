@@ -246,9 +246,8 @@ public class VcashTransaction extends VcashTxBaseObject {
                         case "inputs": {
                             jsonReader.beginArray();
                             while(jsonReader.hasNext()){
-                                Input input = new Input();
                                 Gson datagson = new GsonBuilder().registerTypeAdapter(Input.class, new Input.InputTypeAdapter()).create();
-                                input = datagson.fromJson(jsonReader, Input.class);
+                                Input input = datagson.fromJson(jsonReader, Input.class);
                                 body.inputs.add(input);
                             }
                             jsonReader.endArray();

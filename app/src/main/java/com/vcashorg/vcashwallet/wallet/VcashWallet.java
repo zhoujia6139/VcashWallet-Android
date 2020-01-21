@@ -7,6 +7,7 @@ import com.vcashorg.vcashwallet.api.bean.NodeChainInfo;
 import com.vcashorg.vcashwallet.api.bean.NodeOutputs;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
@@ -32,14 +34,13 @@ import org.bitcoinj.crypto.DeterministicKey;
 
 import static com.vcashorg.vcashwallet.wallet.VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
-import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxReceived;
-import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
 public class VcashWallet {
     static private String Tag = "------VcashWallet";
     public ArrayList<VcashOutput> outputs = new ArrayList<>();
     private ArrayList<VcashTokenOutput> token_outputs = new ArrayList<>();
     public HashMap<String, ArrayList<VcashTokenOutput>> token_outputs_dic = new HashMap<>();
+    ConcurrentHashMap<String, ArrayList<VcashTokenOutput>> tokenoutputs_dic = new ConcurrentHashMap<>();
 
     final private long DEFAULT_BASE_FEE = 1000000;
     private static VcashWallet instance = null;
@@ -185,7 +186,7 @@ public class VcashWallet {
         EncryptedDBHelper.getsInstance().saveOutputData(outputs);
     }
 
-    void syncTokenOutputInfo(){
+    public void syncTokenOutputInfo(){
         ArrayList<VcashTokenOutput> arrayList = new ArrayList<>();
         for (VcashTokenOutput output:token_outputs){
             if (output.status == VcashOutput.OutputStatus.Spent){
@@ -196,6 +197,7 @@ public class VcashWallet {
             }
         }
         token_outputs = arrayList;
+        tokenOutputToDic();
         EncryptedDBHelper.getsInstance().saveTokenOutputData(token_outputs);
     }
 
@@ -308,7 +310,7 @@ public class VcashWallet {
         VcashTxLog txLog = new VcashTxLog();
         txLog.tx_id = getNextLogId();
         txLog.tx_slate_id = slate.uuid;
-        txLog.tx_type = TxSent;
+        txLog.tx_type = AbstractVcashTxLog.TxLogEntryType.TxSent;
         txLog.create_time = AppUtil.getCurrentTimeSecs();
         txLog.fee = slate.fee;
         txLog.amount_credited = change;
@@ -437,8 +439,9 @@ public class VcashWallet {
 
         VcashTokenTxLog txLog = new VcashTokenTxLog();
         txLog.tx_id = getNextLogId();
+        txLog.token_type = token_type;
         txLog.tx_slate_id = slate.uuid;
-        txLog.tx_type = VcashTokenTxLog.TokenTxLogEntryType.TokenTxSent;
+        txLog.tx_type = AbstractVcashTxLog.TxLogEntryType.TxSent;
         txLog.create_time = AppUtil.getCurrentTimeSecs();
         txLog.fee = slate.fee;
         txLog.amount_credited = vcash_change;
@@ -493,7 +496,7 @@ public class VcashWallet {
             VcashTokenTxLog txLog = new VcashTokenTxLog();
             txLog.tx_id = VcashWallet.getInstance().getNextLogId();
             txLog.tx_slate_id = slate.uuid;
-            txLog.tx_type = VcashTokenTxLog.TokenTxLogEntryType.TokenTxReceived;
+            txLog.tx_type = AbstractVcashTxLog.TxLogEntryType.TxReceived;
             txLog.create_time = AppUtil.getCurrentTimeSecs();
             txLog.token_type = slate.token_type;
             txLog.fee = slate.fee;
@@ -505,7 +508,7 @@ public class VcashWallet {
             VcashTxLog txLog = new VcashTxLog();
             txLog.tx_id = VcashWallet.getInstance().getNextLogId();
             txLog.tx_slate_id = slate.uuid;
-            txLog.tx_type = TxReceived;
+            txLog.tx_type = AbstractVcashTxLog.TxLogEntryType.TxReceived;
             txLog.create_time = AppUtil.getCurrentTimeSecs();
             txLog.fee = slate.fee;
             txLog.amount_credited = slate.amount;

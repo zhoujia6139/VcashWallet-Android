@@ -20,6 +20,7 @@ import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.AddressFileUtil;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
@@ -29,7 +30,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.NetConfirmed;
-import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogEntryType.TxSent;
 
 public class TxDetailsActivity extends ToolBarActivity {
 
@@ -170,7 +170,7 @@ public class TxDetailsActivity extends ToolBarActivity {
         if (vcashTxLog == null) return;
         switch (vcashTxLog.confirm_state) {
             case DefaultState:
-                if (vcashTxLog.tx_type == TxSent) {
+                if (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent) {
                     mIvStatus.setImageResource(R.drawable.ic_tx_ongoing_big);
                     mTvStatus.setText(R.string.tx_status_wait_receiver_sign);
                     mTvSign.setText(R.string.verify_signature);
@@ -214,7 +214,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             mTxConfirmNum.setText((WalletApi.getCurChainHeight() - vcashTxLog.confirm_height) + "");
         }
         configInfoFromTxType(vcashTxLog.tx_type);
-        if(vcashTxLog.tx_type == TxSent){
+        if(vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent){
             if(!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
                 mTvRecipient.setTextColor(UIUtils.getColor(R.color.blue));
             }
@@ -243,7 +243,7 @@ public class TxDetailsActivity extends ToolBarActivity {
 
     public void configInfoFromTxType(VcashTxLog.TxLogEntryType txType) {
         switch (txType) {
-            case ConfirmedCoinbase:
+            case ConfirmedCoinbaseOrTokenIssue:
                 mTvTxId.setText(R.string.coinbase);
                 mTvSender.setText(R.string.coinbase);
                 mTvRecipient.setText(R.string.coinbase);
@@ -322,7 +322,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             isSend = serverTx.isSend;
         }
         if (vcashTxLog != null) {
-            isSend = (vcashTxLog.tx_type == TxSent);
+            isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
         if (serverTx != null) {
             showProgressDialog(R.string.wait);
@@ -422,7 +422,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             isSend = serverTx.isSend;
         }
         if (vcashTxLog != null) {
-            isSend = (vcashTxLog.tx_type == TxSent);
+            isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
         if(!isSend && !mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
             new AddressBotDialog(this,mTvSender.getText().toString().trim().split("\\(")[0].trim(),1).show();
@@ -436,7 +436,7 @@ public class TxDetailsActivity extends ToolBarActivity {
             isSend = serverTx.isSend;
         }
         if (vcashTxLog != null) {
-            isSend = (vcashTxLog.tx_type == TxSent);
+            isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
         if(isSend && !mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
             new AddressBotDialog(this,mTvRecipient.getText().toString().trim().split("\\(")[0].trim(),1).show();

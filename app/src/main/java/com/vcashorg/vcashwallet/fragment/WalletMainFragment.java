@@ -83,6 +83,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
         initHeaderView();
         initFooterView();
+        WalletApi.initTokenInfos();
 
         mRvTx.setLayoutManager(new LinearLayoutManager(mActivity));
         RecyclerViewDivider divider = new RecyclerViewDivider(mActivity, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
@@ -345,7 +346,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                     helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_white_grey);
 
                     switch (txType) {
-                        case ConfirmedCoinbase:
+                        case ConfirmedCoinbaseOrTokenIssue:
                             helper.setText(R.id.tv_tx_id, R.string.coinbase);
                         case TxReceived:
                             if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){

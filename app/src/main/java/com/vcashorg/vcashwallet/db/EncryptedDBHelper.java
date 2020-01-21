@@ -408,10 +408,17 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    public ArrayList<VcashTokenTxLog> getTokenTxData(){
+    public ArrayList<VcashTokenTxLog> getTokenTxData(String tokenType){
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<VcashTokenTxLog> arr = null;
-        Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenTxLog ORDER BY tx_id ASC", null);
+        String query;
+        if (tokenType != null) {
+            query = String.format("SELECT * FROM VcashTokenTxLog where token_type = '%s' ORDER BY tx_id ASC", tokenType);
+        } else {
+            query = "SELECT * FROM VcashTokenTxLog ORDER BY tx_id ASC";
+        }
+
+        Cursor cursor = db.rawQuery(query, null);
         if (cursor != null && cursor.moveToFirst()) {
             arr = new ArrayList<VcashTokenTxLog>();
             do {
@@ -451,7 +458,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             item.tx_id = cursor.getShort(cursor.getColumnIndex("tx_id"));
             item.tx_slate_id = cursor.getString(cursor.getColumnIndex("tx_slate_id"));
             item.parter_id = cursor.getString(cursor.getColumnIndex("parter_id"));
-            item.tx_type = VcashTokenTxLog.TokenTxLogEntryType.locateEnum(cursor.getInt(cursor.getColumnIndex("tx_type")));
+            item.tx_type = VcashTokenTxLog.TxLogEntryType.locateEnum(cursor.getInt(cursor.getColumnIndex("tx_type")));
             item.create_time = cursor.getLong(cursor.getColumnIndex("create_time"));
             item.confirm_time = cursor.getLong(cursor.getColumnIndex("confirm_time"));
             item.confirm_height = cursor.getLong(cursor.getColumnIndex("confirm_height"));

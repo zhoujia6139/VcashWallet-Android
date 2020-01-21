@@ -100,7 +100,7 @@ public class NodeApi {
     }
 
     public static void getOutputsByCommitArr(ArrayList<String> commitArr, final WalletCallback callback){
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String item :commitArr){
             sb.append(item);
             sb.append(",");
@@ -129,7 +129,7 @@ public class NodeApi {
     }
 
     public static void getTokenOutputsByCommitArr(String tokenType, ArrayList<String> commitArr, final WalletCallback callback){
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String item :commitArr){
             sb.append(item);
             sb.append(",");

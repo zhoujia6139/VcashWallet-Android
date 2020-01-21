@@ -144,8 +144,7 @@ public class VcashSendActivity extends ToolBarActivity {
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(btnState() && validate() != -1){
-            WalletApi.createSendTokenTransaction("b6a3e3357a85d33120dc412a560fe90bd2a60ff28f3a7b3c5290583349e22a97", WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
-            //WalletApi.createSendTransaction(WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), 0, new WalletCallback() {
+            WalletApi.createSendTransaction("b6a3e3357a85d33120dc412a560fe90bd2a60ff28f3a7b3c5290583349e22a97", WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
