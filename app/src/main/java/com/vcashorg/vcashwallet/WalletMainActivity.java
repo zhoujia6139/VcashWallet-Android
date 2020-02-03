@@ -7,10 +7,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.widget.FrameLayout;
 
 import com.vcashorg.vcashwallet.base.BaseActivity;
-import com.vcashorg.vcashwallet.bean.Address;
 import com.vcashorg.vcashwallet.fragment.AddressBookFragment;
 import com.vcashorg.vcashwallet.fragment.SettingFragment;
-import com.vcashorg.vcashwallet.fragment.WalletMainFragment;
+import com.vcashorg.vcashwallet.fragment.TokenListFragment;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import butterknife.BindView;
@@ -29,14 +28,14 @@ public class WalletMainActivity extends BaseActivity {
 
     @Override
     public void initParams() {
-        WalletMainFragment fragment = new WalletMainFragment();
+        TokenListFragment fragment = new TokenListFragment();
         replaceFragment(fragment);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        WalletMainFragment fragment = new WalletMainFragment();
+        TokenListFragment fragment = new TokenListFragment();
         replaceFragment(fragment);
     }
 
@@ -54,7 +53,7 @@ public class WalletMainActivity extends BaseActivity {
                     AddressBookFragment addressBookFragment = new AddressBookFragment();
                     replaceFragment(addressBookFragment);
                 } else {
-                    WalletMainFragment fragment = new WalletMainFragment();
+                    TokenListFragment fragment = new TokenListFragment();
                     replaceFragment(fragment);
                 }
             }

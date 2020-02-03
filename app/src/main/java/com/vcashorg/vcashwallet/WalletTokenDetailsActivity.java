@@ -1,4 +1,4 @@
-package com.vcashorg.vcashwallet.fragment;
+package com.vcashorg.vcashwallet;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -15,14 +15,10 @@ import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
-import com.vcashorg.vcashwallet.R;
-import com.vcashorg.vcashwallet.TxDetailsActivity;
-import com.vcashorg.vcashwallet.VcashReceiveActivity;
-import com.vcashorg.vcashwallet.VcashSendActivity;
-import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
-import com.vcashorg.vcashwallet.base.BaseFragment;
+import com.vcashorg.vcashwallet.base.BaseActivity;
+import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.WalletTxEntity;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
@@ -40,7 +36,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener{
+public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     public static final int REQUEST_CODE_SERVER_TX = 101;
     public static final int REQUEST_CODE_TX_LOG = 102;
@@ -70,22 +66,17 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     protected int provideContentViewId() {
-        return R.layout.activity_wallet_main;
+        return R.layout.activity_token_details;
     }
 
     @Override
-    protected void loadData() {
-
-    }
-
-    @Override
-    public void initView(View rootView) {
+    public void initView() {
 
         initHeaderView();
         initFooterView();
 
-        mRvTx.setLayoutManager(new LinearLayoutManager(mActivity));
-        RecyclerViewDivider divider = new RecyclerViewDivider(mActivity, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
+        mRvTx.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerViewDivider divider = new RecyclerViewDivider(this, LinearLayoutManager.VERTICAL, R.drawable.rv_divider);
         mRvTx.addItemDecoration(divider);
 
         adapter = new VcashTxAdapter(mData);
@@ -101,13 +92,13 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 if(entity.getItemType() == WalletTxEntity.TYPE_SERVER_TX){
                     ServerTransaction serverTx = entity.getServerTxEntity();
                     ServerTxManager.getInstance().addBlackList(serverTx);
-                    Intent intent = new Intent(mActivity, TxDetailsActivity.class);
+                    Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, serverTx);
                     nv2(intent, REQUEST_CODE_SERVER_TX);
                 }else {
                     VcashTxLog vcashTxLog = entity.getTxLogEntity();
-                    Intent intent = new Intent(mActivity, TxDetailsActivity.class);
+                    Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_LOG);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, vcashTxLog);
                     nv2(intent, REQUEST_CODE_TX_LOG);
@@ -166,10 +157,10 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
         if (popUtil != null && popUtil.isShowing()) return;
         final ServerTransaction recentTx = ServerTxManager.getInstance().getRecentTx();
         if (recentTx != null) {
-            popUtil = PopUtil.get(mActivity,recentTx).setConfirmListener(new PopUtil.PopOnCall() {
+            popUtil = PopUtil.get(this,recentTx).setConfirmListener(new PopUtil.PopOnCall() {
                 @Override
                 public void onConfirm() {
-                    Intent intent = new Intent(mActivity, TxDetailsActivity.class);
+                    Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, recentTx);
                     nv2(intent, REQUEST_CODE_SERVER_TX);
@@ -181,14 +172,14 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     private void initHeaderView() {
-        headerView = LayoutInflater.from(mActivity).inflate(R.layout.layout_vcash_tx_header, null);
+        headerView = LayoutInflater.from(this).inflate(R.layout.layout_vcash_tx_header, null);
         mTvBalance = headerView.findViewById(R.id.tv_balance);
         mTvAvaliable = headerView.findViewById(R.id.tv_available);
         mTvPending = headerView.findViewById(R.id.tv_pending);
     }
 
     private void initFooterView() {
-        footerView = LayoutInflater.from(mActivity).inflate(R.layout.layout_tx_empty_footer, null);
+        footerView = LayoutInflater.from(this).inflate(R.layout.layout_tx_empty_footer, null);
     }
 
     private void refreshData() {
@@ -315,8 +306,8 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                 case WalletTxEntity.TYPE_SERVER_TX:
                     ServerTransaction serverTx = item.getServerTxEntity();
 
-                    Glide.with(mActivity).load(serverTx.isSend ? R.drawable.gif_send : R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
-                   // helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
+                    Glide.with(mContext).load(serverTx.isSend ? R.drawable.gif_send : R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
+                    // helper.setImageResource(R.id.iv_tx, serverTx.isSend ? R.drawable.ic_tx_up : R.drawable.ic_tx_down);
                     helper.setText(R.id.tv_tx_id, TextUtils.isEmpty(serverTx.tx_id) ? "" : serverTx.tx_id);
                     helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(serverTx.slateObj.amount));
                     helper.setText(R.id.tv_tx_state, R.string.wait_for_process);
@@ -352,7 +343,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                                 helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
                             }else {
                                 helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
-                                Glide.with(mActivity).load(R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
+                                Glide.with(mContext).load(R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
                             }
                             helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
                             break;
@@ -365,7 +356,7 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
                                 helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
                             }else {
                                 helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
-                                Glide.with(mActivity).load(R.drawable.gif_send).into((ImageView) helper.getView(R.id.iv_tx));
+                                Glide.with(mContext).load(R.drawable.gif_send).into((ImageView) helper.getView(R.id.iv_tx));
                             }
                             helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
                             break;
@@ -423,10 +414,6 @@ public class WalletMainFragment extends BaseFragment implements SwipeRefreshLayo
         }
     }
 
-    @OnClick(R.id.iv_open_menu)
-    public void onOpenMenuClick() {
-        ((WalletMainActivity)mActivity).openDrawer();
-    }
 
     @OnClick(R.id.send)
     public void onVcashSendClick() {

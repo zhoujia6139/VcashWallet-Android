@@ -1,15 +1,11 @@
 package com.vcashorg.vcashwallet.wallet;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.api.NodeApi;
 import com.vcashorg.vcashwallet.api.ServerApi;
@@ -20,9 +16,9 @@ import com.vcashorg.vcashwallet.api.bean.NodeRefreshTokenOutput;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
-import com.vcashorg.vcashwallet.payload.PayloadUtil;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.utils.CoinUtils;
+import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
@@ -35,7 +31,6 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicException;
@@ -44,9 +39,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,13 +64,15 @@ public class WalletApi {
 
     public static void initTokenInfos() {
         if (tokenInfoMap == null) {
+            tokenInfoMap = new HashMap<>();
+            addedToken = new HashSet();
             readTokenInfoFromFile();
-            readAddedTokenFromFile();
-            updateTokenInfos();
+            readAddedTokenFromSp();
+            updateTokenInfos(null);
         }
     }
 
-    public static void updateTokenInfos() {
+    public static void updateTokenInfos(final WalletNoParamCallBack callback) {
         try{
             final String full_url = "https://raw.githubusercontent.com/jdwldnqi837/VcashTokenInfo/master/VCashTokenInfo.json";
             Request req = new Request.Builder().url(full_url).get().build();
@@ -83,6 +80,10 @@ public class WalletApi {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     Log.e(Tag, "fetch Tokeninfos failed...");
+
+                    if(callback != null){
+                        callback.onCall();
+                    }
                 }
 
                 @Override
@@ -90,21 +91,25 @@ public class WalletApi {
                     try {
                         String json = response.body().string();
                         Type type = new TypeToken<ArrayList<VcashTokenInfo>>() {}.getType();
-                        ArrayList<JsonObject> jsonObjects = new Gson().fromJson(json, type);
-                        if (jsonObjects.size() > 0){
+                        ArrayList<VcashTokenInfo> vcashTokenInfos = new Gson().fromJson(json, type);
+                        if (vcashTokenInfos.size() > 0) {
                             tokenInfoMap = new HashMap<>();
-                            for (JsonObject jsonO :jsonObjects) {
-                                VcashTokenInfo info = new Gson().fromJson(jsonO, VcashTokenInfo.class);
-                                tokenInfoMap.put(info.TokenId, info);
+                            for (VcashTokenInfo vcashTokenInfo : vcashTokenInfos) {
+                                //VcashTokenInfo info = new Gson().fromJson(jsonO, VcashTokenInfo.class);
+                                tokenInfoMap.put(vcashTokenInfo.TokenId, vcashTokenInfo);
                             }
 
-                            writeTokenInfoToFile();
                         }
 
                     }catch (Exception e){
                         Log.e(Tag, "parse tokeninfo response catch exception...");
                     }
 
+                    writeTokenInfoToFile();
+
+                    if(callback != null){
+                        callback.onCall();
+                    }
                 }
             });
         } catch (Exception exc){
@@ -113,26 +118,32 @@ public class WalletApi {
     }
 
     private static void writeTokenInfoToFile() {
-
+        if(tokenInfoMap != null){
+            SPUtil.getInstance(UIUtils.getContext()).putHashMapData(SPUtil.TOKEN_ALL,tokenInfoMap);
+        }
     }
 
     private static void readTokenInfoFromFile() {
-
+        Map<String, VcashTokenInfo> map = SPUtil.getInstance(UIUtils.getContext()).getHashMapData(SPUtil.TOKEN_ALL,VcashTokenInfo.class);
+        if(map != null){
+            tokenInfoMap = map;
+        }
     }
 
-    private static void writeAddedTokenToFile() {
-
+    private static void writeAddedTokenToSp() {
+        if(addedToken != null){
+            SPUtil.getInstance(UIUtils.getContext()).setStringListValue(SPUtil.TOKEN_ADDED_TYPE,addedToken);
+        }
     }
 
-    private static void readAddedTokenFromFile() {
-
+    private static void readAddedTokenFromSp() {
+        Set<String> listValue = SPUtil.getInstance(UIUtils.getContext()).getStringListValue(SPUtil.TOKEN_ADDED_TYPE);
+        if(listValue != null){
+            addedToken = listValue;
+        }
     }
 
     private static String tokenInfoSavePath(){
-        return null;
-    }
-
-    private static String addedTokenSavePath() {
         return null;
     }
 
@@ -141,12 +152,26 @@ public class WalletApi {
     }
 
     public static VcashTokenInfo getTokenInfo(String tokenType) {
+        if(tokenType.equals("VCash")){
+            VcashTokenInfo info = new VcashTokenInfo();
+            info.Balance = WalletApi.getWalletTokenBalanceInfo(tokenType);
+            info.Name = "VCash";
+            info.FullName = "--";
+            info.TokenType = tokenType;
+            return info;
+        }
+
         VcashTokenInfo info = tokenInfoMap.get(tokenType);
         if (info == null && tokenType.length() == 64) {
             info = new VcashTokenInfo();
             info.TokenId = tokenType;
             info.Name = tokenType.substring(0, 8);
             info.FullName = "--";
+        }
+
+        if(info != null){
+            info.TokenType = tokenType;
+            info.Balance = WalletApi.getWalletTokenBalanceInfo(tokenType);
         }
 
         return info;
@@ -158,12 +183,12 @@ public class WalletApi {
 
     public static void addAddedToken(String tokenType) {
         addedToken.add(tokenType);
-        writeAddedTokenToFile();
+        writeAddedTokenToSp();
     }
 
     public static void deleteAddedToken(String tokenType) {
         addedToken.remove(tokenType);
-        writeAddedTokenToFile();
+        writeAddedTokenToSp();
     }
 
     public static void setWalletContext(Context con){
@@ -224,30 +249,33 @@ public class WalletApi {
         long unconfirmed = 0;
         long spendable = 0;
 
-        for (VcashOutput output :VcashWallet.getInstance().outputs){
-            switch (output.status){
-                case Unconfirmed:{
-                    total += output.value;
-                    unconfirmed += output.value;
-                    break;
-                }
-                case Unspent:{
-                    total += output.value;
-                    if (output.isSpendable()){
-                        spendable += output.value;
+        if(VcashWallet.getInstance().outputs != null){
+            for (VcashOutput output :VcashWallet.getInstance().outputs){
+                switch (output.status){
+                    case Unconfirmed:{
+                        total += output.value;
+                        unconfirmed += output.value;
+                        break;
                     }
-                    break;
-                }
+                    case Unspent:{
+                        total += output.value;
+                        if (output.isSpendable()){
+                            spendable += output.value;
+                        }
+                        break;
+                    }
 
-                case Locked:{
-                    locked += output.value;
-                    break;
-                }
+                    case Locked:{
+                        locked += output.value;
+                        break;
+                    }
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
         }
+
         WalletBalanceInfo info = new WalletApi.WalletBalanceInfo();
         info.total = total;
         info.spendable = spendable;
@@ -263,30 +291,33 @@ public class WalletApi {
         long spendable = 0;
 
         ArrayList<VcashTokenOutput> tokenOutputs = VcashWallet.getInstance().token_outputs_dic.get(tokenType);
-        for (VcashTokenOutput output :tokenOutputs){
-            switch (output.status){
-                case Unconfirmed:{
-                    total += output.value;
-                    unconfirmed += output.value;
-                    break;
-                }
-                case Unspent:{
-                    total += output.value;
-                    if (output.isSpendable()){
-                        spendable += output.value;
+        if(tokenOutputs != null){
+            for (VcashTokenOutput output :tokenOutputs){
+                switch (output.status){
+                    case Unconfirmed:{
+                        total += output.value;
+                        unconfirmed += output.value;
+                        break;
                     }
-                    break;
-                }
+                    case Unspent:{
+                        total += output.value;
+                        if (output.isSpendable()){
+                            spendable += output.value;
+                        }
+                        break;
+                    }
 
-                case Locked:{
-                    locked += output.value;
-                    break;
-                }
+                    case Locked:{
+                        locked += output.value;
+                        break;
+                    }
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
         }
+
         WalletBalanceInfo info = new WalletApi.WalletBalanceInfo();
         info.total = total;
         info.spendable = spendable;
@@ -298,7 +329,6 @@ public class WalletApi {
     public static Set getBalancedToken() {
         return VcashWallet.getInstance().token_outputs_dic.keySet();
     }
-
 
 
     public static long getCurChainHeight(){
@@ -968,8 +998,11 @@ public class WalletApi {
 
     public static void updateOutputStatusWithComplete(final WalletCallback callback){
         ArrayList<String> strArr = new ArrayList<>();
-        for (VcashOutput item: VcashWallet.getInstance().outputs){
-            strArr.add(item.commitment);
+
+        if(VcashWallet.getInstance().outputs != null){
+            for (VcashOutput item: VcashWallet.getInstance().outputs){
+                strArr.add(item.commitment);
+            }
         }
 
         if (strArr.size() == 0){

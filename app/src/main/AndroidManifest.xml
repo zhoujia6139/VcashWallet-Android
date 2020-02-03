@@ -89,6 +89,10 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".AddressAddActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".VcashTokenAddActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".WalletTokenDetailsActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

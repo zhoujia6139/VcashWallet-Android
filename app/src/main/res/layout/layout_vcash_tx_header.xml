@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_wallet_main_bg" />
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:id="@+id/ll_top"
@@ -22,8 +21,9 @@
             android:id="@+id/tv_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/A10"
             android:textSize="32sp"
+            android:textStyle="bold"
             tools:text="211.023165231" />
 
         <TextView
@@ -57,7 +57,7 @@
                 android:id="@+id/tv_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+                android:textColor="@color/A10"
                 tools:text="41.023165231 V" />
 
             <TextView
@@ -81,7 +81,7 @@
                 android:id="@+id/tv_pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+                android:textColor="@color/A10"
                 tools:text="170.000000000 V" />
 
             <TextView
