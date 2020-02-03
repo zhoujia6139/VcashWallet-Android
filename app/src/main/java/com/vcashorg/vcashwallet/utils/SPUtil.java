@@ -3,6 +3,7 @@ package com.vcashorg.vcashwallet.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -132,6 +133,9 @@ public class SPUtil {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String json = prefs.getString(key, "");
         HashMap<String, V> map = new HashMap<>();
+        if(TextUtils.isEmpty(json)){
+            return map;
+        }
         Gson gson = new Gson();
         JsonObject obj = new JsonParser().parse(json).getAsJsonObject();
         Set<Map.Entry<String, JsonElement>> entrySet = obj.entrySet();

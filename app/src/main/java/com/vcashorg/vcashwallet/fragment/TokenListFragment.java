@@ -18,6 +18,7 @@ import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -74,8 +75,17 @@ public class TokenListFragment extends BaseFragment {
             tokenInfos.add(vCashToken);
         }
 
+
+        Set balancedToken = WalletApi.getBalancedToken();
+
         Set addedTokens = WalletApi.getAddedTokens();
-        Iterator iterator = addedTokens.iterator();
+
+
+        Set totalTokens = new LinkedHashSet();
+        totalTokens.addAll(balancedToken);
+        totalTokens.addAll(addedTokens);
+
+        Iterator iterator = totalTokens.iterator();
 
         while (iterator.hasNext()) {
             String token = (String) iterator.next();

@@ -154,7 +154,7 @@ public class WalletApi {
     public static VcashTokenInfo getTokenInfo(String tokenType) {
         if(tokenType.equals("VCash")){
             VcashTokenInfo info = new VcashTokenInfo();
-            info.Balance = WalletApi.getWalletTokenBalanceInfo(tokenType);
+            info.Balance = WalletApi.getWalletBalanceInfo();
             info.Name = "VCash";
             info.FullName = "--";
             info.TokenType = tokenType;
