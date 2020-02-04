@@ -50,7 +50,11 @@ public class TokenListFragment extends BaseFragment {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                nv(WalletTokenDetailsActivity.class);
+                VcashTokenInfo tokenInfo = (VcashTokenInfo) adapter.getData().get(position);
+
+                Intent intent = new Intent(mActivity,WalletTokenDetailsActivity.class);
+                intent.putExtra("tokenType",tokenInfo.TokenType);
+                nv(intent);
             }
         });
 
