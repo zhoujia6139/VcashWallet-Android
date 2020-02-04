@@ -20,8 +20,10 @@ import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.base.BaseActivity;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.WalletTxEntity;
+import com.vcashorg.vcashwallet.utils.Args;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -38,7 +40,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener{
+public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final int REQUEST_CODE_SERVER_TX = 101;
     public static final int REQUEST_CODE_TX_LOG = 102;
@@ -78,8 +80,8 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
     @Override
     public void initParams() {
-        tokenType = getIntent().getStringExtra("tokenType");
-        if(!tokenType.equals("VCash")){
+        tokenType = getIntent().getStringExtra(Args.TOKEN_TYPE);
+        if (!VCashUtil.isVCash(tokenType)) {
             mTvName.setText(WalletApi.getTokenInfo(tokenType).Name);
         }
     }
@@ -103,22 +105,23 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 WalletTxEntity entity = (WalletTxEntity) adapter.getData().get(position);
-                if(entity.getItemType() == WalletTxEntity.TYPE_TX_ONGOING || entity.getItemType() == WalletTxEntity.TYPE_TX_COMPLETE) return;
-                if(entity.getItemType() == WalletTxEntity.TYPE_SERVER_TX){
+                if (entity.getItemType() == WalletTxEntity.TYPE_TX_ONGOING || entity.getItemType() == WalletTxEntity.TYPE_TX_COMPLETE)
+                    return;
+                if (entity.getItemType() == WalletTxEntity.TYPE_SERVER_TX) {
                     ServerTransaction serverTx = entity.getServerTxEntity();
                     ServerTxManager.getInstance().addBlackList(serverTx);
                     Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, serverTx);
                     nv2(intent, REQUEST_CODE_SERVER_TX);
-                }else {
+                } else {
                     VcashTxLog vcashTxLog = entity.getTxLogEntity();
                     Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_LOG);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, vcashTxLog);
                     nv2(intent, REQUEST_CODE_TX_LOG);
                 }
-                if (popUtil != null && popUtil.isShowing()){
+                if (popUtil != null && popUtil.isShowing()) {
                     popUtil.dismiss();
                 }
             }
@@ -172,7 +175,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         if (popUtil != null && popUtil.isShowing()) return;
         final ServerTransaction recentTx = ServerTxManager.getInstance().getRecentTx();
         if (recentTx != null) {
-            popUtil = PopUtil.get(this,recentTx).setConfirmListener(new PopUtil.PopOnCall() {
+            popUtil = PopUtil.get(this, recentTx).setConfirmListener(new PopUtil.PopOnCall() {
                 @Override
                 public void onConfirm() {
                     Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
@@ -207,7 +210,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         WalletApi.updateTokenOutputStatusWithComplete(null);
     }
 
-    private void setNewData(){
+    private void setNewData() {
         //refreshlist
         List<ServerTransaction> serverTxs = ServerTxManager.getInstance().getSeverTxList();
 
@@ -223,48 +226,48 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
             onGoingList.add(entity);
         }
 
-        if(tokenType.equals("VCash")){
+        if (VCashUtil.isVCash(tokenType)) {
             List<VcashTxLog> txLogs = deleteDbTxLog(WalletApi.getTransationArr());
             Collections.reverse(txLogs);
             for (int i = 0; i < txLogs.size(); i++) {
                 WalletTxEntity entity = new WalletTxEntity();
                 entity.setItemType(WalletTxEntity.TYPE_TX_LOG);
                 entity.setTxLogEntity(txLogs.get(i));
-                if(txLogs.get(i).confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed
-                        ||txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxSentCancelled
-                        ||txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxReceivedCancelled){
+                if (txLogs.get(i).confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed
+                        || txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxSentCancelled
+                        || txLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
                     completeList.add(entity);
-                }else {
+                } else {
                     onGoingList.add(entity);
                 }
             }
-        }else {
+        } else {
             List<VcashTokenTxLog> tokenTxLogs = deleteDbTokenTxLog(WalletApi.getTokenTransationArr(tokenType));
             Collections.reverse(tokenTxLogs);
             for (int i = 0; i < tokenTxLogs.size(); i++) {
                 WalletTxEntity entity = new WalletTxEntity();
                 entity.setItemType(WalletTxEntity.TYPE_TOKEN_TX_LOG);
                 entity.setTokenTxLogEntity(tokenTxLogs.get(i));
-                if(tokenTxLogs.get(i).confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed
-                        ||tokenTxLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxSentCancelled
-                        ||tokenTxLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxReceivedCancelled){
+                if (tokenTxLogs.get(i).confirm_state == VcashTxLog.TxLogConfirmType.NetConfirmed
+                        || tokenTxLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxSentCancelled
+                        || tokenTxLogs.get(i).tx_type == VcashTxLog.TxLogEntryType.TxReceivedCancelled) {
                     completeList.add(entity);
-                }else {
+                } else {
                     onGoingList.add(entity);
                 }
             }
         }
 
-        if(onGoingList.size() != 0){
+        if (onGoingList.size() != 0) {
             WalletTxEntity entity = new WalletTxEntity();
             entity.setItemType(WalletTxEntity.TYPE_TX_ONGOING);
-            onGoingList.add(0,entity);
+            onGoingList.add(0, entity);
         }
 
-        if(completeList.size() != 0){
+        if (completeList.size() != 0) {
             WalletTxEntity entity = new WalletTxEntity();
             entity.setItemType(WalletTxEntity.TYPE_TX_COMPLETE);
-            completeList.add(0,entity);
+            completeList.add(0, entity);
         }
 
         mData.addAll(onGoingList);
@@ -277,12 +280,12 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         mSrTx.setRefreshing(false);
 
         //refreshbalance
-        if(tokenType.equals("VCash")){
+        if (VCashUtil.isVCash(tokenType)) {
             WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
             mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
             mTvAvaliable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
             mTvPending.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
-        }else {
+        } else {
             WalletApi.WalletBalanceInfo walletTokenBalanceInfo = WalletApi.getWalletTokenBalanceInfo(tokenType);
             mTvBalance.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.total));
             mTvAvaliable.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.spendable) + " V");
@@ -295,7 +298,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
     private List<VcashTxLog> deleteDbTxLog(ArrayList<VcashTxLog> txLogs) {
         List<VcashTxLog> list = new ArrayList<>();
-        if(txLogs != null){
+        if (txLogs != null) {
             for (VcashTxLog txLog : txLogs) {
                 if (!ServerTxManager.getInstance().inServerTxList(txLog.tx_slate_id)) {
                     list.add(txLog);
@@ -307,7 +310,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
     private List<VcashTokenTxLog> deleteDbTokenTxLog(ArrayList<VcashTokenTxLog> txLogs) {
         List<VcashTokenTxLog> list = new ArrayList<>();
-        if(txLogs != null){
+        if (txLogs != null) {
             for (VcashTokenTxLog txLog : txLogs) {
                 if (!ServerTxManager.getInstance().inServerTxList(txLog.tx_slate_id)) {
                     list.add(txLog);
@@ -347,8 +350,8 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
             super(data);
             addItemType(WalletTxEntity.TYPE_SERVER_TX, R.layout.item_vcash_tx);
             addItemType(WalletTxEntity.TYPE_TX_LOG, R.layout.item_vcash_tx);
-            addItemType(WalletTxEntity.TYPE_TX_ONGOING,R.layout.layout_vcash_tx_title);
-            addItemType(WalletTxEntity.TYPE_TX_COMPLETE,R.layout.layout_vcash_tx_title);
+            addItemType(WalletTxEntity.TYPE_TX_ONGOING, R.layout.layout_vcash_tx_title);
+            addItemType(WalletTxEntity.TYPE_TX_COMPLETE, R.layout.layout_vcash_tx_title);
         }
 
         @Override
@@ -367,7 +370,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                     txState1.setCompoundDrawablesWithIntrinsicBounds(
                             UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                     helper.setText(R.id.tv_tx_time, R.string.now);
-                    helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
+                    helper.setBackgroundRes(R.id.rl_tx_bg, R.color.orange_light2);
                     break;
                 case WalletTxEntity.TYPE_TX_LOG:
                     VcashTxLog txLog = item.getTxLogEntity();
@@ -384,21 +387,21 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                     VcashTxLog.TxLogEntryType txType = txLog.tx_type;
                     VcashTxLog.TxLogConfirmType confirmState = txLog.confirm_state;
 
-                    helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_white_grey);
+                    helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_white_grey);
 
-                    txLogTypeState(txType,confirmState,amount,helper);
+                    txLogTypeState(txType, confirmState, amount, helper);
 
                     TextView txState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeSimple(txLog.create_time));
                     switch (confirmState) {
                         case DefaultState:
-                            if(txType == VcashTxLog.TxLogEntryType.TxSent){
+                            if (txType == VcashTxLog.TxLogEntryType.TxSent) {
                                 helper.setText(R.id.tv_tx_state, "recipient processing now");
-                            }else if(txType == VcashTxLog.TxLogEntryType.TxReceived){
+                            } else if (txType == VcashTxLog.TxLogEntryType.TxReceived) {
                                 helper.setText(R.id.tv_tx_state, "sender processing now");
                             }
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;
@@ -406,13 +409,13 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                             helper.setText(R.id.tv_tx_state, "waiting for confirmation");
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
                             break;
                         case NetConfirmed:
-                            helper.setText(R.id.tv_tx_state,R.string.confirmed);
+                            helper.setText(R.id.tv_tx_state, R.string.confirmed);
                             txState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                             break;
                     }
 
@@ -420,7 +423,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                         helper.setText(R.id.tv_tx_state, R.string.canceled);
                         txState.setCompoundDrawablesWithIntrinsicBounds(
                                 UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
-                        helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
+                        helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                     }
 
                     break;
@@ -439,21 +442,21 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                     VcashTxLog.TxLogEntryType tokenTxType = tokenTxLogEntity.tx_type;
                     VcashTxLog.TxLogConfirmType tokenConfirmState = tokenTxLogEntity.confirm_state;
 
-                    helper.setBackgroundRes(R.id.rl_tx_bg,R.drawable.selector_white_grey);
+                    helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_white_grey);
 
-                    txLogTypeState(tokenTxType,tokenConfirmState,tokenAmount,helper);
+                    txLogTypeState(tokenTxType, tokenConfirmState, tokenAmount, helper);
 
                     TextView tokenTxState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                     helper.setText(R.id.tv_tx_time, DateUtil.formatDateTimeSimple(tokenTxLogEntity.create_time));
                     switch (tokenConfirmState) {
                         case DefaultState:
-                            if(tokenTxType == VcashTxLog.TxLogEntryType.TxSent){
+                            if (tokenTxType == VcashTxLog.TxLogEntryType.TxSent) {
                                 helper.setText(R.id.tv_tx_state, "recipient processing now");
-                            }else if(tokenTxType == VcashTxLog.TxLogEntryType.TxReceived){
+                            } else if (tokenTxType == VcashTxLog.TxLogEntryType.TxReceived) {
                                 helper.setText(R.id.tv_tx_state, "sender processing now");
                             }
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
                             tokenTxState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
                             break;
@@ -461,13 +464,13 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                             helper.setText(R.id.tv_tx_state, "waiting for confirmation");
                             tokenTxState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_ongoing), null, null, null);
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.red));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.red));
                             break;
                         case NetConfirmed:
-                            helper.setText(R.id.tv_tx_state,R.string.confirmed);
+                            helper.setText(R.id.tv_tx_state, R.string.confirmed);
                             tokenTxState.setCompoundDrawablesWithIntrinsicBounds(
                                     UIUtils.getResource().getDrawable(R.drawable.ic_tx_confirmed), null, null, null);
-                            helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
+                            helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                             break;
                     }
 
@@ -475,48 +478,48 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                         helper.setText(R.id.tv_tx_state, R.string.canceled);
                         tokenTxState.setCompoundDrawablesWithIntrinsicBounds(
                                 UIUtils.getResource().getDrawable(R.drawable.ic_tx_canceled), null, null, null);
-                        helper.setTextColor(R.id.tv_tx_state,UIUtils.getColor(R.color.A2));
+                        helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
                     }
                     break;
                 case WalletTxEntity.TYPE_TX_ONGOING:
-                    helper.setText(R.id.tv_title,R.string.ongoing_tx);
+                    helper.setText(R.id.tv_title, R.string.ongoing_tx);
                     break;
                 case WalletTxEntity.TYPE_TX_COMPLETE:
-                    helper.setText(R.id.tv_title,R.string.complete_tx);
+                    helper.setText(R.id.tv_title, R.string.complete_tx);
                     break;
             }
 
         }
 
-        private void txLogTypeState(AbstractVcashTxLog.TxLogEntryType txLogEntryType,VcashTxLog.TxLogConfirmType confirmState,long amount,BaseViewHolder helper){
-            switch (txLogEntryType){
+        private void txLogTypeState(AbstractVcashTxLog.TxLogEntryType txLogEntryType, VcashTxLog.TxLogConfirmType confirmState, long amount, BaseViewHolder helper) {
+            switch (txLogEntryType) {
                 case ConfirmedCoinbaseOrTokenIssue:
                     helper.setText(R.id.tv_tx_id, R.string.coinbase);
                 case TxReceived:
-                    if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
+                    if (confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed) {
                         helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
-                    }else {
-                        helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
+                    } else {
+                        helper.setBackgroundRes(R.id.rl_tx_bg, R.color.orange_light2);
                         Glide.with(mContext).load(R.drawable.gif_receive).into((ImageView) helper.getView(R.id.iv_tx));
                     }
-                    helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
+                    helper.setText(R.id.tv_tx_amount, "+" + WalletApi.nanoToVcashString(amount));
                     break;
                 case TxReceivedCancelled:
                     helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);
-                    helper.setText(R.id.tv_tx_amount,  "+" + WalletApi.nanoToVcashString(amount));
+                    helper.setText(R.id.tv_tx_amount, "+" + WalletApi.nanoToVcashString(amount));
                     break;
                 case TxSent:
-                    if(confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed){
+                    if (confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed) {
                         helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
-                    }else {
-                        helper.setBackgroundRes(R.id.rl_tx_bg,R.color.orange_light2);
+                    } else {
+                        helper.setBackgroundRes(R.id.rl_tx_bg, R.color.orange_light2);
                         Glide.with(mContext).load(R.drawable.gif_send).into((ImageView) helper.getView(R.id.iv_tx));
                     }
-                    helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
+                    helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(amount));
                     break;
                 case TxSentCancelled:
                     helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_up);
-                    helper.setText(R.id.tv_tx_amount,  WalletApi.nanoToVcashString(amount));
+                    helper.setText(R.id.tv_tx_amount, WalletApi.nanoToVcashString(amount));
                     break;
             }
         }
@@ -524,13 +527,15 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
     }
 
     @OnClick(R.id.iv_back)
-    public void onBackClick(){
+    public void onBackClick() {
         onBackPressed();
     }
 
     @OnClick(R.id.send)
     public void onVcashSendClick() {
-        nv2(VcashSendActivity.class, REQUEST_CODE_TX_SEND);
+        Intent intent = new Intent(this,VcashSendActivity.class);
+        intent.putExtra(Args.TOKEN_TYPE,tokenType);
+        startActivityForResult(intent,REQUEST_CODE_TX_SEND);
     }
 
     @OnClick(R.id.receive)

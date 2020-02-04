@@ -12,6 +12,7 @@ import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.WalletTokenDetailsActivity;
 import com.vcashorg.vcashwallet.adapter.VcashTokenAdapter;
 import com.vcashorg.vcashwallet.base.BaseFragment;
+import com.vcashorg.vcashwallet.utils.Args;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenInfo;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
@@ -53,7 +54,7 @@ public class TokenListFragment extends BaseFragment {
                 VcashTokenInfo tokenInfo = (VcashTokenInfo) adapter.getData().get(position);
 
                 Intent intent = new Intent(mActivity,WalletTokenDetailsActivity.class);
-                intent.putExtra("tokenType",tokenInfo.TokenType);
+                intent.putExtra(Args.TOKEN_TYPE,tokenInfo.TokenType);
                 nv(intent);
             }
         });

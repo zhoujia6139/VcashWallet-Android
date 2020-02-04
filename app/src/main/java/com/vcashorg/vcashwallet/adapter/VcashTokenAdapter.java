@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.R;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenInfo;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
@@ -31,7 +32,7 @@ public class VcashTokenAdapter extends BaseQuickAdapter<VcashTokenInfo, BaseView
             Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             ivToken.setImageBitmap(decodedByte);
         }else {
-            if(item.TokenType.equals("VCash")){
+            if(VCashUtil.isVCash(item.TokenType)){
                 ivToken.setImageResource(R.drawable.ic_vcash);
             }else {
                 ivToken.setImageResource(R.drawable.ic_vcash_placeholder);

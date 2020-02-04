@@ -15,7 +15,9 @@ import android.widget.TextView;
 import com.mylhyl.zxing.scanner.common.Scanner;
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.bean.Address;
+import com.vcashorg.vcashwallet.utils.Args;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -48,6 +50,8 @@ public class VcashSendActivity extends ToolBarActivity {
     @BindView(R.id.line_amount)
     View mLine2;
 
+    private String tokenType;
+
     @Override
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.send_vcash));
@@ -56,6 +60,11 @@ public class VcashSendActivity extends ToolBarActivity {
     @Override
     protected int provideContentViewId() {
         return R.layout.activity_vcash_send;
+    }
+
+    @Override
+    public void initParams() {
+        tokenType = getIntent().getStringExtra(Args.TOKEN_TYPE);
     }
 
     @Override
@@ -106,7 +115,7 @@ public class VcashSendActivity extends ToolBarActivity {
                 btnState();
             }
         });
-        mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(WalletApi.getWalletBalanceInfo().spendable) + " V");
+        mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(VCashUtil.VCashSpendable(tokenType)) + " V");
     }
 
     private boolean btnState() {
@@ -144,7 +153,7 @@ public class VcashSendActivity extends ToolBarActivity {
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(btnState() && validate() != -1){
-            WalletApi.createSendTransaction("b6a3e3357a85d33120dc412a560fe90bd2a60ff28f3a7b3c5290583349e22a97", WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
+            WalletApi.createSendTransaction(VCashUtil.isVCash(tokenType) ? null : tokenType, WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
