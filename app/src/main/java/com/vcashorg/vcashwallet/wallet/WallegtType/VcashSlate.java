@@ -470,7 +470,7 @@ public class VcashSlate implements Serializable {
                         slate.num_participants = (short) jsonReader.nextInt();
                         break;
                     case "amount":
-                        slate.amount = jsonReader.nextLong();
+                        slate.amount = Long.parseLong(jsonReader.nextString());
                         break;
                     case "token_type":
                         //maybe null
@@ -481,13 +481,13 @@ public class VcashSlate implements Serializable {
                         }
                         break;
                     case "fee":
-                        slate.fee = jsonReader.nextLong();
+                        slate.fee = Long.parseLong(jsonReader.nextString());
                         break;
                     case "height":
-                        slate.height = jsonReader.nextLong();
+                        slate.height = Long.parseLong(jsonReader.nextString());
                         break;
                     case "lock_height":
-                        slate.lock_height = jsonReader.nextLong();
+                        slate.lock_height = Long.parseLong(jsonReader.nextString());
                         break;
                     case "version_info":
                         Gson version_gson = new Gson();
@@ -550,7 +550,7 @@ public class VcashSlate implements Serializable {
                 while (jsonReader.hasNext()){
                     switch (jsonReader.nextName()){
                         case "id":
-                            data.pId = (short) jsonReader.nextInt();
+                            data.pId = Short.parseShort(jsonReader.nextString());
                             break;
                         case "message":
                             if (jsonReader.peek() != JsonToken.NULL) {
