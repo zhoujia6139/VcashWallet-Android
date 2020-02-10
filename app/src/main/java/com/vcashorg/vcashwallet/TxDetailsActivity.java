@@ -111,19 +111,19 @@ public class TxDetailsActivity extends ToolBarActivity {
         int type = intent.getIntExtra(PARAM_TX_TYPE, TYPE_TX_LOG);
         if (type == TYPE_TX_SERVER) {
             serverTx = (ServerTransaction) intent.getSerializableExtra(PARAM_TX_DATA);
-            if(serverTx != null && serverTx.slateObj != null){
+            if (serverTx != null && serverTx.slateObj != null) {
                 tokenType = serverTx.slateObj.token_type;
             }
             configDataFromServerTransaction();
         } else {
-            isToken = intent.getBooleanExtra(PARAM_TX_ISTOKEN,false);
-            if(isToken){
+            isToken = intent.getBooleanExtra(PARAM_TX_ISTOKEN, false);
+            if (isToken) {
                 tokenTxLog = (VcashTokenTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
-                if(tokenType != null){
+                if (tokenType != null) {
                     tokenType = tokenTxLog.token_type;
                 }
                 configDataFromVcashTxLog(tokenTxLog);
-            }else {
+            } else {
                 vcashTxLog = (VcashTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
                 configDataFromVcashTxLog(vcashTxLog);
             }
@@ -145,7 +145,7 @@ public class TxDetailsActivity extends ToolBarActivity {
     @Override
     public void initView() {
 
-        if(!TextUtils.isEmpty(tokenType) && !VCashUtil.isVCash(tokenType)){
+        if (!TextUtils.isEmpty(tokenType) && !VCashUtil.isVCash(tokenType)) {
             mLayoutToken.setVisibility(View.VISIBLE);
             mTvTokenName.setText(WalletApi.getTokenInfo(tokenType).Name);
             mTvToken.setText(WalletApi.getTokenInfo(tokenType).Name);
@@ -191,19 +191,19 @@ public class TxDetailsActivity extends ToolBarActivity {
         mTxAmount.setText(WalletApi.nanoToVcashString(serverTx.slateObj.amount));
         mTxFee.setText(WalletApi.nanoToVcashString(serverTx.slateObj.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp2(System.currentTimeMillis()));
-        if(serverTx.isSend){
-            if(!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+        if (serverTx.isSend) {
+            if (!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
                 mTvRecipient.setTextColor(UIUtils.getColor(R.color.blue));
             }
-        }else {
-            if(!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+        } else {
+            if (!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
                 mTvSender.setTextColor(UIUtils.getColor(R.color.blue));
             }
         }
     }
 
     public void configDataFromVcashTxLog(AbstractVcashTxLog abstractVcashTxLog) {
-        if(abstractVcashTxLog == null) return;
+        if (abstractVcashTxLog == null) return;
         switch (abstractVcashTxLog.confirm_state) {
             case DefaultState:
                 if (abstractVcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent) {
@@ -216,7 +216,7 @@ public class TxDetailsActivity extends ToolBarActivity {
                     } else if (abstractVcashTxLog.server_status == ServerTxStatus.TxReceiverd) {
                         serverTx = ServerTxManager.getInstance().getServerTxByTxId(abstractVcashTxLog.tx_slate_id);
                         mFlSign.setVisibility(serverTx != null ? View.VISIBLE : View.GONE);
-                        if(serverTx != null){
+                        if (serverTx != null) {
                             mTvStatus.setText(serverTx.isSend ? R.string.tx_status_wait_receiver_sign : R.string.tx_status_wait_your_sign);
                         }
                     }
@@ -241,35 +241,35 @@ public class TxDetailsActivity extends ToolBarActivity {
                 break;
         }
 
-        mTvTxId.setText(UIUtils.isEmpty(abstractVcashTxLog.tx_slate_id)? UIUtils.getString(R.string.unReachable) : abstractVcashTxLog.tx_slate_id);
+        mTvTxId.setText(UIUtils.isEmpty(abstractVcashTxLog.tx_slate_id) ? UIUtils.getString(R.string.unReachable) : abstractVcashTxLog.tx_slate_id);
         mTxFee.setText(WalletApi.nanoToVcashString(abstractVcashTxLog.fee));
         mTxTime.setText(DateUtil.formatDateTimeStamp(abstractVcashTxLog.create_time));
-        if(abstractVcashTxLog.confirm_height == 0){
+        if (abstractVcashTxLog.confirm_height == 0) {
             mTxConfirmNum.setText("0");
-        }else {
+        } else {
             mTxConfirmNum.setText((WalletApi.getCurChainHeight() - abstractVcashTxLog.confirm_height) + "");
         }
-        if(isToken){
+        if (isToken) {
             configInfoFromTxTokenType(tokenTxLog);
-        }else {
+        } else {
             configInfoFromTxType(vcashTxLog);
         }
-        if(abstractVcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent){
-            if(!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+        if (abstractVcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent) {
+            if (!mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
                 mTvRecipient.setTextColor(UIUtils.getColor(R.color.blue));
             }
-        }else {
-            if(!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
+        } else {
+            if (!mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
                 mTvSender.setTextColor(UIUtils.getColor(R.color.blue));
             }
         }
-        if(abstractVcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
+        if (abstractVcashTxLog.tx_type == VcashTxLog.TxLogEntryType.TxReceived
                 && UIUtils.isEmpty(abstractVcashTxLog.parter_id)
-                && !UIUtils.isEmpty(abstractVcashTxLog.signed_slate_msg)){
+                && !UIUtils.isEmpty(abstractVcashTxLog.signed_slate_msg)) {
             mFlSign.setVisibility(View.GONE);
-            if(abstractVcashTxLog.confirm_state == NetConfirmed){
+            if (abstractVcashTxLog.confirm_state == NetConfirmed) {
                 mFlCancel.setVisibility(View.GONE);
-            }else {
+            } else {
                 mFlCancel.setVisibility(View.VISIBLE);
             }
             mTvCancel.setText(R.string.delete_transaction);
@@ -281,7 +281,7 @@ public class TxDetailsActivity extends ToolBarActivity {
     }
 
     private void configInfoFromTxType(VcashTxLog vcashTxLog) {
-        if(vcashTxLog == null) return;
+        if (vcashTxLog == null) return;
         VcashTxLog.TxLogEntryType txType = vcashTxLog.tx_type;
         switch (txType) {
             case ConfirmedCoinbaseOrTokenIssue:
@@ -326,7 +326,7 @@ public class TxDetailsActivity extends ToolBarActivity {
     }
 
     private void configInfoFromTxTokenType(VcashTokenTxLog tokenTxLog) {
-        if(tokenTxLog == null) return;
+        if (tokenTxLog == null) return;
         VcashTxLog.TxLogEntryType txType = tokenTxLog.tx_type;
         switch (txType) {
             case ConfirmedCoinbaseOrTokenIssue:
@@ -370,32 +370,32 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
     }
 
-    private void addressBookRemark(){
-        if(mTvSender.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            buildSpanRemark(mTvSender.getText().toString(),"me",mTvSender);
-        }else {
-            String senderRemark = AddressFileUtil.findRemarkByAddress(this,mTvSender.getText().toString().trim());
-            if(senderRemark != null){
-                buildSpanRemark(mTvSender.getText().toString(),senderRemark,mTvSender);
+    private void addressBookRemark() {
+        if (mTvSender.getText().toString().trim().equals(WalletApi.getWalletUserId())) {
+            buildSpanRemark(mTvSender.getText().toString(), "me", mTvSender);
+        } else {
+            String senderRemark = AddressFileUtil.findRemarkByAddress(this, mTvSender.getText().toString().trim());
+            if (senderRemark != null) {
+                buildSpanRemark(mTvSender.getText().toString(), senderRemark, mTvSender);
             }
         }
 
-        if(mTvRecipient.getText().toString().trim().equals(WalletApi.getWalletUserId())){
-            buildSpanRemark(mTvRecipient.getText().toString(),"me",mTvRecipient);
-        }else {
-            String receiveRemark = AddressFileUtil.findRemarkByAddress(this,mTvRecipient.getText().toString().trim());
-            if(receiveRemark != null){
-                buildSpanRemark(mTvRecipient.getText().toString(),receiveRemark,mTvRecipient);
+        if (mTvRecipient.getText().toString().trim().equals(WalletApi.getWalletUserId())) {
+            buildSpanRemark(mTvRecipient.getText().toString(), "me", mTvRecipient);
+        } else {
+            String receiveRemark = AddressFileUtil.findRemarkByAddress(this, mTvRecipient.getText().toString().trim());
+            if (receiveRemark != null) {
+                buildSpanRemark(mTvRecipient.getText().toString(), receiveRemark, mTvRecipient);
             }
         }
     }
 
-    private void buildSpanRemark(String id,String remark,TextView textView){
+    private void buildSpanRemark(String id, String remark, TextView textView) {
         ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(UIUtils.getColor(R.color.colorPrimary));
         String value = id + "(" + remark + ")";
         SpannableString ssText = new SpannableString(value);
         int index = value.indexOf("(");
-        if(index != -1){
+        if (index != -1) {
             ssText.setSpan(foregroundColorSpan, index, value.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         textView.setText(ssText);
@@ -409,6 +409,8 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
         if (vcashTxLog != null) {
             isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
+        } else if (tokenTxLog != null) {
+            isSend = (tokenTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
         if (serverTx != null) {
             showProgressDialog(R.string.wait);
@@ -459,11 +461,29 @@ public class TxDetailsActivity extends ToolBarActivity {
 
     @OnClick(R.id.fl_btn_cancel)
     public void onCancelClick() {
+        AbstractVcashTxLog.TxLogEntryType txType = null;
+        VcashTxLog.TxLogConfirmType confirmType = null;
+        String txSlateId = "";
+        String parter_id = "";
+        String signed_slate_msg = "";
         if (vcashTxLog != null) {
-            switch (vcashTxLog.tx_type) {
+            txType = vcashTxLog.tx_type;
+            confirmType = vcashTxLog.confirm_state;
+            txSlateId = vcashTxLog.tx_slate_id;
+            parter_id = vcashTxLog.parter_id;
+            signed_slate_msg = vcashTxLog.signed_slate_msg;
+        } else if (tokenTxLog != null) {
+            txType = tokenTxLog.tx_type;
+            confirmType = tokenTxLog.confirm_state;
+            txSlateId = tokenTxLog.tx_slate_id;
+            parter_id = tokenTxLog.parter_id;
+            signed_slate_msg = tokenTxLog.signed_slate_msg;
+        }
+        if (txType != null) {
+            switch (txType) {
                 case TxSent:
-                    if(vcashTxLog.confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
-                        cancelTransaction(vcashTxLog.tx_slate_id);
+                    if (confirmType == VcashTxLog.TxLogConfirmType.DefaultState) {
+                        cancelTransaction(txSlateId);
                     }
                     break;
                 case TxSentCancelled:
@@ -471,15 +491,15 @@ public class TxDetailsActivity extends ToolBarActivity {
                     deleteTransaction();
                     break;
                 case TxReceived:
-                    if(UIUtils.isEmpty(vcashTxLog.parter_id)
-                        && !UIUtils.isEmpty(vcashTxLog.signed_slate_msg)){
+                    if (UIUtils.isEmpty(parter_id)
+                            && !UIUtils.isEmpty(signed_slate_msg)) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Are you sure delete the transaction?")
                                 .setMessage("The transaction will not be shown on your phone after being deleted.")
                                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        deleteFileTx(vcashTxLog.tx_slate_id);
+                                        deleteFileTx();
                                     }
                                 })
                                 .setNegativeButton(R.string.cancel, null)
@@ -488,49 +508,59 @@ public class TxDetailsActivity extends ToolBarActivity {
                     break;
             }
         }
-        if(serverTx != null){
-            if(serverTx.status == ServerTxStatus.TxReceiverd){
+
+        if (serverTx != null) {
+            if (serverTx.status == ServerTxStatus.TxReceiverd) {
                 cancelTransaction(serverTx.tx_id);
             }
         }
     }
 
     @OnClick(R.id.tv_copy)
-    public void onCopyClick(){
-        UIUtils.copyText(this,mTvContent.getText().toString());
+    public void onCopyClick() {
+        UIUtils.copyText(this, mTvContent.getText().toString());
     }
 
 
     @OnClick(R.id.sender_id)
-    public void onSenderIdClick(){
+    public void onSenderIdClick() {
         boolean isSend = false;
         if (serverTx != null) {
             isSend = serverTx.isSend;
         }
         if (vcashTxLog != null) {
             isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
+        } else if (tokenTxLog != null) {
+            isSend = (tokenTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
-        if(!isSend && !mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
-            new AddressBotDialog(this,mTvSender.getText().toString().trim().split("\\(")[0].trim(),1).show();
+        if (!isSend && !mTvSender.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
+            new AddressBotDialog(this, mTvSender.getText().toString().trim().split("\\(")[0].trim(), 1).show();
         }
     }
 
     @OnClick(R.id.receiver_id)
-    public void onReceiverClick(){
+    public void onReceiverClick() {
         boolean isSend = false;
         if (serverTx != null) {
             isSend = serverTx.isSend;
         }
         if (vcashTxLog != null) {
             isSend = (vcashTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
+        } else if (tokenTxLog != null) {
+            isSend = (tokenTxLog.tx_type == AbstractVcashTxLog.TxLogEntryType.TxSent);
         }
-        if(isSend && !mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))){
-            new AddressBotDialog(this,mTvRecipient.getText().toString().trim().split("\\(")[0].trim(),1).show();
+        if (isSend && !mTvRecipient.getText().toString().equals(UIUtils.getString(R.string.unReachable))) {
+            new AddressBotDialog(this, mTvRecipient.getText().toString().trim().split("\\(")[0].trim(), 1).show();
         }
     }
 
     public void deleteTransaction() {
-        boolean result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);
+        boolean result = false;
+        if (vcashTxLog != null) {
+            result = WalletApi.deleteTxByTxid(vcashTxLog.tx_slate_id);
+        } else if (tokenTxLog != null) {
+            result = WalletApi.deleteTokenTxByTxid(tokenTxLog.tx_slate_id);
+        }
         if (result) {
             UIUtils.showToastCenter(R.string.delete_success);
             finish();
@@ -539,8 +569,8 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
     }
 
-    public void cancelTransaction(String tx_id){
-        if(WalletApi.cancelTransaction(tx_id)){
+    public void cancelTransaction(String tx_id) {
+        if (WalletApi.cancelTransaction(tx_id)) {
             UIUtils.showToastCenter(R.string.cancel_success);
             if (serverTx != null) {
                 ServerTxManager.getInstance().removeServerTx(serverTx.tx_id);
@@ -551,13 +581,24 @@ public class TxDetailsActivity extends ToolBarActivity {
         }
     }
 
-    private void deleteFileTx(String tx_id){
-        if(WalletApi.cancelTransaction(tx_id)){
-            boolean result = WalletApi.deleteTxByTxid(tx_id);
-            if(result){
+    private void deleteFileTx() {
+        String tx_id = "";
+        if (vcashTxLog != null) {
+            tx_id = vcashTxLog.tx_slate_id;
+        } else if (tokenTxLog != null) {
+            tx_id = tokenTxLog.tx_slate_id;
+        }
+        if (WalletApi.cancelTransaction(tx_id)) {
+            boolean result = false;
+            if (vcashTxLog != null) {
+                result = WalletApi.deleteTxByTxid(tx_id);
+            } else if (tokenTxLog != null) {
+                result = WalletApi.deleteTokenTxByTxid(tx_id);
+            }
+            if (result) {
                 UIUtils.showToastCenter(R.string.delete_success);
                 finish();
-            }else {
+            } else {
                 UIUtils.showToastCenter(R.string.delete_failed);
             }
         } else {

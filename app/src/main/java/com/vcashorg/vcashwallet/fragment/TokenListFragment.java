@@ -4,21 +4,25 @@ import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.vcashorg.vcashwallet.R;
+import com.vcashorg.vcashwallet.TxDetailsActivity;
 import com.vcashorg.vcashwallet.VcashTokenAddActivity;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.WalletTokenDetailsActivity;
 import com.vcashorg.vcashwallet.adapter.VcashTokenAdapter;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
+import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.base.BaseFragment;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.utils.Args;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
+import com.vcashorg.vcashwallet.widget.PopUtil;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
 import java.util.ArrayList;
@@ -34,6 +38,7 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
     public static final int REQUEST_CODE_ADD_TOKEN = 100;
     public static final int REQUEST_CODE_DETAILS = 101;
+    public static final int REQUEST_CODE_SERVER_TX = 102;
 
     @BindView(R.id.sr_token)
     SwipeRefreshLayout mSrToken;
@@ -45,6 +50,8 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
     boolean vcRefreshed;
     boolean tokenRefreshed;
     private long lastFetch = 0;
+
+    private PopUtil popUtil;
 
     @Override
     protected int provideContentViewId() {
@@ -73,24 +80,13 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
         mSrToken.setOnRefreshListener(this);
 
-        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
-            @Override
-            public void onChecked() {
-
-            }
-
-            @Override
-            public void onForceRefresh() {
-
-            }
-        });
-
         WalletApi.initTokenInfos();
     }
 
     @Override
     public void initData() {
         refreshData();
+        onRefresh();
     }
 
     @Override
@@ -153,6 +149,9 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_CODE_ADD_TOKEN || requestCode == REQUEST_CODE_DETAILS){
             refreshData();
+        }else if(requestCode == REQUEST_CODE_SERVER_TX){
+            refreshData();
+            showNewTxPop();
         }
     }
 
@@ -161,6 +160,34 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
         showLoading();
         ServerTxManager.getInstance().fetchTxStatus(true);
         refreshWalletStatus(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("ppp","TokenListFragment onResume");
+        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
+            @Override
+            public void onChecked() {
+                showNewTxPop();
+                refreshData();
+            }
+
+            @Override
+            public void onForceRefresh() {
+                refreshData();
+            }
+        });
+
+        ServerTxManager.getInstance().startWork();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i("ppp","TokenListFragment onPause");
+
+        ServerTxManager.getInstance().stopWork();
     }
 
     private void refreshWalletStatus(final boolean force) {
@@ -194,6 +221,24 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
     private void refreshData(){
         adapter.setNewData(generateTokenList());
+    }
+
+    public void showNewTxPop() {
+        if (popUtil != null && popUtil.isShowing()) return;
+        final ServerTransaction recentTx = ServerTxManager.getInstance().getRecentTx();
+        if (recentTx != null) {
+            popUtil = PopUtil.get(mActivity, recentTx).setConfirmListener(new PopUtil.PopOnCall() {
+                @Override
+                public void onConfirm() {
+                    Intent intent = new Intent(mActivity, TxDetailsActivity.class);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, recentTx);
+                    nv2(intent, REQUEST_CODE_SERVER_TX);
+                }
+            });
+            ServerTxManager.getInstance().addBlackList(recentTx);
+            popUtil.show();
+        }
     }
 
 }
