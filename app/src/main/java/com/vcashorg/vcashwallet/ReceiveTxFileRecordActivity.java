@@ -71,6 +71,7 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
                     intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,tokenTxLog.token_amount_credited - tokenTxLog.token_amount_debited);
                     intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,tokenTxLog.fee);
                     intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,false);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TOKEN,tokenTxLog.token_type);
                     nv(intent);
                 }
             }

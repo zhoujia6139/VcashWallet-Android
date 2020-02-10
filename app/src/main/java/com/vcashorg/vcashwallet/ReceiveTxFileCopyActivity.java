@@ -2,12 +2,14 @@ package com.vcashorg.vcashwallet;
 
 import android.os.Bundle;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
@@ -21,7 +23,7 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
     public static final String PARAM_TX_AMOUNT = "tx_amount";
     public static final String PARAM_TX_FEE = "tx_fee";
     public static final String PARAM_FROM = "from";
-
+    public static final String PARAM_TOKEN = "token";
 
     @BindView(R.id.tv_content)
     TextView mTvContent;
@@ -34,6 +36,8 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
     TextView mTvTxFee;
 
     protected boolean fromDialog;
+
+    private String tokenType = "VCash";
 
     @Override
     protected void initToolBar() {
@@ -52,8 +56,12 @@ public class ReceiveTxFileCopyActivity extends ToolBarActivity {
         mTvContent.setText(content);
         mTvContent.setMovementMethod(ScrollingMovementMethod.getInstance());
 
+        String token = getIntent().getStringExtra(PARAM_TOKEN);
+        if(!TextUtils.isEmpty(token)){
+            tokenType = token;
+        }
         mTvTxId.setText(getIntent().getStringExtra(PARAM_TX_ID));
-        mTvTxAmount.setText(WalletApi.nanoToVcashWithUnit(getIntent().getLongExtra(PARAM_TX_AMOUNT,0)));
+        mTvTxAmount.setText(WalletApi.nanoToVcash(getIntent().getLongExtra(PARAM_TX_AMOUNT,0)) + " " + VCashUtil.VCashUnit(tokenType));
         mTvTxFee.setText(WalletApi.nanoToVcashWithUnit(getIntent().getLongExtra(PARAM_TX_FEE,0)));
 
         fromDialog = getIntent().getBooleanExtra(PARAM_FROM,false);

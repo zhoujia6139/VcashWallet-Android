@@ -98,6 +98,7 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
                                         intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,vcashSlate.amount);
                                         intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,vcashSlate.fee);
                                         intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,true);
+                                        intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TOKEN,vcashSlate.token_type);
                                         nv(intent);
                                         finish();
                                     }else {

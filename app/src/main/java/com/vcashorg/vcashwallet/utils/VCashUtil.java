@@ -14,6 +14,13 @@ public class VCashUtil {
         return !TextUtils.isEmpty(tokenType) && !isVCash(tokenType);
     }
 
+    public static String VCashUnit(String tokenType){
+        if(isVCash(tokenType)){
+            return "VCash";
+        }else {
+            return WalletApi.getTokenInfo(tokenType).Name;
+        }
+    }
 
     public static long VCashSpendable(String tokenType){
         if(isVCash(tokenType)){
