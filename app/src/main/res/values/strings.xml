@@ -124,7 +124,7 @@
     <string name="send_transaction_file">Send VCash with transaction file</string>
     <string name="send_vcash_notify">Sending VCash or VCash Token is an interactive process that the sender and the recipient need to interact back and forth to ensure the transaction is implemented.</string>
     <string name="receive_transaction_file">Receive from transaction file</string>
-    <string name="receive_transaction_file_notify">VCash can be received through transaction files. Copy the transaction file you got into the following form and continue.</string>
+    <string name="receive_transaction_file_notify">VCash or VCash Token can be received through transaction files. Copy the transaction file you got into the following form and continue.</string>
     <string name="enter_tx_file">Enter the received transaction file</string>
     <string name="read_tx_file">Read transaction details</string>
     <string name="receive_transaction_file_notify_2">Copy the signed transaction file and send it to the sender.</string>
