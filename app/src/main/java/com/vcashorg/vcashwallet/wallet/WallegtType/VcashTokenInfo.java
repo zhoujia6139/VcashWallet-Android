@@ -8,6 +8,6 @@ public class VcashTokenInfo {
     public String FullName;
     public String BriefInfo;
     public String DetailInfoUrl;
-    public String IconData;
+    public String IconName;
     public WalletApi.WalletBalanceInfo Balance;
 }

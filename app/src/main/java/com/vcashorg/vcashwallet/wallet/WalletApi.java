@@ -74,7 +74,7 @@ public class WalletApi {
 
     public static void updateTokenInfos(final WalletNoParamCallBack callback) {
         try{
-            final String full_url = "https://raw.githubusercontent.com/jdwldnqi837/VcashTokenInfo/master/VCashTokenInfo.json";
+            final String full_url = "https://s.vcashwallet.app/token_static/VCashTokenInfo.json";
             Request req = new Request.Builder().url(full_url).get().build();
             okClient.newCall(req).enqueue(new Callback() {
                 @Override

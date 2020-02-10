@@ -29,4 +29,8 @@ public class VCashUtil {
             return WalletApi.getWalletTokenBalanceInfo(tokenType).spendable;
         }
     }
+
+    public static String getTokenIconUrl(String iconName) {
+        return String.format("https://s.vcashwallet.app/token_static/icon/%s", iconName);
+    }
 }
