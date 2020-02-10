@@ -25,8 +25,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:drawableLeft="@drawable/ic_vcash_small"
-            android:drawablePadding="10dp"
             android:gravity="center_vertical"
             android:text="@string/balance"
             android:textColor="#777777"

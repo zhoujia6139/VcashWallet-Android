@@ -53,14 +53,26 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
 
-                VcashTxLog vcashTxLog = (VcashTxLog) adapter.getData().get(position);
-                Intent intent = new Intent(ReceiveTxFileRecordActivity.this,ReceiveTxFileCopyActivity.class);
-                intent.putExtra(ReceiveTxFileCopyActivity.PARAM_CONTENT,vcashTxLog.signed_slate_msg);
-                intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_ID,vcashTxLog.tx_slate_id);
-                intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,vcashTxLog.amount_credited - vcashTxLog.amount_debited);
-                intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,vcashTxLog.fee);
-                intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,false);
-                nv(intent);
+                AbstractVcashTxLog abstractVcashTxLog = (AbstractVcashTxLog) adapter.getData().get(position);
+                if(abstractVcashTxLog instanceof VcashTxLog){
+                    VcashTxLog vcashTxLog = (VcashTxLog) abstractVcashTxLog;
+                    Intent intent = new Intent(ReceiveTxFileRecordActivity.this,ReceiveTxFileCopyActivity.class);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_CONTENT,vcashTxLog.signed_slate_msg);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_ID,vcashTxLog.tx_slate_id);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,vcashTxLog.amount_credited - vcashTxLog.amount_debited);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,vcashTxLog.fee);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,false);
+                    nv(intent);
+                }else if(abstractVcashTxLog instanceof VcashTokenTxLog){
+                    VcashTokenTxLog tokenTxLog = (VcashTokenTxLog) abstractVcashTxLog;
+                    Intent intent = new Intent(ReceiveTxFileRecordActivity.this,ReceiveTxFileCopyActivity.class);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_CONTENT,tokenTxLog.signed_slate_msg);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_ID,tokenTxLog.tx_slate_id);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_AMOUNT,tokenTxLog.token_amount_credited - tokenTxLog.token_amount_debited);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_TX_FEE,tokenTxLog.fee);
+                    intent.putExtra(ReceiveTxFileCopyActivity.PARAM_FROM,false);
+                    nv(intent);
+                }
             }
         });
 
@@ -95,7 +107,6 @@ public class ReceiveTxFileRecordActivity extends ToolBarActivity {
                 VcashTokenTxLog log = (VcashTokenTxLog)item;
                 amount = log.token_amount_credited - log.token_amount_debited;
             }
-
 
             VcashTxLog.TxLogEntryType txType = item.tx_type;
             switch (txType) {

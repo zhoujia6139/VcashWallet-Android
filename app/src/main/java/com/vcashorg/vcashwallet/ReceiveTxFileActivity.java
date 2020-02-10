@@ -84,6 +84,7 @@ public class ReceiveTxFileActivity extends ToolBarActivity {
                     final VcashSlate vcashSlate = (VcashSlate) data;
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(SignTxDialog.KEY,vcashSlate);
+                    bundle.putString(SignTxDialog.TOKEN,vcashSlate.token_type);
                     SignTxDialog.newInstance(bundle).setOnSignClickListener(new SignTxDialog.OnSignClickListener() {
                         @Override
                         public void onSignClick() {

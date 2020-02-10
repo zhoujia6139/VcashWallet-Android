@@ -32,9 +32,37 @@
                 android:textSize="20sp" />
 
             <LinearLayout
+                android:id="@+id/layout_token"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:minWidth="80dp"
+                    android:text="Token:"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_token_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="2"
+                    android:textColor="@color/A1"
+                    android:textSize="14sp"
+                    tools:text="efajiogaigiangaion" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -87,9 +115,11 @@
                         tools:text="5.31311" />
 
                     <TextView
+                        android:id="@+id/tv_token_unit"
+                        android:layout_marginLeft="4dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" VCash"
+                        android:text="VCash"
                         android:textColor="@color/A1"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -126,9 +156,10 @@
                         tools:text="0.31311" />
 
                     <TextView
+                        android:layout_marginLeft="4dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" VCash"
+                        android:text="VCash"
                         android:textColor="@color/A1"
                         android:textSize="14sp" />
                 </LinearLayout>

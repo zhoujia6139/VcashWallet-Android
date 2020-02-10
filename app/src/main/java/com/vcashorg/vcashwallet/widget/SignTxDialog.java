@@ -16,18 +16,24 @@ import android.widget.TextView;
 
 import com.vcashorg.vcashwallet.R;
 import com.vcashorg.vcashwallet.utils.DateUtil;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 public class SignTxDialog extends DialogFragment {
 
     public static final String KEY = "vcash_slate";
+    public static final String TOKEN = "token_type";
 
     private TextView mTvTxId;
     private TextView mTvTxAmount;
     private TextView mTvTxFee;
 
     private TextView mBtnSign;
+
+    private View mLayoutToken;
+    private TextView mTvTokenName;
+    private TextView mTvTokenUnit;
 
     private OnSignClickListener mListener;
 
@@ -77,6 +83,10 @@ public class SignTxDialog extends DialogFragment {
         mTvTxFee = view.findViewById(R.id.tv_tx_fee);
         mBtnSign = view.findViewById(R.id.btn_sign);
 
+        mLayoutToken = view.findViewById(R.id.layout_token);
+        mTvTokenName = view.findViewById(R.id.tv_token_name);
+        mTvTokenUnit = view.findViewById(R.id.tv_token_unit);
+
         view.findViewById(R.id.ll_close).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,10 +101,17 @@ public class SignTxDialog extends DialogFragment {
 
         if (getArguments() != null) {
             VcashSlate vcashSlate = (VcashSlate) getArguments().getSerializable(KEY);
+            String tokenType = getArguments().getString(TOKEN);
             if (vcashSlate != null) {
                 mTvTxId.setText(vcashSlate.uuid);
                 mTvTxAmount.setText(WalletApi.nanoToVcashString(vcashSlate.amount));
                 mTvTxFee.setText(WalletApi.nanoToVcashString(vcashSlate.fee));
+            }
+
+            if(tokenType != null && !VCashUtil.isVCash(tokenType)){
+                mLayoutToken.setVisibility(View.VISIBLE);
+                mTvTokenName.setText(WalletApi.getTokenInfo(tokenType).Name);
+                mTvTokenUnit.setText(WalletApi.getTokenInfo(tokenType).Name);
             }
         }
 
