@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.vcashorg.vcashwallet.base.ToolBarActivity;
 import com.vcashorg.vcashwallet.utils.AddressFileUtil;
 import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
+import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
@@ -62,6 +64,13 @@ public class TxDetailsActivity extends ToolBarActivity {
     @BindView(R.id.tv_status)
     TextView mTvStatus;
 
+    @BindView(R.id.tv_token_name)
+    TextView mTvTokenName;
+    @BindView(R.id.layout_token)
+    View mLayoutToken;
+    @BindView(R.id.tv_token)
+    TextView mTvToken;
+
     @BindView(R.id.fl_btn_sign)
     FrameLayout mFlSign;
     @BindView(R.id.tv_sign)
@@ -84,6 +93,8 @@ public class TxDetailsActivity extends ToolBarActivity {
     protected boolean sender;
     protected boolean isToken = false;
 
+    private String tokenType = "";
+
     @Override
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.transaction_details));
@@ -100,11 +111,17 @@ public class TxDetailsActivity extends ToolBarActivity {
         int type = intent.getIntExtra(PARAM_TX_TYPE, TYPE_TX_LOG);
         if (type == TYPE_TX_SERVER) {
             serverTx = (ServerTransaction) intent.getSerializableExtra(PARAM_TX_DATA);
+            if(serverTx != null && serverTx.slateObj != null){
+                tokenType = serverTx.slateObj.token_type;
+            }
             configDataFromServerTransaction();
         } else {
             isToken = intent.getBooleanExtra(PARAM_TX_ISTOKEN,false);
             if(isToken){
                 tokenTxLog = (VcashTokenTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
+                if(tokenType != null){
+                    tokenType = tokenTxLog.token_type;
+                }
                 configDataFromVcashTxLog(tokenTxLog);
             }else {
                 vcashTxLog = (VcashTxLog) intent.getSerializableExtra(PARAM_TX_DATA);
@@ -122,6 +139,16 @@ public class TxDetailsActivity extends ToolBarActivity {
                     finish();
                 }
             });
+        }
+    }
+
+    @Override
+    public void initView() {
+
+        if(!TextUtils.isEmpty(tokenType) && !VCashUtil.isVCash(tokenType)){
+            mLayoutToken.setVisibility(View.VISIBLE);
+            mTvTokenName.setText(WalletApi.getTokenInfo(tokenType).Name);
+            mTvToken.setText(WalletApi.getTokenInfo(tokenType).Name);
         }
 
         addressBookRemark();
@@ -174,7 +201,6 @@ public class TxDetailsActivity extends ToolBarActivity {
             }
         }
     }
-
 
     public void configDataFromVcashTxLog(AbstractVcashTxLog abstractVcashTxLog) {
         if(abstractVcashTxLog == null) return;

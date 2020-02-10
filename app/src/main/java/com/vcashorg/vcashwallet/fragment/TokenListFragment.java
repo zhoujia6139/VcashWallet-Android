@@ -87,7 +87,6 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
             tokenInfos.add(vCashToken);
         }
 
-
         Set balancedToken = WalletApi.getBalancedToken();
 
         Set addedTokens = WalletApi.getAddedTokens();
