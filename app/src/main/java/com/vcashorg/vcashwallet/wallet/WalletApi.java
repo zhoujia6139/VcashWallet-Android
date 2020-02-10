@@ -1169,6 +1169,9 @@ public class WalletApi {
                 if (yesOrNo){
                     ArrayList<NodeRefreshTokenOutput> apiOutputs = (ArrayList<NodeRefreshTokenOutput>)data;
                     ArrayList<VcashTokenTxLog> txs = getTokenTransationArr(token_type);
+                    if(txs == null){
+                        txs = new ArrayList<>();
+                    }
                     boolean hasChange = false;
                     for (VcashTokenOutput item: token_arr){
                         NodeRefreshTokenOutput nodeOutput = null;

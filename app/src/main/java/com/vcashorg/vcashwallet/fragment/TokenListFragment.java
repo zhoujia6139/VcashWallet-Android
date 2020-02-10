@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.fragment;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -26,13 +27,14 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class TokenListFragment extends BaseFragment {
+public class TokenListFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener{
 
+    @BindView(R.id.sr_token)
+    SwipeRefreshLayout mSrToken;
     @BindView(R.id.rv_token)
     RecyclerView mRvToken;
 
     VcashTokenAdapter adapter;
-
 
     @Override
     protected int provideContentViewId() {
@@ -55,9 +57,11 @@ public class TokenListFragment extends BaseFragment {
 
                 Intent intent = new Intent(mActivity,WalletTokenDetailsActivity.class);
                 intent.putExtra(Args.TOKEN_TYPE,tokenInfo.TokenId);
-                nv(intent);
+                startActivityForResult(intent,100);
             }
         });
+
+        mSrToken.setOnRefreshListener(this);
 
         WalletApi.initTokenInfos();
     }
@@ -104,6 +108,14 @@ public class TokenListFragment extends BaseFragment {
         return tokenInfos;
     }
 
+    private void showLoading(){
+        mSrToken.setRefreshing(true);
+    }
+
+    private void hideLoading(){
+        mSrToken.setRefreshing(false);
+    }
+
     @OnClick(R.id.iv_menu)
     public void onOpenMenuClick() {
         ((WalletMainActivity)mActivity).openDrawer();
@@ -118,6 +130,15 @@ public class TokenListFragment extends BaseFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        refreshData();
+    }
+
+    @Override
+    public void onRefresh() {
+
+    }
+
+    private void refreshData(){
         adapter.setNewData(generateTokenList());
     }
 }

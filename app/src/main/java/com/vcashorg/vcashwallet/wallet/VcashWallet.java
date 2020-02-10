@@ -174,14 +174,17 @@ public class VcashWallet {
 
     public void syncOutputInfo(){
         ArrayList<VcashOutput> arrayList = new ArrayList<>();
-        for (VcashOutput output:outputs){
-            if (output.status == VcashOutput.OutputStatus.Spent){
-                Log.w(Tag, String.format("Output commit:%s has been spend, remove from wallet", output.commitment));
-            }
-            else {
-                arrayList.add(output);
+        if(outputs != null){
+            for (VcashOutput output:outputs){
+                if (output.status == VcashOutput.OutputStatus.Spent){
+                    Log.w(Tag, String.format("Output commit:%s has been spend, remove from wallet", output.commitment));
+                }
+                else {
+                    arrayList.add(output);
+                }
             }
         }
+
         outputs = arrayList;
         EncryptedDBHelper.getsInstance().saveOutputData(outputs);
     }

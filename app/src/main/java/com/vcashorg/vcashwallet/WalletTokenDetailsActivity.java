@@ -83,6 +83,8 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         tokenType = getIntent().getStringExtra(Args.TOKEN_TYPE);
         if (!VCashUtil.isVCash(tokenType)) {
             mTvName.setText(WalletApi.getTokenInfo(tokenType).Name);
+        }else {
+            mTvName.setText("VCash");
         }
     }
 
