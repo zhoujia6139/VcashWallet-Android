@@ -408,7 +408,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
                     helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_white_grey);
 
-                    txLogTypeState(txType, confirmState, amount, helper);
+                    txLogTypeState(txType, confirmState, false, amount, helper);
 
                     TextView txState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
@@ -456,14 +456,14 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                         helper.setText(R.id.tv_tx_id, tokenTxId);
                     }
 
-                    long tokenAmount = tokenTxLogEntity.amount_credited - tokenTxLogEntity.amount_debited;
+                    long tokenAmount = tokenTxLogEntity.token_amount_credited - tokenTxLogEntity.token_amount_debited;
 
                     VcashTxLog.TxLogEntryType tokenTxType = tokenTxLogEntity.tx_type;
                     VcashTxLog.TxLogConfirmType tokenConfirmState = tokenTxLogEntity.confirm_state;
 
                     helper.setBackgroundRes(R.id.rl_tx_bg, R.drawable.selector_white_grey);
 
-                    txLogTypeState(tokenTxType, tokenConfirmState, tokenAmount, helper);
+                    txLogTypeState(tokenTxType, tokenConfirmState, true, tokenAmount, helper);
 
                     TextView tokenTxState = helper.getView(R.id.tv_tx_state);
                     helper.setTextColor(R.id.tv_tx_state, UIUtils.getColor(R.color.A2));
@@ -510,10 +510,14 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
         }
 
-        private void txLogTypeState(AbstractVcashTxLog.TxLogEntryType txLogEntryType, VcashTxLog.TxLogConfirmType confirmState, long amount, BaseViewHolder helper) {
+        private void txLogTypeState(AbstractVcashTxLog.TxLogEntryType txLogEntryType, VcashTxLog.TxLogConfirmType confirmState, boolean isToken, long amount, BaseViewHolder helper) {
             switch (txLogEntryType) {
                 case ConfirmedCoinbaseOrTokenIssue:
-                    helper.setText(R.id.tv_tx_id, R.string.coinbase);
+                    if (isToken) {
+                        helper.setText(R.id.tv_tx_id, R.string.tokenissue);
+                    } else {
+                        helper.setText(R.id.tv_tx_id, R.string.coinbase);
+                    }
                 case TxReceived:
                     if (confirmState == VcashTxLog.TxLogConfirmType.NetConfirmed) {
                         helper.setImageResource(R.id.iv_tx, R.drawable.ic_tx_down);

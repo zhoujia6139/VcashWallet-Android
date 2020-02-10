@@ -20,6 +20,7 @@
     <string name="height">Height:</string>
 
     <string name="coinbase">CoinBase</string>
+    <string name="tokenissue">TokenIssue</string>
     <string name="now">Now</string>
     <string name="unReachable">Unreachable</string>
     <string name="ongoing">Ongoing</string>
