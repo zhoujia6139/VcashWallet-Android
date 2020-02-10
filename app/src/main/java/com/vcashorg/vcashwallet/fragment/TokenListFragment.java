@@ -12,9 +12,12 @@ import com.vcashorg.vcashwallet.VcashTokenAddActivity;
 import com.vcashorg.vcashwallet.WalletMainActivity;
 import com.vcashorg.vcashwallet.WalletTokenDetailsActivity;
 import com.vcashorg.vcashwallet.adapter.VcashTokenAdapter;
+import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.base.BaseFragment;
+import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.utils.Args;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenInfo;
+import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
 import com.vcashorg.vcashwallet.widget.RecyclerViewDivider;
 
@@ -38,6 +41,10 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
     RecyclerView mRvToken;
 
     VcashTokenAdapter adapter;
+
+    boolean vcRefreshed;
+    boolean tokenRefreshed;
+    private long lastFetch = 0;
 
     @Override
     protected int provideContentViewId() {
@@ -65,6 +72,18 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
         });
 
         mSrToken.setOnRefreshListener(this);
+
+        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
+            @Override
+            public void onChecked() {
+
+            }
+
+            @Override
+            public void onForceRefresh() {
+
+            }
+        });
 
         WalletApi.initTokenInfos();
     }
@@ -139,7 +158,38 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
-        refreshData();
+        showLoading();
+        ServerTxManager.getInstance().fetchTxStatus(true);
+        refreshWalletStatus(true);
+    }
+
+    private void refreshWalletStatus(final boolean force) {
+        if (force || (AppUtil.getCurrentTimeSecs() - lastFetch) >= 60) {
+            vcRefreshed = false;
+            tokenRefreshed = false;
+            WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    vcRefreshed = true;
+                    checkRefreshEnd();
+                }
+            });
+            WalletApi.updateTokenOutputStatusWithComplete(new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    tokenRefreshed = true;
+                    checkRefreshEnd();
+                }
+            });
+        }
+    }
+
+    private void checkRefreshEnd() {
+        if (vcRefreshed && tokenRefreshed) {
+            hideLoading();
+            refreshData();
+            lastFetch = AppUtil.getCurrentTimeSecs();
+        }
     }
 
     private void refreshData(){
