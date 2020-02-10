@@ -4,7 +4,6 @@ import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 public class VcashTokenInfo {
     public String TokenId;
-    public String TokenType;
     public String Name;
     public String FullName;
     public String BriefInfo;

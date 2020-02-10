@@ -372,10 +372,12 @@ public class VcashWallet {
 
         long vcash_total = 0;
         ArrayList<VcashOutput> vcash_spendable = new ArrayList<>();
-        for (VcashOutput item: outputs){
-            if (item.isSpendable()){
-                vcash_spendable.add(item);
-                vcash_total += item.value;
+        if(outputs != null){
+            for (VcashOutput item: outputs){
+                if (item.isSpendable()){
+                    vcash_spendable.add(item);
+                    vcash_total += item.value;
+                }
             }
         }
 

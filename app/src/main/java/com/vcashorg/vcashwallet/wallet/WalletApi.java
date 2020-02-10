@@ -143,10 +143,6 @@ public class WalletApi {
         }
     }
 
-    private static String tokenInfoSavePath(){
-        return null;
-    }
-
     public static Set getAllTokens() {
         return tokenInfoMap.keySet();
     }
@@ -157,7 +153,7 @@ public class WalletApi {
             info.Balance = WalletApi.getWalletBalanceInfo();
             info.Name = "VCash";
             info.FullName = "--";
-            info.TokenType = tokenType;
+            info.TokenId = tokenType;
             return info;
         }
 
@@ -170,7 +166,7 @@ public class WalletApi {
         }
 
         if(info != null){
-            info.TokenType = tokenType;
+            info.TokenId = tokenType;
             info.Balance = WalletApi.getWalletTokenBalanceInfo(tokenType);
         }
 

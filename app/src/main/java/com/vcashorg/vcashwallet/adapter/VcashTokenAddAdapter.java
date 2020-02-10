@@ -41,7 +41,7 @@ public class VcashTokenAddAdapter extends BaseQuickAdapter<VcashTokenInfo, BaseV
 
         SwitchCompat switchCompat = helper.getView(R.id.token_switcher);
 
-        if(addedTokens.contains(item.TokenType)){
+        if(addedTokens.contains(item.TokenId)){
             switchCompat.setChecked(true);
         }else {
             switchCompat.setChecked(false);
@@ -51,9 +51,9 @@ public class VcashTokenAddAdapter extends BaseQuickAdapter<VcashTokenInfo, BaseV
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    WalletApi.addAddedToken(item.TokenType);
+                    WalletApi.addAddedToken(item.TokenId);
                 }else {
-                    WalletApi.deleteAddedToken(item.TokenType);
+                    WalletApi.deleteAddedToken(item.TokenId);
                 }
             }
         });

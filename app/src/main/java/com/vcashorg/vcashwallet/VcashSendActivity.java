@@ -20,6 +20,7 @@ import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
 import com.vcashorg.vcashwallet.wallet.WalletApi;
@@ -49,12 +50,17 @@ public class VcashSendActivity extends ToolBarActivity {
     View mLine1;
     @BindView(R.id.line_amount)
     View mLine2;
+    @BindView(R.id.tv_vcash_name)
+    TextView mTvVCashName;
 
     private String tokenType;
 
     @Override
     protected void initToolBar() {
         setToolBarTitle(UIUtils.getString(R.string.send_vcash));
+        if(!VCashUtil.isVCash(tokenType)){
+            setToolBarTitle(UIUtils.getString(R.string.send) + " " + WalletApi.getTokenInfo(tokenType).Name);
+        }
     }
 
     @Override
@@ -115,7 +121,13 @@ public class VcashSendActivity extends ToolBarActivity {
                 btnState();
             }
         });
-        mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(VCashUtil.VCashSpendable(tokenType)) + " V");
+
+        if(VCashUtil.isVCash(tokenType)){
+            mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(VCashUtil.VCashSpendable(tokenType)) + " V");
+        }else {
+            mTvAvailable.setText(UIUtils.getString(R.string.available) + ": " + WalletApi.nanoToVcashString(VCashUtil.VCashSpendable(tokenType)));
+            mTvVCashName.setVisibility(View.GONE);
+        }
     }
 
     private boolean btnState() {
@@ -161,6 +173,7 @@ public class VcashSendActivity extends ToolBarActivity {
                         Bundle bundle = new Bundle();
                         bundle.putSerializable(VcashSendDialog.KEY,slate);
                         bundle.putString(VcashSendDialog.RECEIVER,mEtAddress.getText().toString());
+                        bundle.putString(VcashSendDialog.TOKEN,tokenType);
                         VcashSendDialog.newInstance(bundle).setOnConfirmClickListener(new VcashSendDialog.OnConfirmClickListener() {
                             @Override
                             public void onConfirmClick() {
@@ -194,15 +207,28 @@ public class VcashSendActivity extends ToolBarActivity {
                                         public void onCall(boolean yesOrNo, Object data) {
                                             dismissProgressDialog();
                                             if(yesOrNo){
-//                                                UIUtils.showToastCenter(R.string.send_success);
-//                                                VcashTxLog vcashTxLog = WalletApi.getTxByTxid(slate.uuid);
-//                                                vcashTxLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
-//                                                Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
-//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
-//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
-//                                                intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
-//                                                nv(intent);
-//                                                finish();
+                                                UIUtils.showToastCenter(R.string.send_success);
+                                                Intent intent = new Intent(VcashSendActivity.this,TxDetailsActivity.class);
+                                                AbstractVcashTxLog abstractVcashTxLog = WalletApi.getTxByTxid(slate.uuid);
+                                                if(VCashUtil.isVCash(tokenType)){
+                                                    if(abstractVcashTxLog instanceof VcashTxLog){
+                                                        VcashTxLog txLog = (VcashTxLog) abstractVcashTxLog;
+                                                        txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+                                                        intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, txLog);
+                                                        intent.putExtra(TxDetailsActivity.PARAM_TX_ISTOKEN,false);
+                                                    }
+                                                }else {
+                                                    if(abstractVcashTxLog instanceof VcashTokenTxLog){
+                                                        VcashTokenTxLog tokenTxLog = (VcashTokenTxLog) abstractVcashTxLog;
+                                                        tokenTxLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
+                                                        intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, tokenTxLog);
+                                                        intent.putExtra(TxDetailsActivity.PARAM_TX_ISTOKEN,true);
+                                                    }
+                                                }
+                                                intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
+                                                intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
+                                                nv(intent);
+                                                finish();
                                             }else {
                                                 if(data instanceof String){
                                                     UIUtils.showToastCenter((String) data);

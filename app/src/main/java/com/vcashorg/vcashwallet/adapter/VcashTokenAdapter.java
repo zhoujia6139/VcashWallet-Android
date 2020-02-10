@@ -32,7 +32,7 @@ public class VcashTokenAdapter extends BaseQuickAdapter<VcashTokenInfo, BaseView
             Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             ivToken.setImageBitmap(decodedByte);
         }else {
-            if(VCashUtil.isVCash(item.TokenType)){
+            if(VCashUtil.isVCash(item.TokenId)){
                 ivToken.setImageResource(R.drawable.ic_vcash);
             }else {
                 ivToken.setImageResource(R.drawable.ic_vcash_placeholder);

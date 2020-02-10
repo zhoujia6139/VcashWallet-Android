@@ -114,11 +114,19 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_SERVER);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, serverTx);
                     nv2(intent, REQUEST_CODE_SERVER_TX);
-                } else {
+                } else if(entity.getItemType() == WalletTxEntity.TYPE_TX_LOG){
                     VcashTxLog vcashTxLog = entity.getTxLogEntity();
                     Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_LOG);
                     intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, vcashTxLog);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_ISTOKEN,false);
+                    nv2(intent, REQUEST_CODE_TX_LOG);
+                }else if(entity.getItemType() == WalletTxEntity.TYPE_TOKEN_TX_LOG){
+                    VcashTokenTxLog tokenTxLog = entity.getTokenTxLogEntity();
+                    Intent intent = new Intent(WalletTokenDetailsActivity.this, TxDetailsActivity.class);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE, TxDetailsActivity.TYPE_TX_LOG);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_DATA, tokenTxLog);
+                    intent.putExtra(TxDetailsActivity.PARAM_TX_ISTOKEN,true);
                     nv2(intent, REQUEST_CODE_TX_LOG);
                 }
                 if (popUtil != null && popUtil.isShowing()) {
@@ -283,13 +291,13 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         if (VCashUtil.isVCash(tokenType)) {
             WalletApi.WalletBalanceInfo balanceInfo = WalletApi.getWalletBalanceInfo();
             mTvBalance.setText(WalletApi.nanoToVcashString(balanceInfo.total));
-            mTvAvaliable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable) + " V");
-            mTvPending.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed) + " V");
+            mTvAvaliable.setText(WalletApi.nanoToVcashString(balanceInfo.spendable));
+            mTvPending.setText(WalletApi.nanoToVcashString(balanceInfo.unconfirmed));
         } else {
             WalletApi.WalletBalanceInfo walletTokenBalanceInfo = WalletApi.getWalletTokenBalanceInfo(tokenType);
             mTvBalance.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.total));
-            mTvAvaliable.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.spendable) + " V");
-            mTvPending.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.unconfirmed) + " V");
+            mTvAvaliable.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.spendable));
+            mTvPending.setText(WalletApi.nanoToVcashString(walletTokenBalanceInfo.unconfirmed));
         }
 
         //refreshheight
@@ -350,6 +358,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
             super(data);
             addItemType(WalletTxEntity.TYPE_SERVER_TX, R.layout.item_vcash_tx);
             addItemType(WalletTxEntity.TYPE_TX_LOG, R.layout.item_vcash_tx);
+            addItemType(WalletTxEntity.TYPE_TOKEN_TX_LOG,R.layout.item_vcash_tx);
             addItemType(WalletTxEntity.TYPE_TX_ONGOING, R.layout.layout_vcash_tx_title);
             addItemType(WalletTxEntity.TYPE_TX_COMPLETE, R.layout.layout_vcash_tx_title);
         }

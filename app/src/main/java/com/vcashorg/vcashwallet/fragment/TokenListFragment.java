@@ -54,7 +54,7 @@ public class TokenListFragment extends BaseFragment {
                 VcashTokenInfo tokenInfo = (VcashTokenInfo) adapter.getData().get(position);
 
                 Intent intent = new Intent(mActivity,WalletTokenDetailsActivity.class);
-                intent.putExtra(Args.TOKEN_TYPE,tokenInfo.TokenType);
+                intent.putExtra(Args.TOKEN_TYPE,tokenInfo.TokenId);
                 nv(intent);
             }
         });
