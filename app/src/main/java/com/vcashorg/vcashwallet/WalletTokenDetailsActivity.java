@@ -6,6 +6,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -141,19 +142,6 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
         mRvTx.setAdapter(adapter);
 
         mSrTx.setOnRefreshListener(this);
-
-        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
-            @Override
-            public void onChecked() {
-                showNewTxPop();
-                refreshData();
-            }
-
-            @Override
-            public void onForceRefresh() {
-                refreshData();
-            }
-        });
     }
 
     @Override
@@ -341,12 +329,30 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
     @Override
     public void onResume() {
         super.onResume();
+
+        Log.i("ppp","TokenDetails onResume");
+
+        ServerTxManager.getInstance().addNewTxCallBack(new ServerTxManager.ServerTxCallBack() {
+            @Override
+            public void onChecked() {
+                showNewTxPop();
+                refreshData();
+            }
+
+            @Override
+            public void onForceRefresh() {
+                refreshData();
+            }
+        });
         ServerTxManager.getInstance().startWork();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        Log.i("ppp","TokenDetails onPause");
+
         ServerTxManager.getInstance().stopWork();
     }
 
