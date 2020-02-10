@@ -435,11 +435,11 @@ public class VcashSlate implements Serializable {
                 jsonWriter.beginObject();
                 jsonWriter.name("id").value(slate.uuid);
                 jsonWriter.name("num_participants").value(slate.num_participants);
-                jsonWriter.name("amount").value(slate.amount);
+                jsonWriter.name("amount").value(String.valueOf(slate.amount));
                 jsonWriter.name("token_type").value(slate.token_type);
-                jsonWriter.name("fee").value(slate.fee);
-                jsonWriter.name("height").value(slate.height);
-                jsonWriter.name("lock_height").value(slate.lock_height);
+                jsonWriter.name("fee").value(String.valueOf(slate.fee));
+                jsonWriter.name("height").value(String.valueOf(slate.height));
+                jsonWriter.name("lock_height").value(String.valueOf(slate.lock_height));
                 Gson version_gson = new Gson();
                 String version_str = version_gson.toJson(slate.version_info);
                 jsonWriter.name("version_info").jsonValue(version_str);
@@ -525,7 +525,7 @@ public class VcashSlate implements Serializable {
             @Override
             public void write(JsonWriter jsonWriter, ParticipantData data) throws IOException {
                 jsonWriter.beginObject();
-                jsonWriter.name("id").value(data.pId);
+                jsonWriter.name("id").value(String.valueOf(data.pId));
                 jsonWriter.name("message").value(data.message);
                 byte[] compressKey = NativeSecp256k1.instance().getCompressedPubkey(data.public_blind_excess);
                 String public_blind_excessStr = AppUtil.hex(compressKey);
