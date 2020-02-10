@@ -389,6 +389,7 @@ public class WalletApi {
                             tx.token_amount_credited = item.value;
                             tx.tx_type = item.is_token_issue? VcashTxLog.TxLogEntryType.ConfirmedCoinbaseOrTokenIssue: VcashTxLog.TxLogEntryType.TxReceived;
                             tx.server_status = ServerTxStatus.TxClosed;
+                            tx.token_type = item.token_type;
                             item.tx_log_id = tx.tx_id;
                             txArr.add(tx);
                         }
