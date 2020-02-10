@@ -29,6 +29,9 @@ import butterknife.OnClick;
 
 public class TokenListFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener{
 
+    public static final int REQUEST_CODE_ADD_TOKEN = 100;
+    public static final int REQUEST_CODE_DETAILS = 101;
+
     @BindView(R.id.sr_token)
     SwipeRefreshLayout mSrToken;
     @BindView(R.id.rv_token)
@@ -57,7 +60,7 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
                 Intent intent = new Intent(mActivity,WalletTokenDetailsActivity.class);
                 intent.putExtra(Args.TOKEN_TYPE,tokenInfo.TokenId);
-                startActivityForResult(intent,100);
+                startActivityForResult(intent,REQUEST_CODE_DETAILS);
             }
         });
 
@@ -68,7 +71,7 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
     @Override
     public void initData() {
-        adapter.setNewData(generateTokenList());
+        refreshData();
     }
 
     @Override
@@ -124,21 +127,24 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
     @OnClick(R.id.tv_add_token)
     public void onAddTokenClick(){
         Intent intent = new Intent(mActivity, VcashTokenAddActivity.class);
-        startActivityForResult(intent,100);
+        startActivityForResult(intent,REQUEST_CODE_ADD_TOKEN);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        refreshData();
+        if(requestCode == REQUEST_CODE_ADD_TOKEN || requestCode == REQUEST_CODE_DETAILS){
+            refreshData();
+        }
     }
 
     @Override
     public void onRefresh() {
-
+        refreshData();
     }
 
     private void refreshData(){
         adapter.setNewData(generateTokenList());
     }
+
 }
