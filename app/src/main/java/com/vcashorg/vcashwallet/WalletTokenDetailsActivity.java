@@ -211,13 +211,21 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
     }
 
     private void refreshData() {
-        WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
-            @Override
-            public void onCall(boolean yesOrNo, Object data) {
-                setNewData();
-            }
-        });
-        WalletApi.updateTokenOutputStatusWithComplete(null);
+        if (!VCashUtil.isVCash(tokenType)) {
+            WalletApi.updateTokenOutputStatusWithComplete(new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    setNewData();
+                }
+            });
+        }else {
+            WalletApi.updateOutputStatusWithComplete(new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    setNewData();
+                }
+            });
+        }
     }
 
     private void setNewData() {
