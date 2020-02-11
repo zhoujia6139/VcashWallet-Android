@@ -190,6 +190,7 @@ public class VcashSendActivity extends ToolBarActivity {
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_TYPE,TxDetailsActivity.TYPE_TX_LOG);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_DATA,vcashTxLog);
                                                 intent.putExtra(TxDetailsActivity.PARAM_TX_SENDER,true);
+                                                intent.putExtra(TxDetailsActivity.PARAM_TX_ISTOKEN, !VCashUtil.isVCash(tokenType));
                                                 nv(intent);
                                                 finish();
                                             }else {
