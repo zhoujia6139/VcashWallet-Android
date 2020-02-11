@@ -33,6 +33,7 @@ public class NodeApi {
                 .subscribe(new CommonObserver<NodeOutputs>() {
             @Override
             public void onSuccess(NodeOutputs result) {
+                Log.i(Tag, String.format("getOutputsByPmmrIndex:last_retrieved_index=%d, highest_index=%d, size=%d", result.last_retrieved_index, result.highest_index, result.outputs.size()));
                 for (NodeOutputs.NodeOutput item :result.outputs){
                     VcashOutput output = (VcashOutput)VcashWallet.getInstance().identifyUtxoOutput(item);
                     if (output != null){
