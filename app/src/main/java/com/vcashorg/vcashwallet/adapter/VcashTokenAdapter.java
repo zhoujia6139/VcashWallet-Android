@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vcashorg.vcashwallet.R;
@@ -27,10 +28,9 @@ public class VcashTokenAdapter extends BaseQuickAdapter<VcashTokenInfo, BaseView
         helper.setText(R.id.tv_token_name,item.Name);
         helper.setText(R.id.tv_token_full_name,item.FullName);
         ImageView ivToken = helper.getView(R.id.iv_token);
-        if(!TextUtils.isEmpty(item.IconData)){
-            byte[] decodedString = Base64.decode(item.IconData.split(",")[1], Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            ivToken.setImageBitmap(decodedByte);
+
+        if(!TextUtils.isEmpty(item.IconName)){
+            Glide.with(mContext).load(VCashUtil.getTokenIconUrl(item.IconName)).into(ivToken);
         }else {
             if(VCashUtil.isVCash(item.TokenId)){
                 ivToken.setImageResource(R.drawable.ic_vcash);
