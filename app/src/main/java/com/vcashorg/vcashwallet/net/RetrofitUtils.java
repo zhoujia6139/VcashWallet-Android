@@ -88,6 +88,8 @@ public class RetrofitUtils {
                 .addInterceptor(new LogInterceptor())
                 .retryOnConnectionFailure(true)
                 .connectTimeout(20,TimeUnit.SECONDS)
+                .readTimeout(20,TimeUnit.SECONDS)
+                .writeTimeout(15,TimeUnit.SECONDS)
                 .build();
     }
 }
