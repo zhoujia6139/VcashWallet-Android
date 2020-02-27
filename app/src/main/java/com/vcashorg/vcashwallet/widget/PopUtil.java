@@ -57,7 +57,7 @@ public class PopUtil extends PopupWindow {
         //设置SelectPicPopupWindow弹出窗体的宽
         this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         //设置SelectPicPopupWindow弹出窗体的高
-        this.setHeight(dip2px(activity, 134));
+        this.setHeight(dip2px(activity, 146));
         //  设置SelectPicPopupWindow弹出窗体可点击
         this.setFocusable(false);
         //   设置背景透明

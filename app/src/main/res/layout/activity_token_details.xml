@@ -7,6 +7,11 @@
 
     <include layout="@layout/layout_token_details_bar" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/grey_4" />
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/sr_tx"
         android:layout_width="match_parent"

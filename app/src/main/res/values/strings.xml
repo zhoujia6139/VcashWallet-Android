@@ -95,6 +95,7 @@
     <string name="amount">Amount</string>
     <string name="enter_amount">Input amount</string>
     <string name="receive_vcash">Receive VCash</string>
+    <string name="receive_coins">Receive Coins</string>
     <string name="wallet_id">Your wallet ID</string>
     <string name="scan_qr_code">Or scan the QR code</string>
     <string name="general_settings">General settings</string>

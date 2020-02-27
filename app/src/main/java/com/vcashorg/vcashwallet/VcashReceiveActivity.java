@@ -23,7 +23,7 @@ public class VcashReceiveActivity extends ToolBarActivity {
 
     @Override
     protected void initToolBar() {
-        setToolBarTitle(UIUtils.getString(R.string.receive_vcash));
+        setToolBarTitle(UIUtils.getString(R.string.receive_coins));
     }
 
     @Override
