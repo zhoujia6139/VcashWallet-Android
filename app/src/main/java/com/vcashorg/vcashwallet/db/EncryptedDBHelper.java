@@ -143,10 +143,9 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     public ArrayList<VcashTokenOutput> getActiveTokenOutputData(){
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<VcashTokenOutput> arr = null;
+        ArrayList<VcashTokenOutput> arr = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTokenOutput WHERE status != ?", new String[] {Integer.toString(VcashOutput.OutputStatus.Spent.code())});
         if (cursor != null && cursor.moveToFirst()) {
-            arr = new ArrayList<>();
             do {
                 VcashTokenOutput item = new VcashTokenOutput();
                 item.commitment = cursor.getString(cursor.getColumnIndex("commitment"));

@@ -145,7 +145,9 @@ public class VcashWallet {
     }
 
     void setChainTokenOutputs(ArrayList<VcashTokenOutput> chainOutputs){
-        token_outputs = chainOutputs;
+        if(chainOutputs != null){
+            token_outputs = chainOutputs;
+        }
 
         VcashKeychainPath maxKeyPath = new VcashKeychainPath(3, 0, 0, 0, 0);
         if (mKeyPath != null) {

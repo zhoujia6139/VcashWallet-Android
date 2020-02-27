@@ -50,8 +50,13 @@ public class VcashTokenAddActivity extends ToolBarActivity {
                 @Override
                 public void onCall() {
                     if(!isFinishing()){
-                        dismissProgressDialog();
-                        addAdapter.setNewData(generateAllToken());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dismissProgressDialog();
+                                addAdapter.setNewData(generateAllToken());
+                            }
+                        });
                     }
                 }
             });

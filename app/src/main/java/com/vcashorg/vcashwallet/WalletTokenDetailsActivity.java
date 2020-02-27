@@ -281,7 +281,12 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
 
         if (mData != null && mData.size() != 0) {
             adapter.removeFooterView(footerView);
+        }else {
+            WalletTxEntity entity = new WalletTxEntity();
+            entity.setItemType(WalletTxEntity.TYPE_TX_COMPLETE);
+            mData.add(entity);
         }
+
         adapter.setNewData(mData);
         mSrTx.setRefreshing(false);
 
