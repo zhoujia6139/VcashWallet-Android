@@ -53,9 +53,10 @@ public class RetrofitUtils {
         return initRetrofit(initOkHttp(), getServerBaseUrl()).create(ServerApiUrl.class);
     }
 
-    private static String getNodeBaseUrl(){
+    public static String getNodeBaseUrl(){
         if (AppUtil.isInTestNet){
-            return "http://47.75.163.56:13513";
+            //return "http://172.20.10.2:13513";
+            return "http://192.168.31.213:13513";
         }
         else{
             return "https://api-node.vcashwallet.app";
@@ -64,7 +65,10 @@ public class RetrofitUtils {
 
     private static String getServerBaseUrl(){
         if (AppUtil.isInTestNet){
-            return "https://api.vcashwallet.app";
+            return "http://192.168.31.213:13500";
+            //return "https://api.vcashwallet.app";
+            //return "http://172.20.10.2:13500";
+            //return "http://192.168.31.213:13500";
         }
         else{
             return "https://api.vcashwallet.app";

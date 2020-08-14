@@ -13,15 +13,20 @@ import com.vcashorg.vcashwallet.net.RetrofitUtils;
 import com.vcashorg.vcashwallet.net.RxHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
+import com.vcashorg.vcashwallet.wallet.PaymentProof;
 import com.vcashorg.vcashwallet.wallet.VcashWallet;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
+
+import org.bitcoin.protocols.payments.Protos;
+
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
 
 public class ServerApi {
     static private String Tag = "------ServerApi";
     static void checkStatus(String userId, final WalletCallback callback) {
-        RetrofitUtils.getServerApiUrl().checkStatus(userId)
+        String userPubkey = PaymentProof.getPubkeyFromProofAddress(userId);
+        RetrofitUtils.getServerApiUrl().checkStatus(userPubkey)
                 .compose(RxHelper.<ArrayList<JsonElement>>io2main())
                 .subscribe(new CommonObserver<ArrayList<JsonElement>>() {
                     @Override
@@ -47,11 +52,12 @@ public class ServerApi {
     }
 
     public static void sendTransaction(ServerTransaction tx, final WalletCallback callback) {
-        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        //tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        byte[] msgData = tx.msgToSign();
+        tx.msg_sig = ServerApi.getSignatureForMsg(msgData);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, new ServerTransaction.ServerTransactionTypeAdapter()).create();
         JsonElement jsonStr = gson.toJsonTree(tx);
-
 
         RetrofitUtils.getServerApiUrl().sendTransaction(jsonStr)
                 .compose(RxHelper.<ResponseBody>io2main())
@@ -75,8 +81,11 @@ public class ServerApi {
     }
 
     public static void receiveTransaction(ServerTransaction tx, final WalletCallback callback) {
-        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
-        tx.tx_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.txDataToSign(), VcashWallet.getInstance().getSignerKey()));
+//        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+//        tx.tx_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.txDataToSign(), VcashWallet.getInstance().getSignerKey()));
+
+        byte[] msgData = tx.msgToSign();
+        tx.msg_sig = ServerApi.getSignatureForMsg(msgData);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(ServerTransaction.class, new ServerTransaction.ServerTransactionTypeAdapter()).create();
         JsonElement jsonStr = gson.toJsonTree(tx);
@@ -105,7 +114,9 @@ public class ServerApi {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxFinalized;
         tx.tx_id = tx_id;
-        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+//        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        byte[] msgData = tx.msgToSign();
+        tx.msg_sig = ServerApi.getSignatureForMsg(msgData);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
         JsonElement jsonStr = gson.toJsonTree(tx);
@@ -134,7 +145,9 @@ public class ServerApi {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxCanceled;
         tx.tx_id = tx_id;
-        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        //tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        byte[] msgData = tx.msgToSign();
+        tx.msg_sig = ServerApi.getSignatureForMsg(msgData);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
         JsonElement jsonStr = gson.toJsonTree(tx);
@@ -163,7 +176,9 @@ public class ServerApi {
         FinalizeTxInfo tx = new FinalizeTxInfo();
         tx.code = ServerTxStatus.TxClosed;
         tx.tx_id = tx_id;
-        tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        //tx.msg_sig = AppUtil.hex(NativeSecp256k1.instance().ecdsaSign(tx.msgToSign(), VcashWallet.getInstance().getSignerKey()));
+        byte[] msgData = tx.msgToSign();
+        tx.msg_sig = ServerApi.getSignatureForMsg(msgData);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(FinalizeTxInfo.class, new FinalizeTxInfo.FinalizeTxInfoTypeAdapter()).create();
         JsonElement jsonStr = gson.toJsonTree(tx);
@@ -186,5 +201,18 @@ public class ServerApi {
                         }
                     }
                 });
+    }
+
+    static String getSignatureForMsg(byte[] magData) {
+        byte[] hashData = NativeSecp256k1.instance().blake2b(magData, null);
+        String hashDataStr = AppUtil.hex(hashData);
+        String secKey = VcashWallet.getInstance().getSignerKey();
+        String pubkey = PaymentProof.getPubkeyFromProofAddress(VcashWallet.getInstance().mUserId);
+        String signature = PaymentProof.createSignature(hashDataStr, secKey);
+        boolean yesOrNo = PaymentProof.verifySignature(AppUtil.hex(hashData), pubkey, signature);
+        if (!yesOrNo) {
+            Log.w(Tag, "signature is not valid");
+        }
+        return signature;
     }
 }

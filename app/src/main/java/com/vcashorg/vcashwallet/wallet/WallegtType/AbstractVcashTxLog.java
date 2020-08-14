@@ -1,6 +1,7 @@
 package com.vcashorg.vcashwallet.wallet.WallegtType;
 
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
+import com.vcashorg.vcashwallet.utils.UIUtils;
 
 import java.io.Serializable;
 
@@ -17,7 +18,24 @@ public abstract class AbstractVcashTxLog extends Object implements Serializable 
     public long fee;
     public String signed_slate_msg;
 
-    abstract public boolean isCanBeCanneled();
+    public boolean isCanBeCanneled(){
+        if (tx_type == TxLogEntryType.TxSent && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
+            return true;
+        }else if(tx_type == TxLogEntryType.TxReceived && UIUtils.isEmpty(parter_id) && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCanBeAutoCanneled (){
+        if ((tx_type == TxLogEntryType.TxSent || tx_type == TxLogEntryType.TxReceived) &&
+        confirm_state == VcashTxLog.TxLogConfirmType.DefaultState) {
+            return true;
+        }
+
+        return false;
+    }
 
     abstract public void cancelTxlog();
 

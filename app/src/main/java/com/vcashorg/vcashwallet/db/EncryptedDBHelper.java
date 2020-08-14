@@ -2,6 +2,9 @@ package com.vcashorg.vcashwallet.db;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tencent.wcdb.Cursor;
 import com.tencent.wcdb.SQLException;
 import com.tencent.wcdb.database.SQLiteDatabase;
@@ -9,6 +12,7 @@ import com.tencent.wcdb.database.SQLiteOpenHelper;
 import com.tencent.wcdb.repair.RepairKit;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashCommitId;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
@@ -18,13 +22,15 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.VcashWalletInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EncryptedDBHelper extends SQLiteOpenHelper {
     public static final String PASSPHRASE = "vcash_wallet";
 
     private static final String DATABASE_NAME = "vcash_wallet_encrypted.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     static private Context mContext;
     private String mPassphrase;
@@ -86,10 +92,9 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     public ArrayList<VcashOutput> getActiveOutputData(){
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<VcashOutput> arr = null;
+        ArrayList<VcashOutput> arr = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashOutput WHERE status != ?", new String[] {Integer.toString(VcashOutput.OutputStatus.Spent.code())});
         if (cursor != null && cursor.moveToFirst()) {
-            arr = new ArrayList<>();
             do {
                 VcashOutput item = new VcashOutput();
                 item.commitment = cursor.getString(cursor.getColumnIndex("commitment"));
@@ -326,10 +331,9 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     public ArrayList<VcashTxLog> getTxData(){
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<VcashTxLog> arr = null;
+        ArrayList<VcashTxLog> arr = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT * FROM VcashTxLog ORDER BY tx_id ASC", null);
         if (cursor != null && cursor.moveToFirst()) {
-            arr = new ArrayList<VcashTxLog>();
             do {
                 arr.add(parseTxLog(cursor));
             } while (cursor.moveToNext());
@@ -409,7 +413,7 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
     public ArrayList<VcashTokenTxLog> getTokenTxData(String tokenType){
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<VcashTokenTxLog> arr = null;
+        ArrayList<VcashTokenTxLog> arr = new ArrayList<>();
         String query;
         if (tokenType != null) {
             query = String.format("SELECT * FROM VcashTokenTxLog where token_type = '%s' ORDER BY tx_id ASC", tokenType);
@@ -419,7 +423,6 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
 
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null && cursor.moveToFirst()) {
-            arr = new ArrayList<VcashTokenTxLog>();
             do {
                 arr.add(parseTokenTxLog(cursor));
             } while (cursor.moveToNext());
@@ -527,16 +530,27 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
     }
 
     public boolean saveContext(VcashContext context){
+        Gson common_gson = new GsonBuilder().serializeNulls().create();
+        String output_ids_str = common_gson.toJson(context.output_ids);
+        String input_ids_str = common_gson.toJson(context.input_ids);
+        String token_output_ids_str = common_gson.toJson(context.token_output_ids);
+        String token_input_ids_str = common_gson.toJson(context.token_input_ids);
         SQLiteDatabase db = this.getWritableDatabase();
         boolean isSuc = true;
         try {
             db.execSQL("REPLACE INTO VcashContext (" +
-                    "slate_id, sec_key, token_sec_key, sec_nounce)" +
+                    "slate_id, sec_key, token_sec_key, sec_nounce, amout, fee, output_ids, input_ids, token_output_ids, token_input_ids)" +
                     "values(" +
                     "'" + context.slate_id + "'," +
                     "'" + context.sec_key + "'," +
                     "'" + context.token_sec_key + "'," +
-                    "'" + context.sec_nounce + "'" +
+                    "'" + context.sec_nounce + "'," +
+                    context.amout + "," +
+                    context.fee + "," +
+                    "'" + output_ids_str + "'," +
+                    "'" + input_ids_str + "'," +
+                    "'" + token_output_ids_str + "'," +
+                    "'" + token_input_ids_str + "'" +
                     ")");
         }catch (SQLException e){
             isSuc = false;
@@ -555,6 +569,18 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
             context.token_sec_key = cursor.getString(cursor.getColumnIndex("token_sec_key"));
             context.sec_nounce = cursor.getString(cursor.getColumnIndex("sec_nounce"));
             context.slate_id = cursor.getString(cursor.getColumnIndex("slate_id"));
+            context.amout = cursor.getLong(cursor.getColumnIndex("amout"));
+            context.fee = cursor.getLong(cursor.getColumnIndex("fee"));
+            String output_ids_str = cursor.getString(cursor.getColumnIndex("output_ids"));
+            String input_ids_str = cursor.getString(cursor.getColumnIndex("input_ids"));
+            String token_output_ids_str = cursor.getString(cursor.getColumnIndex("token_output_ids"));
+            String token_input_ids_str = cursor.getString(cursor.getColumnIndex("token_input_ids"));
+            Gson common_gson = new GsonBuilder().serializeNulls().create();
+            TypeToken typeToken = new TypeToken<ArrayList<VcashCommitId>>() {};
+            context.output_ids = common_gson.fromJson(output_ids_str, typeToken.getType());
+            context.input_ids = common_gson.fromJson(input_ids_str, typeToken.getType());
+            context.token_output_ids = common_gson.fromJson(token_output_ids_str, typeToken.getType());
+            context.token_input_ids = common_gson.fromJson(token_input_ids_str, typeToken.getType());
             return context;
         }
         return null;
@@ -629,14 +655,10 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "curHeight          integer," +
                 "curTxLogId         integer)");
 
-        db.execSQL("CREATE TABLE VcashContext (" +
-                "slate_id       text primary key NOT NULL," +
-                "sec_nounce     text," +
-                "sec_key        text," +
-                "token_sec_key  text)");
 
         createTableVcashTokenOutput(db);
         createTableVcashTokenTxLog(db);
+        createTableVcashContext(db);
     }
 
     @Override
@@ -648,10 +670,20 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
         }
 
         // version 3:
-        if (oldVersion == 2 && newVersion >= 3){
+        if (oldVersion <= 2 && newVersion >= 3){
             db.execSQL("ALTER TABLE VcashContext ADD COLUMN token_sec_key text");
             createTableVcashTokenOutput(db);
             createTableVcashTokenTxLog(db);
+        }
+
+        //version 4
+        if (oldVersion <= 3 && newVersion >= 4){
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN amout integer");
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN fee integer");
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN output_ids text");
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN input_ids text");
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN token_output_ids text");
+            db.execSQL("ALTER TABLE VcashContext ADD COLUMN token_input_ids text");
         }
 
         // OPTIONAL: backup master info for corruption recovery.
@@ -694,5 +726,19 @@ public class EncryptedDBHelper extends SQLiteOpenHelper {
                 "token_outputs      text," +
                 "inputs             text," +
                 "outputs            text)");
+    }
+
+    private void createTableVcashContext(SQLiteDatabase db){
+        db.execSQL("CREATE TABLE VcashContext (" +
+                "slate_id       text primary key NOT NULL," +
+                "sec_nounce     text," +
+                "sec_key        text," +
+                "token_sec_key  text," +
+                "amout          integer," +
+                "fee            integer," +
+                "output_ids     text," +
+                "input_ids      text," +
+                "token_output_ids       text," +
+                "token_input_ids        text)");
     }
 }

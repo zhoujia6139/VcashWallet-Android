@@ -31,7 +31,7 @@ public class JsonRpcRq {
             jsonWriter.name("jsonrpc").value(req.jsonrpc);
             jsonWriter.name("method").value(req.method);
             jsonWriter.name("id").value(req.id);
-            final Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
+            final Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).serializeNulls().create();
             String paramStr = slate_gson.toJson(req.params, new TypeToken<ArrayList<VcashSlate>>(){}.getType());
             jsonWriter.name("params").jsonValue(paramStr);
             jsonWriter.endObject();

@@ -8,7 +8,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.NativeSecp256k1;
+import com.vcashorg.vcashwallet.wallet.PaymentProof;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
+import com.vcashorg.vcashwallet.wallet.WalletApi;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -32,42 +34,21 @@ public class ServerTransaction implements Serializable {
 
     public ServerTransaction(VcashSlate sla){
         tx_id = sla.uuid;
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-        slate = gson.toJson(sla);
+        slate = WalletApi.encryptSlateForParter(sla);
     }
 
     public ServerTransaction(){
 
     }
 
-    public boolean isValidTxSignature(){
-        if (status == ServerTxStatus.TxDefaultStatus){
-            return true;
-        }
-        else if (status == ServerTxStatus.TxReceiverd){
-            return NativeSecp256k1.instance().ecdsaVerify(this.txDataToSign(), AppUtil.decode(tx_sig), AppUtil.decode(receiver_id));
-        }
-
-        return false;
-    }
-
     public byte[] msgToSign(){
         ByteBuffer buf = ByteBuffer.allocate(100);
         String short_tx_id = tx_id.replace("-", "");
         buf.put(AppUtil.decode(short_tx_id));
-        buf.put(AppUtil.decode(sender_id));
-        buf.put(AppUtil.decode(receiver_id));
-        buf.flip();
-        return AppUtil.BufferToByteArr(buf);
-    }
-
-    public byte[] txDataToSign(){
-        ByteBuffer buf = ByteBuffer.allocate(20000);
-        String short_tx_id = tx_id.replace("-", "");
-        buf.put(AppUtil.decode(short_tx_id));
-        buf.put(AppUtil.decode(sender_id));
-        buf.put(AppUtil.decode(receiver_id));
-        buf.put(slateObj.tx.computePayload(true));
+        String senderPubkey = WalletApi.getPubkeyFromProofAddress(sender_id);
+        buf.put(AppUtil.decode(senderPubkey));
+        String receiverPubkey = WalletApi.getPubkeyFromProofAddress(receiver_id);
+        buf.put(AppUtil.decode(receiverPubkey));
         buf.flip();
         return AppUtil.BufferToByteArr(buf);
     }
@@ -77,8 +58,8 @@ public class ServerTransaction implements Serializable {
         public void write(JsonWriter jsonWriter, ServerTransaction tx) throws IOException {
             jsonWriter.beginObject();
             jsonWriter.name("tx_id").value(tx.tx_id);
-            jsonWriter.name("sender_id").value(tx.sender_id);
-            jsonWriter.name("receiver_id").value(tx.receiver_id);
+            jsonWriter.name("sender_id").value(PaymentProof.getPubkeyFromProofAddress(tx.sender_id));
+            jsonWriter.name("receiver_id").value(PaymentProof.getPubkeyFromProofAddress(tx.receiver_id));
             jsonWriter.name("slate").value(tx.slate);
             jsonWriter.name("status").value(tx.status.code());
             jsonWriter.name("msg_sig").value(tx.msg_sig);
@@ -96,10 +77,12 @@ public class ServerTransaction implements Serializable {
                         tx.tx_id = jsonReader.nextString();
                         break;
                     case "sender_id":
-                        tx.sender_id = jsonReader.nextString();
+                        String sender_id = jsonReader.nextString();
+                        tx.sender_id = PaymentProof.getProofAddressFromPubkey(sender_id);
                         break;
                     case "receiver_id":
-                        tx.receiver_id = jsonReader.nextString();
+                        String receiver_id = jsonReader.nextString();
+                        tx.receiver_id = PaymentProof.getProofAddressFromPubkey(receiver_id);
                         break;
                     case "slate":
                         tx.slate = jsonReader.nextString();

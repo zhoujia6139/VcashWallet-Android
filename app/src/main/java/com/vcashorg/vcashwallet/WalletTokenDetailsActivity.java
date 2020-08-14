@@ -199,6 +199,7 @@ public class WalletTokenDetailsActivity extends BaseActivity implements SwipeRef
     }
 
     private void refreshData() {
+        WalletApi.updateTxStatus();
         if (!VCashUtil.isVCash(tokenType)) {
             WalletApi.updateTokenOutputStatusWithComplete(new WalletCallback() {
                 @Override

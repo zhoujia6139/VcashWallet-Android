@@ -21,16 +21,6 @@ public class VcashTxLog extends AbstractVcashTxLog implements Serializable {
         outputs.add(commitment);
     }
 
-    public boolean isCanBeCanneled(){
-        if (tx_type == TxLogEntryType.TxSent && confirm_state == TxLogConfirmType.DefaultState){
-            return true;
-        }else if(tx_type == TxLogEntryType.TxReceived && UIUtils.isEmpty(parter_id) && confirm_state == TxLogConfirmType.DefaultState){
-            return true;
-        }
-
-        return false;
-    }
-
     public void cancelTxlog(){
         ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
         if (tx_type == TxLogEntryType.TxSent){

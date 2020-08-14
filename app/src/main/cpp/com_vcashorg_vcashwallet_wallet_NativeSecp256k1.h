@@ -65,6 +65,14 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
 
 /*
  * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
+ * Method:    secp256k1_pubkey_to_commit
+ * Signature: (J[B)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1pubkey_1to_1commit
+        (JNIEnv *, jobject, jlong, jbyteArray);
+
+/*
+ * Class:     com_vcashorg_vcashwallet_wallet_NativeSecp256k1
  * Method:    secp256k1_get_compressed_pubkey
  * Signature: (J[B)[B
  */

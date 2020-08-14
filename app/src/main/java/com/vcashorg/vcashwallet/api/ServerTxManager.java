@@ -1,10 +1,6 @@
 package com.vcashorg.vcashwallet.api;
 
 import android.util.Log;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
@@ -89,13 +85,7 @@ public class ServerTxManager {
                         txMap.clear();
 
                         for (ServerTransaction item : txs) {
-                            Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-
-                            try {
-                                item.slateObj = gson.fromJson(item.slate, VcashSlate.class);
-                            }catch (JsonSyntaxException e){
-                                continue;
-                            }
+                            item.slateObj = WalletApi.parseSlateFromEncrypedSlatePackStr(item.slate);
                             if (item.slateObj != null) {
                                 AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(item.slateObj.uuid);
 
@@ -143,10 +133,10 @@ public class ServerTxManager {
 
                                 //if goes here item.status would be TxDefaultStatus or TxReceiverd
                                 item.isSend = (item.status == ServerTxStatus.TxReceiverd);
-                                if (!item.isValidTxSignature()){
-                                    Log.e(Tag, String.format("receive a invalid tx"));
-                                    continue;
-                                }
+//                                if (!item.isValidTxSignature()){
+//                                    Log.e(Tag, String.format("receive a invalid tx"));
+//                                    continue;
+//                                }
 
                                 //process special case here
                                 //if tx confirmed by net, finalize directly

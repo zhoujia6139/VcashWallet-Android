@@ -61,6 +61,7 @@ public class PasswordActivity extends ToolBarActivity {
     Button btnStart;
 
     ArrayList<String> words;
+    private ProgressDialog recover_progress;
 
     @Override
     protected void initToolBar() {
@@ -249,15 +250,7 @@ public class PasswordActivity extends ToolBarActivity {
     }
 
     private void recover(final String psw) {
-        final ProgressDialog progress = new ProgressDialog(PasswordActivity.this);
-        progress.setCancelable(false);
-        progress.setTitle(R.string.app_name);
-        progress.setMessage(UIUtils.getString(R.string.restoring_wallet));
-        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progress.setProgress(100);
-        progress.setIndeterminate(false);
-        progress.setProgressNumberFormat("");
-        progress.show();
+        initAndShowProcessView();
 
         WalletApi.clearWallet();
         SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET,false);
@@ -269,6 +262,18 @@ public class PasswordActivity extends ToolBarActivity {
 
                 boolean result = WalletApi.createWallet(words, psw);
                 if (result) {
+                    try {
+                        String json = new Gson().toJson(words);
+                        String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
+                        boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
+                        if (!save) {
+                            emitter.onError(null);
+                        }
+                    } catch (DecryptionException e) {
+                        emitter.onError(null);
+                    } catch (UnsupportedEncodingException e) {
+                        emitter.onError(null);
+                    }
                     emitter.onComplete();
                 } else {
                     emitter.onError(null);
@@ -289,67 +294,107 @@ public class PasswordActivity extends ToolBarActivity {
                     @Override
                     public void onError(Throwable e) {
                         UIUtils.showToastCenter(R.string.restore_fail);
-                        if (progress.isShowing()) {
-                            progress.dismiss();
+                        if (recover_progress.isShowing()) {
+                            recover_progress.dismiss();
                         }
                     }
 
                     @Override
                     public void onComplete() {
-                        WalletApi.checkWalletUtxo(new WalletCallback() {
-                            @Override
-                            public void onCall(boolean yesOrNo, Object data) {
-                               // Log.i("yjq","回调返回时间 : " + System.currentTimeMillis());
-
-                                if (yesOrNo) {
-                                    if(data instanceof Double){
-                                        double percent = (double) data;
-                                        progress.setProgress((int)(percent * 100));
-                                    }else {
-                                        try {
-                                            String json = new Gson().toJson(words);
-                                            String encrypt = AESUtil.encrypt(json, new CharSequenceX(psw), AESUtil.DefaultPBKDF2Iterations);
-                                            boolean save = PayloadUtil.getInstance(PasswordActivity.this).saveMnemonicToSDCard(encrypt);
-                                            if (save) {
-                                                progress.setProgress(100);
-                                                if (progress.isShowing()) {
-                                                    progress.dismiss();
-                                                }
-                                                SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
-                                                UIUtils.showToastCenter(R.string.create_wallet_success);
-                                                Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
-                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                nv(intent);
-                                                finish();
-                                            } else {
-                                                if (progress.isShowing()) {
-                                                    progress.dismiss();
-                                                }
-                                                UIUtils.showToastCenter(R.string.restore_fail);
-                                            }
-                                        } catch (DecryptionException e) {
-                                            UIUtils.showToastCenter(R.string.restore_fail);
-                                            e.printStackTrace();
-                                        } catch (UnsupportedEncodingException e) {
-                                            UIUtils.showToastCenter(R.string.restore_fail);
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                } else {
-                                    if (progress.isShowing()) {
-                                        progress.dismiss();
-                                    }
-                                    if (data instanceof String) {
-                                        UIUtils.showToastCenter((String) data);
-                                    } else {
-                                        UIUtils.showToastCenter(R.string.restore_fail);
-                                    }
-                                }
-                            }
-                        });
-                        WalletApi.checkWalletTokenUtxo(null);
+                        startCheckWalletUtxo(0);
                     }
                 });
+    }
+
+    private void startCheckWalletUtxo(final long startHeight) {
+        final PasswordActivity activity = this;
+        WalletApi.checkWalletUtxo(startHeight, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo) {
+                    if(data instanceof Double){
+                        double percent = (double) data;
+                        recover_progress.setProgress((int)(percent * 100));
+                    }else {
+                        startCheckWalletTokenUtxo(0);
+                    }
+                } else {
+                    final long lastIndex = (long)data;
+                    new AlertDialog.Builder(activity)
+                            .setMessage("restore failed! retry?")
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startCheckWalletUtxo(lastIndex);
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    UIUtils.showToastCenter(R.string.restore_fail);
+                                    if (recover_progress.isShowing()) {
+                                        recover_progress.dismiss();
+                                    }
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+    }
+
+    private void startCheckWalletTokenUtxo(final long startHeight) {
+        final PasswordActivity activity = this;
+        WalletApi.checkWalletTokenUtxo(startHeight, new WalletCallback() {
+            @Override
+            public void onCall(boolean yesOrNo, Object data) {
+                if (yesOrNo) {
+                    if(data instanceof Double){
+//                        double percent = (double) data;
+//                        progress.setProgress((int)(percent * 100));
+                    }else {
+                        SPUtil.getInstance(UIUtils.getContext()).setValue(SPUtil.FIRST_CREATE_WALLET, true);
+                        UIUtils.showToastCenter(R.string.create_wallet_success);
+                        Intent intent = new Intent(PasswordActivity.this, WalletMainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        nv(intent);
+                        finish();
+                    }
+                } else {
+                    final long lastIndex = (long)data;
+                    new AlertDialog.Builder(activity)
+                            .setMessage("token restore failed! retry?")
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startCheckWalletTokenUtxo(lastIndex);
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    UIUtils.showToastCenter(R.string.restore_fail);
+                                    if (recover_progress.isShowing()) {
+                                        recover_progress.dismiss();
+                                    }
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+    }
+
+    private void initAndShowProcessView(){
+        recover_progress = new ProgressDialog(PasswordActivity.this);
+        recover_progress.setCancelable(false);
+        recover_progress.setTitle(R.string.app_name);
+        recover_progress.setMessage(UIUtils.getString(R.string.restoring_wallet));
+        recover_progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        recover_progress.setProgress(100);
+        recover_progress.setIndeterminate(false);
+        recover_progress.setProgressNumberFormat("");
+        recover_progress.show();
     }
 
 }

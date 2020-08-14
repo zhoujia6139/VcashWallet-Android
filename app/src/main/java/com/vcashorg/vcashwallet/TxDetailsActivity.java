@@ -8,12 +8,15 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vcashorg.vcashwallet.api.ServerTxManager;
 import com.vcashorg.vcashwallet.api.bean.ServerTransaction;
 import com.vcashorg.vcashwallet.api.bean.ServerTxStatus;
@@ -23,6 +26,7 @@ import com.vcashorg.vcashwallet.utils.DateUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.utils.VCashUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog;
 import com.vcashorg.vcashwallet.wallet.WallegtType.WalletCallback;
@@ -140,6 +144,27 @@ public class TxDetailsActivity extends ToolBarActivity {
                 }
             });
         }
+
+//        final Gson slate_gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).serializeNulls().create();
+//        VcashSlate slate = null;
+//        if (vcashTxLog != null) {
+//            slate = slate_gson.fromJson(vcashTxLog.signed_slate_msg, VcashSlate.class);
+//        }
+//        if (tokenTxLog != null) {
+//            slate = slate_gson.fromJson(tokenTxLog.signed_slate_msg, VcashSlate.class);
+//        }
+//        String proofStr = WalletApi.exportPaymentProof(slate);
+//        WalletApi.verifyPaymentProof(proofStr, new WalletCallback() {
+//            @Override
+//            public void onCall(boolean yesOrNo, Object data) {
+//                if (yesOrNo) {
+//                    Log.e("", "");
+//                } else {
+//                    Log.e("", "");
+//                }
+//            }
+//        });
+
     }
 
     @Override

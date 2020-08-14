@@ -192,6 +192,7 @@ public class TokenListFragment extends BaseFragment implements SwipeRefreshLayou
 
     private void refreshWalletStatus(final boolean force) {
         if (force || (AppUtil.getCurrentTimeSecs() - lastFetch) >= 60) {
+            WalletApi.updateTxStatus();
             vcRefreshed = false;
             tokenRefreshed = false;
             WalletApi.updateOutputStatusWithComplete(new WalletCallback() {

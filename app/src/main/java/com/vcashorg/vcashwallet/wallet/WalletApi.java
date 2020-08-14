@@ -6,6 +6,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.api.NodeApi;
 import com.vcashorg.vcashwallet.api.ServerApi;
@@ -21,6 +24,7 @@ import com.vcashorg.vcashwallet.utils.CoinUtils;
 import com.vcashorg.vcashwallet.utils.SPUtil;
 import com.vcashorg.vcashwallet.utils.UIUtils;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.ExportPaymentInfo;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate;
@@ -34,6 +38,7 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicException;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -54,7 +59,14 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate.SlateState.Standard2;
+import static java.nio.ByteOrder.BIG_ENDIAN;
+
 public class WalletApi {
+    static {
+        System.loadLibrary("secp256k1_wrapper");
+        System.loadLibrary("paymentproof");
+    }
     static private String Tag = "------WalletApi";
     final public static long VCASH_BASE = 1000000000;
     private static  Context context;
@@ -331,9 +343,8 @@ public class WalletApi {
         return VcashWallet.getInstance().getChainHeight();
     }
 
-    public static void checkWalletUtxo(final WalletCallback callback){
-        ArrayList<VcashOutput> arr = new ArrayList<>();
-        NodeApi.getOutputsByPmmrIndex(0, arr, new WalletCallback() {
+    public static void checkWalletUtxo(long startHeight, final WalletCallback callback){
+        NodeApi.getOutputsByPmmrIndex(startHeight, new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data){
                 if (yesOrNo){
@@ -365,16 +376,15 @@ public class WalletApi {
                 }
                 else {
                     if (callback != null){
-                        callback.onCall(false, null);
+                        callback.onCall(false, data);
                     }
                 }
             }
         });
     }
 
-    public static void checkWalletTokenUtxo(final WalletCallback callback){
-        ArrayList<VcashTokenOutput> arr = new ArrayList<>();
-        NodeApi.getTokenOutputsByPmmrIndex(0, arr, new WalletCallback() {
+    public static void checkWalletTokenUtxo(long startHeight, final WalletCallback callback){
+        NodeApi.getTokenOutputsByPmmrIndex(startHeight, new WalletCallback() {
             @Override
             public void onCall(boolean yesOrNo, Object data){
                 if (yesOrNo){
@@ -407,18 +417,47 @@ public class WalletApi {
                 }
                 else {
                     if (callback != null){
-                        callback.onCall(false, null);
+                        callback.onCall(false, data);
                     }
                 }
             }
         });
     }
 
-    public static void createSendTransaction(String token_type, long amount, final WalletCallback callback){
+    public static void createSendTransaction(String token_type, long amount, final String proofAddress, final WalletCallback callback){
+        VcashSlate.PaymentInfo info = null;
+        if (WalletApi.isValidSlatePackAddress(proofAddress)) {
+            String receiverAddr = WalletApi.getPubkeyFromProofAddress(proofAddress);
+            info = new VcashSlate.PaymentInfo();
+            info.sender_address = WalletApi.getPubkeyFromProofAddress(VcashWallet.getInstance().mUserId);
+            info.receiver_address = receiverAddr;
+        }
+
+        final VcashSlate.PaymentInfo final_info = info;
         if (token_type != null) {
-            VcashWallet.getInstance().sendTokenTransaction(token_type, amount, callback);
+            VcashWallet.getInstance().sendTokenTransaction(token_type, amount, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if (yesOrNo) {
+                        VcashSlate slate = (VcashSlate)data;
+                        slate.partnerAddress = proofAddress;
+                        slate.payment_proof = final_info;
+                    }
+                    callback.onCall(yesOrNo, data);
+                }
+            });
         } else {
-            VcashWallet.getInstance().sendTransaction(amount, 0, callback);
+            VcashWallet.getInstance().sendTransaction(amount, 0, new WalletCallback() {
+                @Override
+                public void onCall(boolean yesOrNo, Object data) {
+                    if (yesOrNo) {
+                        VcashSlate slate = (VcashSlate)data;
+                        slate.partnerAddress = proofAddress;
+                        slate.payment_proof = final_info;
+                    }
+                    callback.onCall(yesOrNo, data);
+                }
+            });
         }
     }
 
@@ -559,6 +598,7 @@ public class WalletApi {
                                         });
                                     }
                                 }catch (Exception e){
+                                    Log.e(Tag, String.format("sendTransaction post to %s failed!", full_url));
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
@@ -606,8 +646,7 @@ public class WalletApi {
                 if (yesOrNo){
                     Log.w(Tag, String.format("sendTransaction by file suc"));
                     EncryptedDBHelper.getsInstance().commitDatabaseTransaction();
-                    final Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-                    String slate_str = gson.toJson(slate);
+                    String slate_str = WalletApi.encryptSlateForParter(slate);
                     callback.onCall(true, slate_str);
                 }
                 else{
@@ -634,8 +673,10 @@ public class WalletApi {
         }
 
         //save txLog
+        String slateStr = AppUtil.hex(slate.selializeAsData());
         if (slate.txLog != null) {
             slate.txLog.server_status = ServerTxStatus.TxDefaultStatus;
+            slate.txLog.signed_slate_msg = slateStr;
             if (!EncryptedDBHelper.getsInstance().saveTx(slate.txLog)){
                 if (callback != null){
                     callback.onCall(false, "Db error:saveTx failed");
@@ -644,6 +685,7 @@ public class WalletApi {
             }
         } else {
             slate.tokenTxLog.server_status = ServerTxStatus.TxDefaultStatus;
+            slate.tokenTxLog.signed_slate_msg = slateStr;
             if (!EncryptedDBHelper.getsInstance().saveTx(slate.tokenTxLog)){
                 if (callback != null){
                     callback.onCall(false, "Db error:saveTokenTx failed");
@@ -670,16 +712,7 @@ public class WalletApi {
     }
 
     public static void isValidSlateConentForReceive(String fileContent, final WalletCallback callback){
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-        VcashSlate slate;
-        try {
-             slate = gson.fromJson(fileContent, VcashSlate.class);
-        }catch (Exception e){
-            if (callback != null){
-                callback.onCall(false, "Wrong Data Format");
-            }
-            return;
-        }
+        VcashSlate slate = WalletApi.parseSlateFromEncrypedSlatePackStr(fileContent);
         if (slate == null || !slate.isValidForReceive()){
             if (callback != null){
                 callback.onCall(false, "Wrong Data Format");
@@ -739,10 +772,11 @@ public class WalletApi {
             return;
         }
 
-        if (!VcashWallet.getInstance().receiveTransaction(slate)){
-            Log.e(Tag, "VcashWallet receiveTransaction failed");
-            callback.onCall(false, null);
-            return;
+        if (slate.ttl_cutoff_height > 0 && slate.ttl_cutoff_height <= VcashWallet.getInstance().getChainHeight()) {
+            Log.e(Tag, "Transaction Expired!");
+            if (callback != null){
+                callback.onCall(false, "Transaction Expired!");
+            }
         }
 
         EncryptedDBHelper.getsInstance().beginDatabaseTransaction();
@@ -756,8 +790,59 @@ public class WalletApi {
             }
         };
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-        String slateStr = gson.toJson(slate);
+        if (!VcashWallet.getInstance().receiveTransaction(slate)){
+            Log.e(Tag, "VcashWallet receiveTransaction failed");
+            callback.onCall(false, null);
+            return;
+        }
+
+        if (slate.payment_proof != null) {
+            if (slate.payment_proof.sender_address == null || slate.payment_proof.sender_address.length() != 64 ||
+            slate.payment_proof.receiver_address == null || slate.payment_proof.receiver_address.length() != 64) {
+                rollbackBlock.onCall();
+                Log.e(Tag, "Tx payment proof address is invalid!");
+                callback.onCall(false, "Tx payment proof address is invalid!");
+                return;
+            }
+
+            String selfAddress = WalletApi.getPubkeyFromProofAddress(VcashWallet.getInstance().mUserId);
+            if (!selfAddress.equals(slate.payment_proof.receiver_address)) {
+                rollbackBlock.onCall();
+                Log.e(Tag, "Tx is not for me!");
+                callback.onCall(false, "Tx is not for me!");
+                return;
+            }
+
+            byte[] excess = slate.calculateExcess();
+            byte[] key = VcashWallet.getInstance().getPaymentProofKey();
+            String signature = WalletApi.createPaymentProofSignature(slate.token_type, slate.amount, AppUtil.hex(excess), slate.payment_proof.sender_address, AppUtil.hex(key));
+            if (signature == null) {
+                rollbackBlock.onCall();
+                Log.e(Tag, "Create Tx payment proof failed");
+                callback.onCall(false, "Create Tx payment proof failed");
+                return;
+            }
+            Log.w(Tag, String.format("-------------signature:%s", signature));
+
+            boolean isValid = WalletApi.verifyPaymentProof(slate.token_type, slate.amount, AppUtil.hex(excess), slate.payment_proof.sender_address, slate.payment_proof.receiver_address, signature);
+            if (!isValid) {
+                rollbackBlock.onCall();
+                Log.e(Tag, "Create Tx payment proof failed");
+                callback.onCall(false, "Create Tx payment proof failed");
+                return;
+            }
+
+            slate.payment_proof.receiver_signature = signature;
+        }
+
+        // Can remove amount and fee now
+        // as well as sender's sig data
+        slate.amount = 0;
+        slate.fee = 0;
+        slate.removeOtherSigdata();
+        slate.state = Standard2;
+
+        String slateStr = WalletApi.encryptSlateForParter(slate);
 
         if (slate.token_type != null) {
             slate.createNewTokenOutputsFn.onCall();
@@ -828,16 +913,7 @@ public class WalletApi {
     }
 
     public static void isValidSlateConentForFinalize(String fileContent, final WalletCallback callback){
-        Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).create();
-        VcashSlate slate;
-        try {
-            slate = gson.fromJson(fileContent, VcashSlate.class);
-        }catch (Exception e){
-            if (callback != null){
-                callback.onCall(false, "Wrong Data Format");
-            }
-            return;
-        }
+        VcashSlate slate = WalletApi.parseSlateFromEncrypedSlatePackStr(fileContent);
         if (slate == null || !slate.isValidForFinalize()){
             if (callback != null){
                 callback.onCall(false, "Wrong Data Format");
@@ -886,6 +962,13 @@ public class WalletApi {
     }
 
     public static void finalizeTransaction(final VcashSlate slate, final WalletCallback callback){
+        AbstractVcashTxLog txLog = EncryptedDBHelper.getsInstance().getTxBySlateId(slate.uuid);
+        if (txLog == null || txLog.signed_slate_msg == null) {
+            Log.e(Tag, "database record is broke, cannot find tx record");
+            callback.onCall(false, null);
+            return;
+        }
+
         VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(slate.uuid);
         if (context == null){
             Log.e(Tag, "database record is broke, cannot finalize tx");
@@ -900,6 +983,32 @@ public class WalletApi {
             return;
         }
 
+        VcashSlate origSlate = VcashSlate.parseSlateFromData(AppUtil.decode(txLog.signed_slate_msg));
+        if (origSlate.payment_proof != null) {
+            if (slate.payment_proof == null) {
+                Log.e(Tag, "Expected Payment Proof for this Transaction is not present");
+                callback.onCall(false, null);
+                return;
+            }
+
+            if (!origSlate.payment_proof.sender_address.equals(slate.payment_proof.sender_address) ||
+                    !origSlate.payment_proof.receiver_address.equals(slate.payment_proof.receiver_address)) {
+                Log.e(Tag, "Payment Proof address does not match original Payment Proof address");
+                callback.onCall(false, null);
+                return;
+            }
+
+            byte[] excess = slate.calculateExcess();
+            boolean isValid = WalletApi.verifyPaymentProof(slate.token_type, slate.amount, AppUtil.hex(excess), slate.payment_proof.sender_address, slate.payment_proof.receiver_address, slate.payment_proof.receiver_signature);
+            if (!isValid) {
+                Log.e(Tag, "Recipient did not provide requested proof signature");
+                callback.onCall(false, "Recipient did not provide requested proof signature");
+                return;
+            }
+        }
+
+
+
         slate.tx.sortTx();
         byte[] txPayload = slate.tx.computePayload(false);
         NodeApi.postTx(AppUtil.hex(txPayload), new WalletCallback() {
@@ -911,6 +1020,7 @@ public class WalletApi {
                     if (txLog != null){
                         txLog.confirm_state = VcashTxLog.TxLogConfirmType.LoalConfirmed;
                         txLog.server_status = ServerTxStatus.TxFinalized;
+                        txLog.signed_slate_msg = AppUtil.hex(slate.selializeAsData());
                         EncryptedDBHelper.getsInstance().saveTx(txLog);
                     }
                 }
@@ -991,6 +1101,39 @@ public class WalletApi {
         }
 
         return retArr;
+    }
+
+    public static void updateTxStatus() {
+        ArrayList<VcashTxLog> txArr = EncryptedDBHelper.getsInstance().getTxData();
+        for (VcashTxLog tx :txArr) {
+            WalletApi.checkSingleTxStatus(tx);
+        }
+
+        ArrayList<VcashTokenTxLog> tokenTxArr = EncryptedDBHelper.getsInstance().getTokenTxData(null);
+        for (VcashTokenTxLog tx: tokenTxArr) {
+            WalletApi.checkSingleTxStatus(tx);
+        }
+    }
+
+    static void checkSingleTxStatus(AbstractVcashTxLog tx) {
+        if (!tx.isCanBeAutoCanneled()) {
+            return;
+        }
+
+        if (tx.signed_slate_msg != null) {
+            try {
+                Gson gson = new GsonBuilder().registerTypeAdapter(VcashSlate.class, new VcashSlate.VcashSlateTypeAdapter()).serializeNulls().create();
+                VcashSlate slate = gson.fromJson(tx.signed_slate_msg, VcashSlate.class);
+                if (slate != null &&
+                        slate.ttl_cutoff_height > 0 &&
+                        slate.ttl_cutoff_height <= VcashWallet.getInstance().getChainHeight()) {
+                    tx.cancelTxlog();
+                    EncryptedDBHelper.getsInstance().saveTx(tx);
+                }
+            } catch (JsonSyntaxException exc) {
+
+            }
+        }
     }
 
     public static void updateOutputStatusWithComplete(final WalletCallback callback){
@@ -1211,7 +1354,7 @@ public class WalletApi {
                                 VcashTokenTxLog tx = null;
                                 for (VcashTokenTxLog txLog :txs){
                                     if (txLog.confirm_state == VcashTxLog.TxLogConfirmType.LoalConfirmed){
-                                        for (String commitStr :txLog.inputs){
+                                        for (String commitStr :txLog.token_inputs){
                                             if (commitStr.equals(item.commitment)){
                                                 tx = txLog;
                                                 break;
@@ -1266,6 +1409,183 @@ public class WalletApi {
 
     public static void addTxDataListener(WalletNoParamCallBack listener){
         EncryptedDBHelper.getsInstance().addTxDataListener(listener);
+    }
+
+    public static Boolean isValidSlatePackAddress(String address) {
+        String pubkey = WalletApi.getPubkeyFromProofAddress(address);
+        return (pubkey != null && pubkey.length() == 64);
+    }
+
+    public static String getPubkeyFromProofAddress(String proofAddress) {
+        return PaymentProof.getPubkeyFromProofAddress(proofAddress);
+    }
+
+    public static String createPaymentProofSignature(String token_type, long amount, String excess, String senderPubkey, String secKey) {
+        return PaymentProof.createPaymentProofSignature(token_type, amount, excess, senderPubkey, secKey);
+    }
+
+    public static boolean verifyPaymentProof(String token_type, long amount, String excess, String senderPubkey, String verifyPubkey, String signature) {
+        return PaymentProof.verifyPaymentProof(token_type, amount, excess, senderPubkey, verifyPubkey, signature);
+    }
+
+    public static String exportPaymentProof(VcashSlate slate) {
+        if (slate.payment_proof != null) {
+            ExportPaymentInfo proof = new ExportPaymentInfo();
+            proof.token_type = slate.token_type;
+            proof.amount = String.valueOf(slate.amount);
+            byte[] excessData = slate.calculateExcess();
+            proof.excess = AppUtil.hex(excessData);
+
+            proof.recipient_address = PaymentProof.getProofAddressFromPubkey(slate.payment_proof.receiver_address);
+            proof.recipient_sig = slate.payment_proof.receiver_signature;
+            proof.sender_address = VcashWallet.getInstance().mUserId;
+            byte[] key = VcashWallet.getInstance().getPaymentProofKey();
+            String signature = PaymentProof.createPaymentProofSignature(slate.token_type, slate.amount, proof.excess, slate.payment_proof.sender_address, AppUtil.hex(key));
+            if (signature != null) {
+                boolean isValid = WalletApi.verifyPaymentProof(slate.token_type, slate.amount, proof.excess, slate.payment_proof.sender_address, slate.payment_proof.sender_address, signature);
+                if (isValid) {
+                    proof.sender_sig = signature;
+                    Gson gson = new Gson();
+                    return gson.toJson(proof);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static void verifyPaymentProof(String proofStr, final WalletCallback callback){
+        try{
+            Gson gson = new Gson();
+            ExportPaymentInfo proof = gson.fromJson(proofStr, ExportPaymentInfo.class);
+            if (proof != null) {
+                String senderAddr;
+                if (proof.sender_address.length() == 64) {
+                    senderAddr = proof.sender_address;
+                } else if (proof.sender_address.length() == 56) {
+                    senderAddr = PaymentProof.getPubkeyFromProofAddress(proof.sender_address);
+                } else {
+                    if(callback != null){
+                        callback.onCall(false, "Sender address format is invalid.");
+                    }
+                    return;
+                }
+
+                String receiverAddr;
+                if (proof.recipient_address.length() == 64) {
+                    receiverAddr = proof.recipient_address;
+                } else if (proof.recipient_address.length() == 56) {
+                    receiverAddr = PaymentProof.getPubkeyFromProofAddress(proof.recipient_address);
+                } else {
+                    if(callback != null){
+                        callback.onCall(false, "Recipient address format is invalid.");
+                    }
+                    return;
+                }
+
+                if (proof.sender_sig.length() != 128) {
+                    if(callback != null){
+                        callback.onCall(false, "Sender signature format is invalid.");
+                    }
+                    return;
+                }
+
+                if (proof.recipient_sig.length() != 128) {
+                    if(callback != null){
+                        callback.onCall(false, "Recipient signature format is invalid.");
+                    }
+                    return;
+                }
+
+                boolean isSenderSigValid = WalletApi.verifyPaymentProof(proof.token_type, Long.parseLong(proof.amount), proof.excess, senderAddr, senderAddr, proof.sender_sig);
+                if (!isSenderSigValid) {
+                    if(callback != null){
+                        callback.onCall(false, "Invalid sender signature.");
+                    }
+                    return;
+                }
+
+                boolean isReceiverSigValid = WalletApi.verifyPaymentProof(proof.token_type, Long.parseLong(proof.amount), proof.excess, senderAddr, receiverAddr, proof.recipient_sig);
+                if (!isReceiverSigValid) {
+                    if(callback != null){
+                        callback.onCall(false, "Invalid recipient signature.");
+                    }
+                    return;
+                }
+
+                if (proof.token_type != null) {
+                    NodeApi.getTokenKernel(proof.excess, new WalletCallback() {
+                        @Override
+                        public void onCall(boolean yesOrNo, Object data) {
+                            if (yesOrNo) {
+                                if(callback != null){
+                                    callback.onCall(true, "Signature is valid.");
+                                }
+                            } else {
+                                if(callback != null){
+                                    callback.onCall(false, "Transaction not found on chain.");
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    NodeApi.getKernel(proof.excess, new WalletCallback() {
+                        @Override
+                        public void onCall(boolean yesOrNo, Object data) {
+                            if (yesOrNo) {
+                                if(callback != null){
+                                    callback.onCall(true, "Signature is valid.");
+                                }
+                            } else {
+                                if(callback != null){
+                                    callback.onCall(false, "Transaction not found on chain.");
+                                }
+                            }
+                        }
+                    });
+                }
+
+                return;
+            }
+        }catch (Exception e) {
+
+        }
+
+        if(callback != null){
+            callback.onCall(false, "Proof format is invalid.");
+        }
+    }
+
+    public static VcashSlate parseSlateFromEncrypedSlatePackStr(String slateStr) {
+        byte[] key = VcashWallet.getInstance().getPaymentProofKey();
+        byte[] slate_bin = PaymentProof.slateFromSlatePackMessage(slateStr, AppUtil.hex(key));
+        if (slate_bin == null) {
+            return null;
+        }
+
+        VcashSlate slate = VcashSlate.parseSlateFromData(slate_bin);
+        if (slate == null) {
+            return null;
+        }
+
+        String slateAddress = PaymentProof.senderAddrFromSlatePackMessage(slateStr, AppUtil.hex(key));
+
+        slate.partnerAddress = slateAddress;
+
+        VcashContext context = EncryptedDBHelper.getsInstance().getContextBySlateId(slate.uuid);
+        if (context != null) {
+            slate.amount = context.amout;
+            slate.fee = context.fee;
+        }
+
+        return slate;
+    }
+
+    public static String encryptSlateForParter(VcashSlate slate) {
+        byte[] slate_bin = slate.selializeAsData();
+        String slateStr = PaymentProof.createSlatePackMsg(slate_bin, slate.partnerAddress, VcashWallet.getInstance().mUserId);
+
+        return slateStr;
     }
 
     public static double nanoToVcash(long nano){

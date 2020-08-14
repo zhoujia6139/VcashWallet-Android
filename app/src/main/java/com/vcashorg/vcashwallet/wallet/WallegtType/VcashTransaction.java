@@ -27,7 +27,7 @@ public class VcashTransaction extends VcashTxBaseObject {
     byte[] offset;
     TransactionBody body = new TransactionBody();
 
-    byte[]calculateFinalExcess(){
+    public byte[]calculateFinalExcess(){
         ArrayList<byte[]> negativeCommits = new ArrayList<byte[]>();
         ArrayList<byte[]> positiveCommits = new ArrayList<byte[]>();
         for (Input input : body.inputs){
@@ -63,18 +63,18 @@ public class VcashTransaction extends VcashTxBaseObject {
         return false;
     }
 
-    byte[]calculateTokenFinalExcess(){
-        ArrayList<byte[]> negativeCommits = new ArrayList<byte[]>();
-        ArrayList<byte[]> positiveCommits = new ArrayList<byte[]>();
-        for (TokenInput input : body.token_inputs){
-            negativeCommits.add(input.commit);
-        }
-        for (TokenOutput output : body.token_outputs){
-            positiveCommits.add(output.commit);
-        }
-
-        return NativeSecp256k1.instance().commitSum(positiveCommits, negativeCommits);
-    }
+//    public byte[]calculateTokenFinalExcess(){
+//        ArrayList<byte[]> negativeCommits = new ArrayList<byte[]>();
+//        ArrayList<byte[]> positiveCommits = new ArrayList<byte[]>();
+//        for (TokenInput input : body.token_inputs){
+//            negativeCommits.add(input.commit);
+//        }
+//        for (TokenOutput output : body.token_outputs){
+//            positiveCommits.add(output.commit);
+//        }
+//
+//        return NativeSecp256k1.instance().commitSum(positiveCommits, negativeCommits);
+//    }
 
     boolean setTokenTxExcessAndandTxSig(byte[] excess, byte[] sig){
         if (body.token_kernels.size() == 1){
@@ -387,29 +387,18 @@ public class VcashTransaction extends VcashTxBaseObject {
                 String excessSigStr = AppUtil.hex(compact_excess_sig);
                 String featureStr = null;
                 if (kernel.features == KernelFeatures.KernelFeaturePlain) {
-                    HashMap<String, Map> featureMap = new HashMap<>();
-                    HashMap<String, Long> feeMap = new HashMap<>();
-                    feeMap.put("fee", kernel.fee);
-                    featureMap.put("Plain", feeMap);
-                    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-                    featureStr = gson.toJson(featureMap);
+                    featureStr = "Plain";
                 } else if (kernel.features == KernelFeatures.KernelFeatureCoinbase) {
                     featureStr = "Coinbase";
                 } else if (kernel.features == KernelFeatures.KernelFeatureHeightLocked) {
-                    HashMap<String, Map> featureMap = new HashMap<>();
-                    HashMap<String, Long> feeMap = new HashMap<>();
-                    feeMap.put("fee", kernel.fee);
-                    feeMap.put("lock_height", kernel.lock_height);
-                    featureMap.put("HeightLocked", feeMap);
-                    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-                    featureStr = gson.toJson(featureMap);
+                    featureStr = "HeightLocked";
                 }
                 jsonWriter.beginObject();
                 jsonWriter.name("excess").value(excessStr);
                 jsonWriter.name("excess_sig").value(excessSigStr);
-                jsonWriter.name("features").jsonValue(featureStr);
-//                jsonWriter.name("fee").value(kernel.fee);
-//                jsonWriter.name("lock_height").value(kernel.lock_height);
+                jsonWriter.name("features").value(featureStr);
+                jsonWriter.name("fee").value(kernel.fee);
+                jsonWriter.name("lock_height").value(kernel.lock_height);
                 jsonWriter.endObject();
             }
 
@@ -431,31 +420,14 @@ public class VcashTransaction extends VcashTxBaseObject {
                             break;
 
                         case "features":
-                            try {
-                                String featureStr = jsonReader.nextString();
-                                if (featureStr.equals("Coinbase")) {
-                                    kernel.features = KernelFeatures.KernelFeatureCoinbase;
-                                }
-                            } catch (Exception e) {
-                                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-                                Type type = new TypeToken<Map<String, Map<String, Long>>>() {}.getType();
-                                Map<String, Map<String, Long>> featureMap = gson.fromJson(jsonReader, type);
-                                //String featureStr = jsonReader.nextString();
-                                if (featureMap.get("Plain") != null) {
-                                    kernel.features = KernelFeatures.KernelFeaturePlain;
-                                    Map<String, Long> feeMap = featureMap.get("Plain");
-//                                Type type2 = new TypeToken<Map<String, Long>>() {}.getType();
-//                                Map<String, Long> feeMap = gson2.fromJson(feeStr, type2);
-                                    kernel.fee = feeMap.get("fee");
-
-                                } else {
-                                    kernel.features = KernelFeatures.KernelFeatureHeightLocked;
-                                    Map<String, Long> feeMap = featureMap.get("HeightLocked");
-                                    kernel.fee = feeMap.get("fee");
-                                    kernel.lock_height = feeMap.get("lock_height");
-                                }
+                            String featureStr = jsonReader.nextString();
+                            if (featureStr.equals("Coinbase")) {
+                                kernel.features = KernelFeatures.KernelFeatureCoinbase;
+                            } else if (featureStr.equals("Plain")) {
+                                kernel.features = KernelFeatures.KernelFeaturePlain;
+                            } else if (featureStr.equals("HeightLocked")) {
+                                kernel.features = KernelFeatures.KernelFeatureHeightLocked;
                             }
-
                             break;
 
                         case "fee":
@@ -686,6 +658,7 @@ public class VcashTransaction extends VcashTxBaseObject {
                 jsonWriter.name("excess_sig").value(excessSigStr);
                 jsonWriter.name("features").value(featureStr);
                 jsonWriter.name("token_type").value(kernel.token_type);
+                jsonWriter.name("lock_height").value(kernel.lock_height);
                 jsonWriter.endObject();
             }
 
@@ -880,7 +853,8 @@ public class VcashTransaction extends VcashTxBaseObject {
     public enum KernelFeatures{
         KernelFeaturePlain(0),
         KernelFeatureCoinbase(1),
-        KernelFeatureHeightLocked(2);
+        KernelFeatureHeightLocked(2),
+        KernelFeatureNoRecentDuplicate(3);
 
         private final int code;
 

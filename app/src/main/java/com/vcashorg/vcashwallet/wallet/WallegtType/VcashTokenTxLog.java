@@ -34,16 +34,6 @@ public class VcashTokenTxLog extends AbstractVcashTxLog implements Serializable 
         token_outputs.add(commitment);
     }
 
-    public boolean isCanBeCanneled(){
-        if (tx_type == TxLogEntryType.TxSent && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
-            return true;
-        }else if(tx_type == TxLogEntryType.TxReceived && UIUtils.isEmpty(parter_id) && confirm_state == VcashTxLog.TxLogConfirmType.DefaultState){
-            return true;
-        }
-
-        return false;
-    }
-
     public void cancelTxlog(){
         ArrayList<VcashOutput> walletOutputs = VcashWallet.getInstance().outputs;
         ArrayList<VcashTokenOutput> walletTokenOutputs = VcashWallet.getInstance().token_outputs_dic.get(this.token_type);

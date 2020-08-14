@@ -10,9 +10,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public class NativeSecp256k1 {
-    static {
-        System.loadLibrary("secp256k1_wrapper");
-    }
     private static NativeSecp256k1 sIntance;
     private long mContext;
 
@@ -50,6 +47,10 @@ public class NativeSecp256k1 {
 
     public byte[] commitToPubkey(byte[] commit){
         return this.secp256k1_commit_to_pubkey(mContext, commit);
+    }
+
+    public byte[] pubkeyToCommit(byte[] pubkey){
+        return this.secp256k1_pubkey_to_commit(mContext, pubkey);
     }
 
     public byte[] getCompressedPubkey(byte[] pubkey){
@@ -148,6 +149,8 @@ public class NativeSecp256k1 {
     private native byte[] secp256k1_commit_sum(long context, byte[][] positive, byte[][] negative);
 
     private native byte[] secp256k1_commit_to_pubkey(long context, byte[] commit);
+
+    private native byte[] secp256k1_pubkey_to_commit(long context, byte[] pubkey);
 
     private native byte[] secp256k1_get_compressed_pubkey(long context, byte[] pubkey);
 

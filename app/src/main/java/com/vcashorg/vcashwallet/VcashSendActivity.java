@@ -165,7 +165,8 @@ public class VcashSendActivity extends ToolBarActivity {
     @OnClick(R.id.btn_send)
     public void onSendClick(){
         if(btnState() && validate() != -1){
-            WalletApi.createSendTransaction(VCashUtil.isVCash(tokenType) ? null : tokenType, WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), new WalletCallback() {
+            String address = mEtAddress.getText().toString().trim();
+            WalletApi.createSendTransaction(VCashUtil.isVCash(tokenType) ? null : tokenType, WalletApi.vcashToNano(Double.parseDouble(mEtAmount.getText().toString().trim())), address, new WalletCallback() {
                 @Override
                 public void onCall(boolean yesOrNo, Object data) {
                     if(yesOrNo){
@@ -269,7 +270,7 @@ public class VcashSendActivity extends ToolBarActivity {
         }
 
         //send for user return 0;
-        if(address.length() != 66){
+        if(!WalletApi.isValidSlatePackAddress(address)){
             UIUtils.showToastCenter(R.string.send_address_length);
             return -1;
         }else if(address.equals(WalletApi.getWalletUserId())){

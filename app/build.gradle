@@ -6,8 +6,8 @@ android {
         applicationId "com.vcashorg.vcashwallet"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "3.0.0"
+        versionCode 4
+        versionName "4.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -88,5 +88,4 @@ dependencies {
     implementation 'com.mylhyl:zxingscanner:2.1.6'
     implementation 'com.tencent.wcdb:wcdb-android:1.0.8'
     implementation files('libs/commons-lang3-3.6.jar')
-    implementation files('libs/java-uuid-generator-3.1.4.jar')
 }

@@ -251,6 +251,25 @@ JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k
     return nullptr;
 }
 
+JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1pubkey_1to_1commit
+        (JNIEnv *env, jobject claseObject, jlong context, jbyteArray pubkey){
+    int pubkeyLen = env->GetArrayLength(pubkey);
+    if (pubkeyLen == PUBKEY_SIZE) {
+        uint8_t *pubkeys = ConvertJByteaArrayToUnsingedChars(env, pubkey);
+        secp256k1_pedersen_commitment innerCommit;
+
+        int ret = secp256k1_pubkey_to_pedersen_commitment(
+                    (secp256k1_context *) (uintptr_t) context,
+                    &innerCommit,
+                    (secp256k1_pubkey*)pubkeys);
+        if (ret == 1) {
+                return serCommit(env, (secp256k1_context*)(uintptr_t)context, &innerCommit);
+        }
+    }
+
+    return nullptr;
+}
+
 JNIEXPORT jbyteArray JNICALL Java_com_vcashorg_vcashwallet_wallet_NativeSecp256k1_secp256k1_1get_1compressed_1pubkey
         (JNIEnv *env, jobject claseObject, jlong context, jbyteArray pubkey){
     int pubkeyLen = env->GetArrayLength(pubkey);

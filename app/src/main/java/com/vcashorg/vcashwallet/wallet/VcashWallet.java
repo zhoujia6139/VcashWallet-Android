@@ -8,6 +8,7 @@ import com.vcashorg.vcashwallet.api.bean.NodeOutputs;
 import com.vcashorg.vcashwallet.db.EncryptedDBHelper;
 import com.vcashorg.vcashwallet.utils.AppUtil;
 import com.vcashorg.vcashwallet.wallet.WallegtType.AbstractVcashTxLog;
+import com.vcashorg.vcashwallet.wallet.WallegtType.VcashCommitId;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashContext;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashOutput;
 import com.vcashorg.vcashwallet.wallet.WallegtType.VcashTokenOutput;
@@ -32,7 +33,9 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
+import static com.vcashorg.vcashwallet.wallet.VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeNone;
 import static com.vcashorg.vcashwallet.wallet.VcashKeychain.SwitchCommitmentType.SwitchCommitmentTypeRegular;
+import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashSlate.SlateState.Standard1;
 import static com.vcashorg.vcashwallet.wallet.WallegtType.VcashTxLog.TxLogConfirmType.DefaultState;
 
 public class VcashWallet {
@@ -75,9 +78,17 @@ public class VcashWallet {
         return instance;
     }
 
-    public byte[] getSignerKey(){
-        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
-        return key.getPrivKeyBytes();
+    public String getSignerKey(){
+//        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
+//        return key.getPrivKeyBytes();
+        byte[] data = this.getPaymentProofKey();
+        return AppUtil.hex(data);
+    }
+
+    public byte[] getPaymentProofKey(){
+        byte[] key_data = this.mKeyChain.deriveBindKey(0, new VcashKeychainPath(3, 0, 1, 0,0), SwitchCommitmentTypeNone);
+        byte[] key_hash = NativeSecp256k1.instance().blake2b(key_data, null);
+        return key_hash;
     }
 
     public long getChainHeight(){
@@ -215,6 +226,26 @@ public class VcashWallet {
         tokenOutputToDic();
     }
 
+    public VcashOutput findOutputByCommit(String commit) {
+        for (VcashOutput output : this.outputs) {
+            if (output.commitment.equals(commit)) {
+                return output;
+            }
+        }
+
+        return null;
+    }
+
+    public VcashTokenOutput findTokenOutputByCommit(String commit) {
+        for (VcashTokenOutput output : this.token_outputs) {
+            if (output.commitment.equals(commit)) {
+                return output;
+            }
+        }
+
+        return null;
+    }
+
     public Object identifyUtxoOutput(NodeOutputs.NodeOutput nodeOutput){
         byte[] commit = AppUtil.decode(nodeOutput.commit);
         byte[] proof = AppUtil.decode(nodeOutput.proof);
@@ -279,7 +310,7 @@ public class VcashWallet {
         // 1.1First attempt to spend without change
         long actualFee = fee;
         if (fee == 0){
-            actualFee = calcuteFee(spendable.size(), 1, 1);
+            actualFee = calcuteFee(spendable.size(), 1, 1, 0, 0, 0);
         }
         long amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
@@ -292,7 +323,7 @@ public class VcashWallet {
 
         // 1.2Second attempt to spend with change
         if (total != amount_with_fee) {
-            actualFee = calcuteFee(spendable.size(), 2, 1);
+            actualFee = calcuteFee(spendable.size(), 2, 1, 0, 0, 0);
         }
         amount_with_fee = amount + actualFee;
         if (total < amount_with_fee){
@@ -308,9 +339,9 @@ public class VcashWallet {
         VcashSlate slate = new VcashSlate();
         slate.num_participants = 2;
         slate.amount = amount;
-        slate.height = mChainHeight;
-        slate.lock_height = 0;
         slate.fee = actualFee;
+        slate.kernel_features = 0;
+        slate.state = Standard1;
 
         VcashTxLog txLog = new VcashTxLog();
         txLog.tx_id = getNextLogId();
@@ -323,7 +354,8 @@ public class VcashWallet {
         txLog.confirm_state = DefaultState;
         slate.txLog = txLog;
 
-        byte[] blind = slate.addTxElement(spendable, change, false);
+        VcashCommitId changeOutputid = new VcashCommitId();
+        byte[] blind = slate.addTxElement(spendable, change, changeOutputid, false);
         if (blind == null){
             Log.e(Tag, "sender addTxElement failed");
             if (callback!=null){
@@ -336,16 +368,32 @@ public class VcashWallet {
         VcashContext context = new VcashContext();
         context.sec_key = AppUtil.hex(blind);
         context.slate_id = slate.uuid;
+        context.amout = amount;
+        context.fee = actualFee;
+
+        for (VcashOutput item: spendable) {
+            VcashCommitId outputid = new VcashCommitId();
+            outputid.keyPath = item.keyPath;
+            outputid.mmr_index = item.mmr_index;
+            outputid.value = item.value;
+            context.input_ids.add(outputid);
+        }
+        if (change > 0) {
+            context.output_ids.add(changeOutputid);
+        }
+
         slate.context = context;
 
         //4 sender fill round 1
-        if (!slate.fillRound1(context, 0, null)){
+        if (!slate.fillRound1(context)){
             Log.e(Tag, "sender fillRound1 failed");
             if (callback!=null){
                 callback.onCall(false, null);
             }
             return;
         }
+
+        slate.tx = null;
 
         if (callback!=null){
             callback.onCall(true, slate);
@@ -388,7 +436,7 @@ public class VcashWallet {
 
         //assume spend all vcash input as fee
         int token_output_count = change > 0? 2:1;
-        long fee1 = calcuteFee(spendable.size()+vcash_spendable.size(), 1+token_output_count, 2);
+        long fee1 = calcuteFee(vcash_spendable.size(), 1, 1, spendable.size(), token_output_count, 1);
         if (vcash_total < fee1) {
             String errMsg = String.format(Locale.getDefault(), "Not enough funds, available:%f, needed:%f", WalletApi.nanoToVcash(vcash_total), WalletApi.nanoToVcash(fee1));
             if (callback!=null){
@@ -398,7 +446,7 @@ public class VcashWallet {
         }
 
         //assume 1 vcash input and 1 vcash output, spend all token input with 1 token chang output
-        long fee2 = calcuteFee(spendable.size()+1, 1+token_output_count, 2);
+        long fee2 = calcuteFee(1, 1, 1, spendable.size(), token_output_count, 1);
         Comparator<VcashOutput> comparator = new Comparator<VcashOutput>(){
             @Override
             public int compare(VcashOutput arg1, VcashOutput arg2) {
@@ -440,9 +488,10 @@ public class VcashWallet {
         slate.num_participants = 2;
         slate.token_type = token_type;
         slate.amount = amount;
-        slate.height = mChainHeight;
-        slate.lock_height = 0;
         slate.fee = actualFee;
+        slate.kernel_features = 0;
+        slate.token_kernel_features = 0;
+        slate.state = Standard1;
 
         VcashTokenTxLog txLog = new VcashTokenTxLog();
         txLog.tx_id = getNextLogId();
@@ -458,7 +507,8 @@ public class VcashWallet {
         txLog.confirm_state = DefaultState;
         slate.tokenTxLog = txLog;
 
-        byte[] blind = slate.addTxElement(vcash_actual_spend, vcash_change, true);
+        VcashCommitId changeOutputid = new VcashCommitId();
+        byte[] blind = slate.addTxElement(vcash_actual_spend, vcash_change, changeOutputid,true);
         if (blind == null){
             Log.e(Tag, "sender addTxElement failed");
             if (callback!=null){
@@ -467,7 +517,8 @@ public class VcashWallet {
             return;
         }
 
-        byte[] token_blind = slate.addTokenTxElement(spendable, change);
+        VcashCommitId tokenChangeOutputid = new VcashCommitId();
+        byte[] token_blind = slate.addTokenTxElement(spendable, change, tokenChangeOutputid);
         if (token_blind == null){
             Log.e(Tag, "sender addTokenTxElement failed");
             if (callback!=null){
@@ -481,16 +532,43 @@ public class VcashWallet {
         context.sec_key = AppUtil.hex(blind);
         context.token_sec_key = AppUtil.hex(token_blind);
         context.slate_id = slate.uuid;
+        context.amout = amount;
+        context.fee = slate.fee;
+
+        for (VcashOutput item: vcash_actual_spend) {
+            VcashCommitId outputid = new VcashCommitId();
+            outputid.keyPath = item.keyPath;
+            outputid.mmr_index = item.mmr_index;
+            outputid.value = item.value;
+            context.input_ids.add(outputid);
+        }
+        if (vcash_change > 0) {
+            context.output_ids.add(changeOutputid);
+        }
+
+        for (VcashTokenOutput item: spendable) {
+            VcashCommitId outputid = new VcashCommitId();
+            outputid.keyPath = item.keyPath;
+            outputid.mmr_index = item.mmr_index;
+            outputid.value = item.value;
+            context.token_input_ids.add(outputid);
+        }
+        if (change > 0) {
+            context.token_output_ids.add(tokenChangeOutputid);
+        }
+
         slate.context = context;
 
         //4 sender fill round 1
-        if (!slate.fillRound1(context, 0, null)){
+        if (!slate.fillRound1(context)){
             Log.e(Tag, "sender fillRound1 failed");
             if (callback!=null){
                 callback.onCall(false, null);
             }
             return;
         }
+
+        slate.tx = null;
 
         if (callback!=null){
             callback.onCall(true, slate);
@@ -524,8 +602,8 @@ public class VcashWallet {
             slate.txLog = txLog;
         }
 
-
-        byte[] blind = slate.addReceiverTxOutput();
+        VcashCommitId commitId = new VcashCommitId();
+        byte[] blind = slate.addReceiverTxOutput(commitId);
         if (blind == null){
             Log.e("", "--------receiver addReceiverTxOutput failed");
             return false;
@@ -539,16 +617,23 @@ public class VcashWallet {
             context.sec_key = AppUtil.hex(blind);
         }
         context.slate_id = slate.uuid;
+        context.amout = slate.amount;
+        context.fee = slate.fee;
+        if (slate.token_type != null) {
+            context.token_output_ids.add(commitId);
+        } else {
+            context.output_ids.add(commitId);
+        }
         slate.context = context;
 
         //7, receiver fill round 1
-        if (!slate.fillRound1(context, 1, null)){
+        if (!slate.fillRound1(context)){
             Log.e(Tag, "--------receiver fillRound1 failed");
             return false;
         }
 
         //8, receiver fill round 2
-        if (!slate.fillRound2(context, 1)){
+        if (!slate.fillRound2(context)){
             Log.e(Tag, "--------receiver fillRound2 failed");
             return false;
         }
@@ -557,8 +642,14 @@ public class VcashWallet {
     }
 
     boolean finalizeTransaction(VcashSlate slate){
+        //compute offset
+        slate.subInputFromOffset(slate.context);
+
+        //construct tx
+        slate.repopulateTx(slate.context);
+
         //9, sender fill round 2
-        if (!slate.fillRound2(slate.context, 0)){
+        if (!slate.fillRound2(slate.context)){
             Log.e(Tag, "--------sender fillRound2 failed");
             return false;
         }
@@ -593,18 +684,29 @@ public class VcashWallet {
     }
 
 
-    private long calcuteFee(int inputCount, int outputCount, int kernelCount){
+    private long calcuteFee(int inputCount, int outputCount, int kernelCount, int tokeninputCount, int tokenoutputCount, int tokenkernelCount){
         int tx_weight = outputCount*4 + kernelCount - inputCount;
-        if (tx_weight < 1){
-            tx_weight = 1;
+        if (tx_weight < 0) {
+            tx_weight = 0;
+        }
+        int token_tx_weight = tokenoutputCount*4 + tokenkernelCount - tokeninputCount;
+        if (token_tx_weight < 0) {
+            token_tx_weight = 0;
+        }
+        int total_weight = tx_weight + token_tx_weight;
+        if (total_weight < 1){
+            total_weight = 1;
         }
 
-        return DEFAULT_BASE_FEE*tx_weight;
+        return DEFAULT_BASE_FEE*total_weight;
     }
 
     private String createUserId(){
-        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
-        return AppUtil.hex(key.getPubKey());
+//        DeterministicKey key = this.mKeyChain.deriveKey(new VcashKeychainPath(4, 0, 0, 0,0));
+//        return AppUtil.hex(key.getPubKey());
+        byte[] secData = this.getPaymentProofKey();
+        String secStr = PaymentProof.getPaymentProofAddress(secData);
+        return secStr;
     }
 
     private void saveBaseInfo(){
