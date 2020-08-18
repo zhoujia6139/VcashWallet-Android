@@ -6,8 +6,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.vcashorg.vcashwallet.api.NodeApi;
@@ -38,7 +36,6 @@ import com.vcashorg.vcashwallet.wallet.WallegtType.WalletNoParamCallBack;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicException;
-import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -756,7 +753,7 @@ public class WalletApi {
     }
 
     private static void receiveTx(Object obj, final WalletCallback callback){
-        VcashSlate slate = null;
+        VcashSlate slate;
         ServerTransaction serverTx = null;
         if (obj instanceof VcashSlate){
             slate = (VcashSlate)obj;
